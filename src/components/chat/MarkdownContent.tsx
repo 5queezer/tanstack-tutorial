@@ -44,7 +44,7 @@ function parseBlocks(content: string): Array<MarkdownBlock> {
     }
 
     const unordered = /^[-*]\s+(.+)$/.exec(trimmed)
-    const ordered = /^\d+[.)]\s+(.+)$/.exec(trimmed)
+    const ordered = /^\d+\.\s+(.+)$/.exec(trimmed)
     if (unordered || ordered) {
       flushParagraph()
       const listItems = [unordered?.[1] ?? ordered?.[1] ?? '']
@@ -52,7 +52,7 @@ function parseBlocks(content: string): Array<MarkdownBlock> {
 
       while (index + 1 < lines.length) {
         const nextTrimmed = lines[index + 1].trim()
-        const nextMatch = isOrdered ? /^\d+[.)]\s+(.+)$/.exec(nextTrimmed) : /^[-*]\s+(.+)$/.exec(nextTrimmed)
+        const nextMatch = isOrdered ? /^\d+\.\s+(.+)$/.exec(nextTrimmed) : /^[-*]\s+(.+)$/.exec(nextTrimmed)
         if (!nextMatch) break
         listItems.push(nextMatch[1])
         index += 1
