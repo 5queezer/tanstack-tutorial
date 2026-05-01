@@ -388,7 +388,7 @@ setPendingSearchPrompt(input.prompt ?? 'What should I search for?')
                           overflowWrap: 'anywhere',
                         }}
                       >
-                        {message.parts?.map((part, index) => {
+                        {message.parts.map((part, index) => {
                           if (part.type === 'thinking') {
                             if (!showThinking) return null
 
