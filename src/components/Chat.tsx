@@ -344,22 +344,7 @@ setPendingSearchPrompt(input.prompt ?? 'What should I search for?')
             </button>
           </div>
 
-          {latestStatus ? (
-            <section
-              style={{
-                display: 'grid',
-                gap: '0.45rem',
-                padding: '0.7rem 0.8rem',
-                border: '1px solid #e4e4e4',
-                borderRadius: 12,
-                background: '#fafafa',
-              }}
-            >
-              <div style={{ color: '#666', fontSize: 13 }}>{latestStatus.label}</div>
-
-
-            </section>
-          ) : null}
+          {latestStatus ? <p style={{ color: '#666', fontSize: 13, margin: 0 }}>{latestStatus.label}</p> : null}
 
           {modelsError ? <p style={{ color: 'crimson', margin: 0 }}>{modelsError}</p> : null}
         </header>
