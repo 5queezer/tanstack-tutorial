@@ -322,7 +322,6 @@ export function Chat() {
   const [modelFollowUps, setModelFollowUps] = useState<Array<string>>([])
   const [agUiFollowUps, setAgUiFollowUps] = useState<Array<string>>([])
   const [isLoadingFollowUps, setIsLoadingFollowUps] = useState(false)
-  const followUpRequestKeyRef = useRef('')
   const [pendingSearchPrompt, setPendingSearchPrompt] = useState<string | undefined>()
   const [interactiveSearchInput, setInteractiveSearchInput] = useState('')
   const searchQueryResolverRef = useRef<((result: { query: string }) => void) | undefined>(undefined)
@@ -431,10 +430,6 @@ setPendingSearchPrompt(input.prompt ?? 'What should I search for?')
 
     const lastAssistant = [...serializableMessages].reverse().find((message) => message.role === 'assistant')
     if (!lastAssistant) return
-
-    const requestKey = JSON.stringify({ selectedModel, serializableMessages })
-    if (requestKey === followUpRequestKeyRef.current) return
-    followUpRequestKeyRef.current = requestKey
 
     let cancelled = false
     setIsLoadingFollowUps(true)
