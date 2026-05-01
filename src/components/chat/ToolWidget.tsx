@@ -12,7 +12,7 @@ function parseToolPayload(value: unknown) {
 }
 
 function formatNumber(value: unknown, digits = 1) {
-  return typeof value === 'number' ? value.toFixed(digits) : '—'
+  return Number(value).toFixed(digits)
 }
 
 function Metric({ label, value }: { label: string; value: string }) {
