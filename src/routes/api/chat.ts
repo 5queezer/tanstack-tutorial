@@ -99,7 +99,12 @@ async function* withOpenRouterErrorMetadata(
 
       if (chunk.type === 'RUN_FINISHED') {
         yield createStatusEvent('Complete')
-        yield createFollowUpsEvent(createServerFollowUps(accumulatedContent))
+        yield {
+          type: 'CUSTOM',
+          name: 'f',
+          timestamp: Date.now(),
+          value: { followUps: createServerFollowUps(accumulatedContent) },
+        } as StreamChunk
       }
 
       yield chunk
@@ -108,15 +113,6 @@ async function* withOpenRouterErrorMetadata(
     yield createStatusEvent('Error')
     yield createRunErrorChunk(formatOpenRouterError(errorCapture.lastError ?? error))
   }
-}
-
-function createFollowUpsEvent(followUps: Array<string>): StreamChunk {
-  return {
-    type: 'CUSTOM',
-    name: 'f',
-    timestamp: Date.now(),
-    value: { followUps },
-  } as StreamChunk
 }
 
 function createServerFollowUps(assistantText: string) {
