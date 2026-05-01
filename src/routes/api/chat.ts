@@ -67,10 +67,7 @@ export const Route = createFileRoute('/api/chat')({
                 },
               }
             : undefined,
-        }), errorCapture, {
-          model,
-          thinking: enableThinking,
-        })
+        }), errorCapture)
 
         return toServerSentEventsResponse(stream, { abortController })
       },
@@ -81,43 +78,42 @@ export const Route = createFileRoute('/api/chat')({
 async function* withOpenRouterErrorMetadata(
   stream: AsyncIterable<StreamChunk>,
   errorCapture: ReturnType<typeof createOpenRouterErrorCaptureLogger>,
-  context: { model: string; thinking: boolean },
 ): AsyncIterable<StreamChunk> {
   let sawFirstToken = false
   let accumulatedContent = ''
 
-  yield createStatusEvent('Model validated', 15, context)
-  yield createStatusEvent('Request sent to OpenRouter', 35, context)
+  yield createStatusEvent('Model validated', 15)
+  yield createStatusEvent('Request sent to OpenRouter', 35)
 
   try {
     for await (const chunk of stream) {
       if (chunk.type === 'RUN_STARTED') {
-        yield createStatusEvent('AG-UI run started', 50, context)
+        yield createStatusEvent('AG-UI run started', 50)
       }
 
       if (chunk.type === 'TEXT_MESSAGE_CONTENT') {
         accumulatedContent += chunk.delta ?? ''
         if (!sawFirstToken) {
           sawFirstToken = true
-          yield createStatusEvent('First token received', 70, context)
+          yield createStatusEvent('First token received', 70)
         }
       }
 
       if (chunk.type === 'RUN_ERROR') {
-        yield createStatusEvent('Provider error', 100, context)
+        yield createStatusEvent('Provider error', 100)
         yield enrichRunErrorChunk(chunk, errorCapture.lastError)
         continue
       }
 
       if (chunk.type === 'RUN_FINISHED') {
-        yield createStatusEvent('Run complete', 100, context)
+        yield createStatusEvent('Run complete', 100)
         yield createFollowUpsEvent(createServerFollowUps(accumulatedContent))
       }
 
       yield chunk
     }
   } catch (error) {
-    yield createStatusEvent('Provider error', 100, context)
+    yield createStatusEvent('Provider error', 100)
     yield createRunErrorChunk(formatOpenRouterError(errorCapture.lastError ?? error))
   }
 }
@@ -149,21 +145,12 @@ function createServerFollowUps(assistantText: string) {
   return ['Give a concrete example?', 'Turn that into steps?', 'What should I ask next?']
 }
 
-function createStatusEvent(
-  label: string,
-  progress: number,
-  context: { model: string; thinking: boolean },
-): StreamChunk {
+function createStatusEvent(label: string, progress: number): StreamChunk {
   return {
     type: 'CUSTOM',
     name: 's',
     timestamp: Date.now(),
-    value: {
-      label,
-      progress,
-      model: context.model,
-      thinking: context.thinking,
-    },
+    value: { label, progress },
   } as StreamChunk
 }
 
