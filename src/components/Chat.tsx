@@ -44,7 +44,7 @@ const STORAGE_KEYS = {
 } as const
 
 function readLocalStorage(key: string) {
-  return localStorage.getItem(key) ?? undefined
+  return localStorage.getItem(key)
 }
 
 function readLocalStorageBoolean(key: string) {
