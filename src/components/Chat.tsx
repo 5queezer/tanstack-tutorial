@@ -346,8 +346,8 @@ setPendingSearchPrompt(input.prompt ?? 'What should I search for?')
     connection: fetchServerSentEvents('/api/chat'),
     body: { model: selectedModel || undefined, showThinking: showThinking && thinkingAvailable },
     tools: [interactiveSearchTool],
-    onCustomEvent: (eventName, value) => {
-      if (eventName === 'f') setAgUiFollowUps((value as { followUps: Array<string> }).followUps)
+    onCustomEvent: (_eventName, value) => {
+      setAgUiFollowUps((value as { followUps: Array<string> }).followUps)
     },
   })
   const heuristicFollowUps = useMemo(() => {
