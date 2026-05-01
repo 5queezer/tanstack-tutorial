@@ -302,7 +302,7 @@ export function Chat() {
                   fontFamily: 'inherit',
                 }}
               >
-                {modelOptions.length === 0 ? <option value="">Loading models...</option> : null}
+                {modelOptions.length === 0 ? <option value="">Loading...</option> : null}
                 {modelOptions.map((model) => (
                   <option key={model.id} value={model.id}>
                     {model.label}{model.free ? ' (free)' : ''}
@@ -392,7 +392,7 @@ export function Chat() {
         >
             <div style={{ display: 'grid', gap: '0.75rem', padding: '1rem' }}>
               {messages.length === 0 ? (
-                <p style={{ margin: 0, color: '#666' }}>Ask something to start the conversation.</p>
+                <p style={{ margin: 0, color: '#666' }}>Ask something to start.</p>
               ) : (
                 <>
                   {messages.map((message) => {
@@ -506,7 +506,7 @@ export function Chat() {
 
                   {!isLoading ? <FollowUps questions={followUps} onSelect={handleFollowUpClick} /> : null}
                   {!isLoading && followUpMode === 'm' && isLoadingFollowUps ? (
-                    <p style={{ margin: '0.25rem 0', color: '#666' }}>Generating follow-ups…</p>
+                    <p style={{ margin: '0.25rem 0', color: '#666' }}>Generating…</p>
                   ) : null}
 
                   {isLoading ? <TypingIndicator /> : null}
@@ -521,7 +521,7 @@ export function Chat() {
           <input
             value={input}
             onChange={(event) => setInput(event.target.value)}
-            placeholder="Ask something..."
+            placeholder="Ask..."
             aria-label="Chat message"
             style={{ flex: 1, padding: '0.75rem', border: '1px solid #ccc', borderRadius: 8, fontFamily: 'inherit' }}
           />
