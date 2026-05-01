@@ -41,3 +41,10 @@ For this repo, treat the chat app as an agent harness. Optimize the app/harness 
 
 ## What's Been Tried
 - Session setup: selected bundle gzip size as primary metric to keep AHE-inspired harness changes disciplined and transferable rather than benchmark-specific.
+- Kept: replaced `react-markdown`/`remark-gfm` with a focused safe renderer for common chat markdown (paragraphs, lists, code, links), yielding the largest early bundle win while retaining useful formatting.
+- Kept: replaced Radix Select/Toggle/Tooltip/ScrollArea with native controls. This applied AHE component observability by removing heavy UI harness dependencies where browser primitives preserved behavior.
+- Kept: split the client-visible `request_search_query` definition away from server tool implementations, then switched that client-visible schema to plain JSON Schema. This avoided leaking Zod/server tool code into the browser.
+- Kept: removed identity/pass-through wrappers (`clientTools`, unused status local, server entry wrapper, redundant false debug flags, StrictMode/startTransition wrappers, single-page scrollRestoration) when typecheck/build verified equivalent behavior.
+- Discarded: plain client tool object/factory splits. They slightly regressed because `@tanstack/ai-react`/`@tanstack/ai-client` already include the relevant runtime and extra module boundaries added overhead.
+- Discarded: converting all server tool Zod schemas to JSON Schema. Verbose schemas outweighed any server-bundle benefit; keep Zod for server-only maintainability.
+- Discarded: factoring a single-use tool label ternary into a helper. Single-use helper overhead was larger than inline minified code.

@@ -101,10 +101,6 @@ const stockBySymbol: Record<string, StockOutput> = {
   SPY: { price: 586.12, change: 0.91, changePercent: 0.16, currency: 'USD', marketState: 'Demo delayed' },
 }
 
-function delay(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms))
-}
-
 export const getWeather = getWeatherDef.server(async (args, context) => {
   const { city } = args as WeatherInput
   context?.emitCustomEvent('tool.status', {
@@ -112,8 +108,6 @@ export const getWeather = getWeatherDef.server(async (args, context) => {
     label: `Looking up weather for ${city}`,
     progress: 25,
   })
-  await delay(350)
-
   const key = city.toLowerCase().trim()
   const weather = weatherByCity[key] ?? {
     condition: 'Mild and clear',
@@ -144,8 +138,6 @@ export const getStockQuote = getStockDef.server(async (args, context) => {
     label: `Fetching quote for ${normalizedSymbol}`,
     progress: 25,
   })
-  await delay(350)
-
   const quote = stockBySymbol[normalizedSymbol] ?? {
     price: 100 + normalizedSymbol.length * 7.13,
     change: 1.24,
