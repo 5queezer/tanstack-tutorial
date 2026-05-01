@@ -3,7 +3,6 @@ export function FollowUps({ questions, onSelect }: { questions: Array<string>; o
 
   return (
     <section
-      aria-label="Follow-ups"
       style={{
         display: 'grid',
         gap: '0.35rem',
