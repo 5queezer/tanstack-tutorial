@@ -13,10 +13,7 @@ export const Route = createFileRoute('/api/chat')({
         if (!process.env.OPENROUTER_API_KEY) {
           return new Response(
             JSON.stringify({ error: 'OPENROUTER_API_KEY not configured' }),
-            {
-              status: 500,
-              headers: { 'Content-Type': 'application/json' },
-            },
+            { status: 500 },
           )
         }
 
@@ -27,10 +24,7 @@ export const Route = createFileRoute('/api/chat')({
         const showThinking = Boolean(body.showThinking ?? body.data?.showThinking)
 
         if (typeof model !== 'string' || !model) {
-          return new Response(JSON.stringify({ error: 'No OpenRouter model selected' }), {
-            status: 400,
-            headers: { 'Content-Type': 'application/json' },
-          })
+          return new Response(JSON.stringify({ error: 'No OpenRouter model selected' }), { status: 400 })
         }
         const selectedModel = showThinking ? await getOpenRouterModel(model) : undefined
         const enableThinking = showThinking && Boolean(selectedModel?.supportsThinking)
