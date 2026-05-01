@@ -1,5 +1,4 @@
 import { fetchServerSentEvents, useChat } from '@tanstack/ai-react'
-import { clientTools } from '@tanstack/ai-client'
 import { useEffect, useMemo, useRef, useState, type SubmitEventHandler } from 'react'
 import { thinkingDotKeyframes, isStatusEventValue } from './chat/agui'
 import { createFollowUps, getMessageText } from './chat/followUps'
@@ -69,7 +68,7 @@ export function Chat() {
   const { messages, sendMessage, isLoading, error, stop } = useChat({
     connection: fetchServerSentEvents('/api/chat'),
     body: { model: selectedModel || undefined, showThinking: showThinking && thinkingAvailable },
-    tools: clientTools(interactiveSearchTool),
+    tools: [interactiveSearchTool],
     onCustomEvent: (eventName, value) => {
       if (eventName === 'followups.generated' && isFollowUpsEventValue(value)) {
         setAgUiFollowUps(value.followUps)
@@ -87,7 +86,6 @@ export function Chat() {
       ])
     },
   })
-  const latestAgUiStatus = agUiStatuses.at(-1)
   const heuristicFollowUps = useMemo(() => {
     if (isLoading || messages.length === 0) return []
 
