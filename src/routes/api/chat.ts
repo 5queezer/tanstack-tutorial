@@ -71,7 +71,6 @@ async function* withOpenRouterErrorMetadata(
   stream: AsyncIterable<StreamChunk>,
   errorCapture: ReturnType<typeof createOpenRouterErrorCaptureLogger>,
 ): AsyncIterable<StreamChunk> {
-  let sawFirstToken = false
   let accumulatedContent = ''
 
   try {
@@ -82,10 +81,7 @@ async function* withOpenRouterErrorMetadata(
 
       if (chunk.type === 'TEXT_MESSAGE_CONTENT') {
         accumulatedContent += chunk.delta ?? ''
-        if (!sawFirstToken) {
-          sawFirstToken = true
-          yield createStatusEvent('First token')
-        }
+
       }
 
       if (chunk.type === 'RUN_ERROR') {
