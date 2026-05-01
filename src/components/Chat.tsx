@@ -39,7 +39,6 @@ export function Chat() {
       setInteractiveSearchInput(suggestedQuery)
       setPendingSearchQuery({
         prompt: input.prompt ?? 'What should I search for?',
-        suggestedQuery,
       })
 
       return new Promise<{ query: string }>((resolve) => {

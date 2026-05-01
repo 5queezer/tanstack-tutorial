@@ -17,7 +17,6 @@ export type AgUiStatusEvent = {
 
 export type PendingSearchQueryRequest = {
   prompt: string
-  suggestedQuery: string
 }
 
 export type FollowUpMode = 'h' | 'm' | 'a' | 'o'

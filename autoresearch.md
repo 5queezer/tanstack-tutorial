@@ -48,3 +48,6 @@ For this repo, treat the chat app as an agent harness. Optimize the app/harness 
 - Discarded: plain client tool object/factory splits. They slightly regressed because `@tanstack/ai-react`/`@tanstack/ai-client` already include the relevant runtime and extra module boundaries added overhead.
 - Discarded: converting all server tool Zod schemas to JSON Schema. Verbose schemas outweighed any server-bundle benefit; keep Zod for server-only maintainability.
 - Discarded: factoring a single-use tool label ternary into a helper. Single-use helper overhead was larger than inline minified code.
+- Kept: progressively trusted internal server/client contracts for known tool outputs and custom events, removing fallback parsing/validation/unused payload fields where inputs are controlled by this app.
+- Kept: inlined tiny single-use UI components after simplification (`TypingIndicator`, `AgUiStatusPanel`, `InteractiveSearchPrompt`, `FollowUps`). This reduced module/prop overhead but made `Chat.tsx` more monolithic; re-extract if complexity grows.
+- Kept: removed decorative UI bytes (emojis, animated typing keyframes, follow-up arrow) while preserving text affordances.
