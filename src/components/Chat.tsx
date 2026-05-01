@@ -2,7 +2,6 @@ import { fetchServerSentEvents, useChat } from '@tanstack/ai-react'
 import { useEffect, useMemo, useRef, useState, type SubmitEventHandler } from 'react'
 import { createFollowUps, getMessageText } from './chat/followUps'
 import { readLocalStorage, readLocalStorageBoolean, STORAGE_KEYS, writeLocalStorage } from './chat/storage'
-import { AgUiStatusPanel } from './chat/AgUiStatusPanel'
 import { FollowUps } from './chat/FollowUps'
 import { InteractiveSearchPrompt } from './chat/InteractiveSearchPrompt'
 import { MarkdownContent } from './chat/MarkdownContent'
@@ -72,6 +71,7 @@ export function Chat() {
       ])
     },
   })
+  const latestStatus = agUiStatuses.at(-1)
   const heuristicFollowUps = useMemo(() => {
     if (isLoading || messages.length === 0) return []
 
@@ -360,7 +360,50 @@ export function Chat() {
             </button>
           </div>
 
-          <AgUiStatusPanel statuses={agUiStatuses} hasError={Boolean(error)} />
+          {latestStatus ? (
+            <section
+              style={{
+                display: 'grid',
+                gap: '0.45rem',
+                padding: '0.7rem 0.8rem',
+                border: '1px solid #e4e4e4',
+                borderRadius: 12,
+                background: '#fafafa',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', fontSize: 13 }}>
+                <strong>AG-UI</strong>
+                <span style={{ color: '#666' }}>{latestStatus.label}</span>
+              </div>
+              <div style={{ height: 6, overflow: 'hidden', borderRadius: 999, background: '#e8e8e8' }}>
+                <div
+                  style={{
+                    width: `${latestStatus.progress}%`,
+                    height: '100%',
+                    borderRadius: 999,
+                    background: latestStatus.progress >= 100 && error ? 'crimson' : '#111',
+                    transition: 'width 220ms ease',
+                  }}
+                />
+              </div>
+              <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+                {agUiStatuses.map((status) => (
+                  <span
+                    key={`${status.at}-${status.label}`}
+                    style={{
+                      padding: '0.2rem 0.45rem',
+                      borderRadius: 999,
+                      background: '#eee',
+                      color: '#555',
+                      fontSize: 12,
+                    }}
+                  >
+                    {status.label}
+                  </span>
+                ))}
+              </div>
+            </section>
+          ) : null}
 
           {modelsError ? <p style={{ color: 'crimson', margin: 0 }}>{modelsError}</p> : null}
         </header>
