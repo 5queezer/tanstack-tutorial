@@ -27,7 +27,7 @@ export type OpenRouterModelResponse = {
 export function isFreeOpenRouterModel(model: { id?: string }) {
   // OpenRouter's zero-priced catalogue entries can still route to paid providers.
   // The explicit `:free` suffix is the reliable user-selectable free variant.
-  return model.id?.endsWith(':free') ?? false
+  return Boolean(model.id?.endsWith(':free'))
 }
 
 export function isTextChatOpenRouterModel(model: {
