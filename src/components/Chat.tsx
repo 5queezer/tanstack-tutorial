@@ -377,7 +377,7 @@ export function Chat() {
           return (freeOnly ? nextModels.find((model) => model.free)?.id : undefined) ?? nextModels.find((model) => model.free)?.id ?? nextModels[0]?.id ?? ''
         })
       } catch (err) {
-        setModelsError(err instanceof Error ? err.message : 'Model load failed')
+        setModelsError((err as Error).message)
       }
     }
 
