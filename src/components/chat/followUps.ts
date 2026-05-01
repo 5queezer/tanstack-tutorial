@@ -15,10 +15,10 @@ export function createFollowUps(userText = '', assistantText = '') {
 
   if (tooShortForSpecificFollowUps) {
     return [
-      'What can you help me with?',
-      'Give me a few example prompts',
-      'Help me brainstorm an idea',
-      'Explain something complicated simply',
+      'What can you help with?',
+      'Give example prompts',
+      'Help me brainstorm',
+      'Explain something simply',
     ]
   }
 
@@ -26,8 +26,8 @@ export function createFollowUps(userText = '', assistantText = '') {
   const assistantMentionsSteps = /step|first|next|then|finally|start|begin/i.test(cleanedAssistantText)
 
   return [
-    assistantMentionsSteps ? 'Can you turn that into a checklist?' : 'Can you give me a concrete example?',
-    `Can you explain more about “${topic}”?`,
+    assistantMentionsSteps ? 'Turn that into a checklist?' : 'Give a concrete example?',
+    `Explain more about “${topic}”?`,
     'What are the trade-offs?',
     'What should I ask next?',
   ]
