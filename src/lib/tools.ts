@@ -1,6 +1,7 @@
 import { toolDefinition } from '@tanstack/ai'
 import { z } from 'zod'
 import { requestSearchQueryDef } from './request-search-tool'
+import { githubGet, githubSearch } from './github-tool'
 
 export const getWeatherDef = toolDefinition({
   name: 'get_weather',
@@ -139,4 +140,4 @@ export const braveWebSearch = braveWebSearchDef.server(async (args) => {
   }
 })
 
-export const serverTools = [getWeather, getStockQuote, braveWebSearch, requestSearchQueryDef]
+export const serverTools = [getWeather, getStockQuote, braveWebSearch, githubSearch, githubGet, requestSearchQueryDef]
