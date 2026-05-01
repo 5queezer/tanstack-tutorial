@@ -112,11 +112,7 @@ export const braveWebSearch = braveWebSearchDef.server(async (args) => {
     throw new Error('BRAVE_API_KEY missing')
   }
 
-  const url = new URL('https://api.search.brave.com/res/v1/web/search')
-  url.searchParams.set('q', query)
-  url.searchParams.set('count', String(count))
-
-  const response = await fetch(url, {
+  const response = await fetch(`https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(query)}&count=${count}`, {
     headers: {
       'X-Subscription-Token': process.env.BRAVE_API_KEY,
     },
