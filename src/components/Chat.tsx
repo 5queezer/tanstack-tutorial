@@ -191,10 +191,6 @@ function renderInline(text: string, isUser: boolean): Array<ReactNode> {
 }
 
 
-function parseToolPayload(value: unknown) {
-  return value as Record<string, unknown>
-}
-
 function formatNumber(value: unknown, digits = 1) {
   return Number(value).toFixed(digits)
 }
@@ -209,8 +205,8 @@ function Metric({ label, value }: { label: string; value: string }) {
 }
 
 function ToolWidget({ toolName, input, output }: { toolName: string; input: unknown; output: unknown }) {
-  const result = parseToolPayload(output)
-  const args = parseToolPayload(input)
+  const result = output as Record<string, unknown>
+  const args = input as Record<string, unknown>
 
   if (!result) {
     return args ? <div style={{ color: '#555', fontSize: 13 }}>Input: {JSON.stringify(args)}</div> : null
