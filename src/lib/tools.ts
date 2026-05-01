@@ -6,7 +6,7 @@ export const getWeatherDef = toolDefinition({
   name: 'get_weather',
   description: 'Get demo city weather: temperature, condition, humidity, and wind.',
   inputSchema: z.object({
-    city: z.string().describe('City'),
+    city: z.string(),
   }),
 })
 
@@ -14,7 +14,7 @@ export const getStockDef = toolDefinition({
   name: 'get_stock_quote',
   description: 'Get a demo stock quote for a ticker symbol.',
   inputSchema: z.object({
-    symbol: z.string().describe('Ticker'),
+    symbol: z.string(),
   }),
 })
 
@@ -22,7 +22,7 @@ export const braveWebSearchDef = toolDefinition({
   name: 'brave_web_search',
   description: 'Search the live web with Brave for current, recent, news, or docs questions. Cite URLs.',
   inputSchema: z.object({
-    query: z.string().max(400).describe('Search'),
+    query: z.string().max(400),
     count: z.number().int().min(1).max(10).optional(),
   }),
 })
