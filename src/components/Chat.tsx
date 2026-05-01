@@ -15,7 +15,7 @@ export function Chat() {
   const [freeOnly, setFreeOnly] = useState(false)
   const [showThinking, setShowThinking] = useState(false)
   const [settingsLoaded, setSettingsLoaded] = useState(false)
-  const [agUiStatuses, setAgUiStatuses] = useState<Array<AgUiStatusEvent>>([])
+  const [agUiStatus, setAgUiStatus] = useState<AgUiStatusEvent>()
   const [followUpMode, setFollowUpMode] = useState<FollowUpMode>('h')
   const [modelFollowUps, setModelFollowUps] = useState<Array<string>>([])
   const [agUiFollowUps, setAgUiFollowUps] = useState<Array<string>>([])
@@ -53,16 +53,10 @@ setPendingSearchPrompt(input.prompt ?? 'What should I search for?')
 
       if (!['s', 't'].includes(eventName)) return
 
-      setAgUiStatuses((current) => [
-        ...current.slice(-5),
-        {
-          ...(value as Omit<AgUiStatusEvent, 'at'>),
-          at: Date.now(),
-        },
-      ])
+      setAgUiStatus(value as AgUiStatusEvent)
     },
   })
-  const latestStatus = agUiStatuses.at(-1)
+  const latestStatus = agUiStatus
   const heuristicFollowUps = useMemo(() => {
     if (isLoading || messages.length === 0) return []
 
@@ -206,7 +200,7 @@ setPendingSearchPrompt(input.prompt ?? 'What should I search for?')
     const text = input.trim()
     if (!text) return
 
-    setAgUiStatuses([])
+    setAgUiStatus(undefined)
     setModelFollowUps([])
     setAgUiFollowUps([])
     sendMessage(text)
@@ -215,7 +209,7 @@ setPendingSearchPrompt(input.prompt ?? 'What should I search for?')
 
   function handleFollowUpClick(question: string) {
     if (isLoading) return
-    setAgUiStatuses([])
+    setAgUiStatus(undefined)
     setModelFollowUps([])
     setAgUiFollowUps([])
     sendMessage(question)
