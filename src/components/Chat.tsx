@@ -1,10 +1,5 @@
 import { fetchServerSentEvents, useChat } from '@tanstack/ai-react'
 import { clientTools } from '@tanstack/ai-client'
-import { CheckIcon, ChevronDownIcon } from '@radix-ui/react-icons'
-import * as ScrollArea from '@radix-ui/react-scroll-area'
-import * as Select from '@radix-ui/react-select'
-import * as Toggle from '@radix-ui/react-toggle'
-import * as Tooltip from '@radix-ui/react-tooltip'
 import { useEffect, useMemo, useRef, useState, type SubmitEventHandler } from 'react'
 import { thinkingDotKeyframes, isStatusEventValue } from './chat/agui'
 import { createFollowUps, getMessageText } from './chat/followUps'
@@ -53,7 +48,6 @@ export function Chat() {
     [freeOnly, models],
   )
   const selectedModelInfo = models.find((model) => model.id === selectedModel)
-  const selectedModelLabel = selectedModelInfo?.label ?? 'Loading models...'
   const thinkingAvailable = Boolean(selectedModelInfo?.supportsThinking)
   const interactiveSearchTool = useMemo(
     () => requestSearchQueryDef.client((toolInput) => {
@@ -281,7 +275,7 @@ export function Chat() {
   }
 
   return (
-    <Tooltip.Provider delayDuration={200}>
+    <>
       <style>{thinkingDotKeyframes}</style>
       <main
         style={{
@@ -308,101 +302,33 @@ export function Chat() {
           >
             <div style={{ display: 'grid', gap: 4, fontSize: 14 }}>
               <span>Model</span>
-              <Select.Root
+              <select
+                aria-label="Model"
+                title={selectedModel}
                 value={selectedModel}
-                onValueChange={(modelId) => {
+                onChange={(event) => {
+                  const modelId = event.target.value
                   setSelectedModel(modelId)
                   setShowThinking((current) => current && Boolean(models.find((model) => model.id === modelId)?.supportsThinking))
                 }}
                 disabled={isLoading || modelOptions.length === 0}
+                style={{
+                  width: 'min(420px, calc(100vw - 2rem))',
+                  height: 38,
+                  padding: '0 0.65rem',
+                  border: '1px solid #ccc',
+                  borderRadius: 8,
+                  background: '#fff',
+                  fontFamily: 'inherit',
+                }}
               >
-                <Select.Trigger
-                  aria-label="Model"
-                  title={selectedModel}
-                  style={{
-                    display: 'inline-flex',
-                    fontFamily: 'inherit',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: '0.5rem',
-                    width: 'min(420px, calc(100vw - 2rem))',
-                    padding: '0.55rem 0.7rem',
-                    border: '1px solid #ccc',
-                    borderRadius: 8,
-                    background: '#fff',
-                    cursor: isLoading || modelOptions.length === 0 ? 'not-allowed' : 'pointer',
-                  }}
-                >
-                  <Select.Value placeholder="Loading models...">{selectedModelLabel}</Select.Value>
-                  <Select.Icon>
-                    <ChevronDownIcon />
-                  </Select.Icon>
-                </Select.Trigger>
-
-                <Select.Portal>
-                  <Select.Content
-                    position="popper"
-                    sideOffset={6}
-                    align="start"
-                    style={{
-                      zIndex: 10,
-                      width: 'min(560px, calc(100vw - 2rem))',
-                      overflow: 'hidden',
-                      padding: 6,
-                      border: '1px solid #ddd',
-                      borderRadius: 10,
-                      background: '#fff',
-                      boxShadow: '0 10px 30px rgba(0,0,0,0.12)',
-                    }}
-                  >
-                    <Select.Viewport style={{ maxHeight: 340, overflowY: 'auto', padding: 2, fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' }}>
-                      {modelOptions.map((model) => (
-                        <Select.Item
-                          key={model.id}
-                          value={model.id}
-                          style={{
-                            position: 'relative',
-                            display: 'flex',
-                            alignItems: 'center',
-                            width: '100%',
-                            minHeight: 36,
-                            boxSizing: 'border-box',
-                            padding: '0.55rem 0.65rem 0.55rem 2rem',
-                            borderRadius: 8,
-                            cursor: 'pointer',
-                            outline: 'none',
-                            fontFamily: 'inherit',
-                            fontSize: 14,
-                          }}
-                        >
-                          <Select.ItemIndicator
-                            style={{
-                              position: 'absolute',
-                              left: 10,
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                            }}
-                          >
-                            <CheckIcon />
-                          </Select.ItemIndicator>
-                          <Select.ItemText
-                            style={{
-                              display: 'block',
-                              minWidth: 0,
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              whiteSpace: 'nowrap',
-                              fontFamily: 'inherit',
-                            }}
-                          >
-                            {model.label}{model.free ? ' (free)' : ''}
-                          </Select.ItemText>
-                        </Select.Item>
-                      ))}
-                    </Select.Viewport>
-                  </Select.Content>
-                </Select.Portal>
-              </Select.Root>
+                {modelOptions.length === 0 ? <option value="">Loading models...</option> : null}
+                {modelOptions.map((model) => (
+                  <option key={model.id} value={model.id}>
+                    {model.label}{model.free ? ' (free)' : ''}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div style={{ display: 'grid', gap: 4, fontSize: 14 }}>
@@ -427,10 +353,11 @@ export function Chat() {
               </select>
             </div>
 
-            <Toggle.Root
-              pressed={freeOnly}
-              onPressedChange={handleFreeOnlyChange}
+            <button
+              type="button"
+              onClick={() => handleFreeOnlyChange(!freeOnly)}
               disabled={isLoading || models.length === 0}
+              aria-pressed={freeOnly}
               aria-label="Show free models only"
               style={{
                 fontFamily: 'inherit',
@@ -443,12 +370,13 @@ export function Chat() {
               }}
             >
               Free only
-            </Toggle.Root>
+            </button>
 
-            <Toggle.Root
-              pressed={showThinking}
-              onPressedChange={setShowThinking}
+            <button
+              type="button"
+              onClick={() => setShowThinking(!showThinking)}
               disabled={isLoading || !thinkingAvailable}
+              aria-pressed={showThinking}
               aria-label="Show model thinking"
               title={thinkingAvailable ? 'Show model thinking/reasoning when available' : 'Selected model does not advertise thinking support'}
               style={{
@@ -463,7 +391,7 @@ export function Chat() {
               }}
             >
               Thinking
-            </Toggle.Root>
+            </button>
           </div>
 
           <AgUiStatusPanel statuses={agUiStatuses} hasError={Boolean(error)} />
@@ -471,18 +399,17 @@ export function Chat() {
           {modelsError ? <p style={{ color: 'crimson', margin: 0 }}>{modelsError}</p> : null}
         </header>
 
-        <ScrollArea.Root
+        <section
           style={{
             flex: 1,
             minHeight: 0,
-            overflow: 'hidden',
+            overflow: 'auto',
             border: '1px solid #ddd',
             borderRadius: 14,
             marginBottom: '1rem',
             background: '#fff',
           }}
         >
-          <ScrollArea.Viewport style={{ width: '100%', height: '100%' }}>
             <div style={{ display: 'grid', gap: '0.75rem', padding: '1rem' }}>
               {messages.length === 0 ? (
                 <p style={{ margin: 0, color: '#666' }}>Ask something to start the conversation.</p>
@@ -606,15 +533,7 @@ export function Chat() {
                 </>
               )}
             </div>
-          </ScrollArea.Viewport>
-          <ScrollArea.Scrollbar
-            orientation="vertical"
-            style={{ display: 'flex', padding: 3, width: 10, background: '#f3f3f3' }}
-          >
-            <ScrollArea.Thumb style={{ flex: 1, borderRadius: 999, background: '#bbb' }} />
-          </ScrollArea.Scrollbar>
-          <ScrollArea.Corner />
-        </ScrollArea.Root>
+        </section>
 
         {error ? <p style={{ color: 'crimson', marginTop: 0 }}>{String(error)}</p> : null}
 
@@ -627,43 +546,25 @@ export function Chat() {
             style={{ flex: 1, padding: '0.75rem', border: '1px solid #ccc', borderRadius: 8, fontFamily: 'inherit' }}
           />
 
-          <Tooltip.Root>
-            <Tooltip.Trigger asChild>
-              <button
-                type={isLoading ? 'button' : 'submit'}
-                onClick={isLoading ? stop : undefined}
-                disabled={!isLoading && !selectedModel}
-                style={{
-                  fontFamily: 'inherit',
-                  padding: '0.75rem 1rem',
-                  border: 0,
-                  borderRadius: 8,
-                  color: '#fff',
-                  background: isLoading ? '#888' : '#111',
-                  cursor: 'pointer',
-                }}
-              >
-                {isLoading ? 'Stop' : 'Send'}
-              </button>
-            </Tooltip.Trigger>
-            <Tooltip.Portal>
-              <Tooltip.Content
-                sideOffset={6}
-                style={{
-                  padding: '0.4rem 0.6rem',
-                  borderRadius: 6,
-                  color: '#fff',
-                  background: '#111',
-                  fontSize: 12,
-                }}
-              >
-                {isLoading ? 'Stop the response' : 'Send your message'}
-                <Tooltip.Arrow style={{ fill: '#111' }} />
-              </Tooltip.Content>
-            </Tooltip.Portal>
-          </Tooltip.Root>
+          <button
+            type={isLoading ? 'button' : 'submit'}
+            onClick={isLoading ? stop : undefined}
+            disabled={!isLoading && !selectedModel}
+            title={isLoading ? 'Stop the response' : 'Send your message'}
+            style={{
+              fontFamily: 'inherit',
+              padding: '0.75rem 1rem',
+              border: 0,
+              borderRadius: 8,
+              color: '#fff',
+              background: isLoading ? '#888' : '#111',
+              cursor: 'pointer',
+            }}
+          >
+            {isLoading ? 'Stop' : 'Send'}
+          </button>
         </form>
       </main>
-    </Tooltip.Provider>
+    </>
   )
 }
