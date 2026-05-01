@@ -326,26 +326,25 @@ export function Chat() {
       setAgUiFollowUps(value as Array<string>)
     },
   })
-  const heuristicFollowUps = (() => {
-    if (isLoading || messages.length === 0) return []
+  const followUps = followUpMode === 'h'
+    ? (() => {
+        if (isLoading || messages.length === 0) return []
 
-    const lastAssistant = [...messages].reverse().find((message) => message.role === 'assistant')
-    const lastAssistantText = getMessageText(lastAssistant)
-    if (!lastAssistant || !lastAssistantText.trim()) return []
+        const lastAssistant = [...messages].reverse().find((message) => message.role === 'assistant')
+        const lastAssistantText = getMessageText(lastAssistant)
+        if (!lastAssistant || !lastAssistantText.trim()) return []
 
-    const lastUserText = getMessageText(
-      [...messages].reverse().find((message) => message.role === 'user'),
-    )
+        const lastUserText = getMessageText(
+          [...messages].reverse().find((message) => message.role === 'user'),
+        )
 
-    return createFollowUps(lastUserText, lastAssistantText)
-  })()
-  const followUps = followUpMode === 'o'
-    ? []
+        return createFollowUps(lastUserText, lastAssistantText)
+      })()
     : followUpMode === 'm'
       ? modelFollowUps
       : followUpMode === 'a'
         ? agUiFollowUps
-        : heuristicFollowUps
+        : []
 
   useEffect(() => {
     setSelectedModel(localStorage.getItem(STORAGE_KEYS.selectedModel) ?? '')
