@@ -9,7 +9,7 @@ import { serverTools } from '../../lib/tools'
 export const Route = createFileRoute('/api/chat')({
   server: {
     handlers: {
-      POST: async ({ request }) => {
+      async POST({ request }) {
         if (!process.env.OPENROUTER_API_KEY) {
           return new Response(
             JSON.stringify({ error: 'OPENROUTER_API_KEY not configured' }),

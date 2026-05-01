@@ -16,7 +16,7 @@ type OpenRouterFollowUpResponse = {
 export const Route = createFileRoute('/api/followups')({
   server: {
     handlers: {
-      POST: async ({ request }) => {
+      async POST({ request }) {
         if (!process.env.OPENROUTER_API_KEY) {
           return json({ followUps: [] })
         }

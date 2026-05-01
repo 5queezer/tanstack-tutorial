@@ -5,7 +5,7 @@ import { getOpenRouterModels } from '../../lib/openrouter-models'
 export const Route = createFileRoute('/api/models')({
   server: {
     handlers: {
-      GET: async () => {
+      async GET() {
         try {
           const models = await getOpenRouterModels()
 
