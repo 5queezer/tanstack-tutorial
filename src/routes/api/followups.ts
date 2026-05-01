@@ -2,8 +2,6 @@ import { createFileRoute } from '@tanstack/react-router'
 
 import { getOpenRouterModel } from '../../lib/openrouter-models'
 
-const OPENROUTER_CHAT_URL = 'https://openrouter.ai/api/v1/chat/completions'
-
 type FollowUpMessage = {
   role?: string
   content?: string
@@ -41,7 +39,7 @@ export const Route = createFileRoute('/api/followups')({
         }
 
         try {
-          const response = await fetch(OPENROUTER_CHAT_URL, {
+          const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
             method: 'POST',
             headers: {
               Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
