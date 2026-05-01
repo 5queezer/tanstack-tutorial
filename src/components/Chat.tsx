@@ -416,7 +416,7 @@ export function Chat() {
       .then((payload?: { followUps?: Array<string> }) => {
         setModelFollowUps(payload?.followUps ?? [])
       })
-      .catch(() => setModelFollowUps([]))
+      .catch(() => {})
   }, [followUpMode, isLoading, messages, selectedModel])
 
   function handleFreeOnlyChange(pressed: boolean) {
