@@ -59,24 +59,28 @@ function writeLocalStorage(key: string, value: string | boolean) {
   window.localStorage.setItem(key, String(value))
 }
 
-function createFollowUps(topic: string) {
-  const cleanedTopic = topic.replace(/\s+/g, ' ').trim()
-  const subject = cleanedTopic.length > 90 ? `${cleanedTopic.slice(0, 87)}...` : cleanedTopic
+function createFollowUps(userText = '', assistantText = '') {
+  const cleanedUserText = userText.replace(/\s+/g, ' ').trim()
+  const cleanedAssistantText = assistantText.replace(/\s+/g, ' ').trim()
+  const tooShortForSpecificFollowUps = cleanedUserText.length < 12 || /^(hi|hello|hey|yo|sup|thanks|thank you)[!.?\s]*$/i.test(cleanedUserText)
 
-  if (!subject) {
+  if (tooShortForSpecificFollowUps) {
     return [
-      'Can you give me a concrete example?',
-      'What are the trade-offs?',
-      'Can you explain that more simply?',
-      'What should I do next?',
+      'What can you help me with?',
+      'Give me a few example prompts',
+      'Help me brainstorm an idea',
+      'Explain something complicated simply',
     ]
   }
 
+  const topic = cleanedUserText.length > 80 ? `${cleanedUserText.slice(0, 77)}...` : cleanedUserText
+  const assistantMentionsSteps = /step|first|next|then|finally|start|begin/i.test(cleanedAssistantText)
+
   return [
-    `Can you give me a concrete example for ${subject}?`,
-    `What are the main trade-offs around ${subject}?`,
-    `How would I get started with ${subject}?`,
-    `What are common mistakes with ${subject}?`,
+    assistantMentionsSteps ? 'Can you turn that into a checklist?' : 'Can you give me a concrete example?',
+    `Can you explain more about “${topic}”?`,
+    'What are the trade-offs?',
+    'What should I ask next?',
   ]
 }
 
@@ -103,13 +107,14 @@ export function Chat() {
     if (isLoading || messages.length === 0) return []
 
     const lastAssistant = [...messages].reverse().find((message) => message.role === 'assistant')
-    if (!lastAssistant || !getMessageText(lastAssistant).trim()) return []
+    const lastAssistantText = getMessageText(lastAssistant)
+    if (!lastAssistant || !lastAssistantText.trim()) return []
 
     const lastUserText = getMessageText(
       [...messages].reverse().find((message) => message.role === 'user'),
     )
 
-    return createFollowUps(lastUserText)
+    return createFollowUps(lastUserText, lastAssistantText)
   }, [isLoading, messages])
 
   useEffect(() => {

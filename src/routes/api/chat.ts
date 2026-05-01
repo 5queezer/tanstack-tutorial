@@ -42,12 +42,24 @@ export const Route = createFileRoute('/api/chat')({
 
         const enableThinking = showThinking && Boolean(selectedModel.supportsThinking)
         const abortController = new AbortController()
+        const errorCapture = createOpenRouterErrorCaptureLogger()
 
         const stream = withOpenRouterErrorMetadata(chat({
           adapter: getChatModel(model),
           messages,
           conversationId,
           abortController,
+          debug: {
+            provider: false,
+            output: false,
+            middleware: false,
+            tools: false,
+            agentLoop: false,
+            config: false,
+            request: false,
+            errors: true,
+            logger: errorCapture.logger,
+          },
           modelOptions: enableThinking
             ? {
                 reasoning: {
@@ -57,7 +69,7 @@ export const Route = createFileRoute('/api/chat')({
                 },
               }
             : undefined,
-        }))
+        }), errorCapture)
 
         return toServerSentEventsResponse(stream, { abortController })
       },
@@ -67,40 +79,101 @@ export const Route = createFileRoute('/api/chat')({
 
 async function* withOpenRouterErrorMetadata(
   stream: AsyncIterable<StreamChunk>,
+  errorCapture: ReturnType<typeof createOpenRouterErrorCaptureLogger>,
 ): AsyncIterable<StreamChunk> {
   try {
-    yield* stream
-  } catch (error) {
-    const formatted = formatOpenRouterError(error)
+    for await (const chunk of stream) {
+      if (chunk.type === 'RUN_ERROR') {
+        yield enrichRunErrorChunk(chunk, errorCapture.lastError)
+        continue
+      }
 
-    yield {
-      type: 'RUN_ERROR',
-      timestamp: Date.now(),
-      message: formatted.message,
-      code: formatted.code,
-      error: {
-        message: formatted.message,
-        code: formatted.code,
-      },
-    } as StreamChunk
+      yield chunk
+    }
+  } catch (error) {
+    yield createRunErrorChunk(formatOpenRouterError(errorCapture.lastError ?? error))
   }
 }
 
+function enrichRunErrorChunk(chunk: StreamChunk, capturedError: unknown): StreamChunk {
+  if (!capturedError) return chunk
+
+  const formatted = formatOpenRouterError(capturedError)
+  return {
+    ...chunk,
+    message: formatted.message,
+    code: formatted.code,
+    error: {
+      message: formatted.message,
+      code: formatted.code,
+    },
+  } as StreamChunk
+}
+
+function createRunErrorChunk(formatted: { message: string; code?: string }): StreamChunk {
+  return {
+    type: 'RUN_ERROR',
+    timestamp: Date.now(),
+    message: formatted.message,
+    code: formatted.code,
+    error: {
+      message: formatted.message,
+      code: formatted.code,
+    },
+  } as StreamChunk
+}
+
+function createOpenRouterErrorCaptureLogger() {
+  const capture = {
+    lastError: undefined as unknown,
+    logger: {
+      debug: () => {},
+      info: () => {},
+      warn: () => {},
+      error: (_message: string, meta?: Record<string, unknown>) => {
+        if (meta?.error) {
+          capture.lastError = meta.error
+        }
+      },
+    },
+  }
+
+  return capture
+}
+
 function formatOpenRouterError(error: unknown) {
-  const status = getErrorNumber(error, 'status') ?? getErrorNumber(error, 'code')
-  const nestedError = getErrorRecord(error, 'error')
-  const metadata = getErrorRecord(nestedError, 'metadata')
+  const payload = getOpenRouterErrorPayload(error)
+  const metadata = getErrorRecord(payload, 'metadata')
+  const status =
+    getErrorNumber(error, 'status') ??
+    getErrorNumber(payload, 'code') ??
+    getErrorNumber(error, 'code')
   const raw = getErrorString(metadata, 'raw')
   const providerName = getErrorString(metadata, 'provider_name')
+  const fallbackMessage = getErrorString(payload, 'message')
   const message = raw
     ? `${providerName ? `${providerName}: ` : ''}${raw}`
-    : error instanceof Error
-      ? error.message
-      : 'Unknown OpenRouter error'
+    : fallbackMessage ?? (error instanceof Error ? error.message : 'Unknown OpenRouter error')
 
   return {
     message: status ? `${status} ${message}` : message,
     code: status ? String(status) : undefined,
+  }
+}
+
+function getOpenRouterErrorPayload(error: unknown): Record<string, unknown> | undefined {
+  const directPayload = getErrorRecord(error, 'error')
+  if (directPayload) return directPayload
+
+  const response = getErrorRecord(error, 'response')
+  const body = getErrorString(response, 'body$') ?? getErrorString(error, 'body$')
+  if (!body) return undefined
+
+  try {
+    const parsed = JSON.parse(body) as unknown
+    return getErrorRecord(parsed, 'error')
+  } catch {
+    return undefined
   }
 }
 
