@@ -500,7 +500,7 @@ setPendingSearchPrompt(input.prompt ?? 'What should I search for?')
           boxSizing: 'border-box',
           display: 'flex',
           flexDirection: 'column',
-          fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+          fontFamily: 'system-ui,sans-serif',
         }}
       >
         <header style={{ display: 'grid', gap: '0.75rem', marginBottom: '1rem' }}>
