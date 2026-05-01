@@ -5,6 +5,8 @@ import * as Select from '@radix-ui/react-select'
 import * as Toggle from '@radix-ui/react-toggle'
 import * as Tooltip from '@radix-ui/react-tooltip'
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 import type { ChatModel } from '../lib/models'
 
@@ -28,6 +30,14 @@ type UiChatModel = ChatModel & {
 type ChatMessage = {
   role: string
   parts?: Array<{ type?: string; content?: string }>
+}
+
+type AgUiStatusEvent = {
+  label: string
+  progress: number
+  model?: string
+  thinking?: boolean
+  at: number
 }
 
 function getMessageText(message?: ChatMessage) {
@@ -84,6 +94,15 @@ function createFollowUps(userText = '', assistantText = '') {
   ]
 }
 
+function isStatusEventValue(value: unknown): value is Omit<AgUiStatusEvent, 'at'> {
+  return Boolean(
+    value &&
+      typeof value === 'object' &&
+      typeof (value as { label?: unknown }).label === 'string' &&
+      typeof (value as { progress?: unknown }).progress === 'number',
+  )
+}
+
 export function Chat() {
   const [input, setInput] = useState('')
   const [models, setModels] = useState<Array<UiChatModel>>([])
@@ -92,6 +111,7 @@ export function Chat() {
   const [freeOnly, setFreeOnly] = useState(false)
   const [showThinking, setShowThinking] = useState(false)
   const [settingsLoaded, setSettingsLoaded] = useState(false)
+  const [agUiStatuses, setAgUiStatuses] = useState<Array<AgUiStatusEvent>>([])
   const modelOptions = useMemo(
     () => models.filter((model) => !freeOnly || model.free),
     [freeOnly, models],
@@ -102,7 +122,19 @@ export function Chat() {
   const { messages, sendMessage, isLoading, error, stop } = useChat({
     connection: fetchServerSentEvents('/api/chat'),
     body: { model: selectedModel || undefined, showThinking: showThinking && thinkingAvailable },
+    onCustomEvent: (eventName, value) => {
+      if (eventName !== 'demo.status' || !isStatusEventValue(value)) return
+
+      setAgUiStatuses((current) => [
+        ...current.slice(-5),
+        {
+          ...value,
+          at: Date.now(),
+        },
+      ])
+    },
   })
+  const latestAgUiStatus = agUiStatuses.at(-1)
   const followUps = useMemo(() => {
     if (isLoading || messages.length === 0) return []
 
@@ -202,12 +234,14 @@ export function Chat() {
     const text = input.trim()
     if (!text) return
 
+    setAgUiStatuses([])
     sendMessage(text)
     setInput('')
   }
 
   function handleFollowUpClick(question: string) {
     if (isLoading) return
+    setAgUiStatuses([])
     sendMessage(question)
   }
 
@@ -375,6 +409,52 @@ export function Chat() {
             </Toggle.Root>
           </div>
 
+          {latestAgUiStatus ? (
+            <section
+              aria-label="AG-UI stream status"
+              style={{
+                display: 'grid',
+                gap: '0.45rem',
+                padding: '0.7rem 0.8rem',
+                border: '1px solid #e4e4e4',
+                borderRadius: 12,
+                background: '#fafafa',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', fontSize: 13 }}>
+                <strong>AG-UI live</strong>
+                <span style={{ color: '#666' }}>{latestAgUiStatus.label}</span>
+              </div>
+              <div style={{ height: 6, overflow: 'hidden', borderRadius: 999, background: '#e8e8e8' }}>
+                <div
+                  style={{
+                    width: `${latestAgUiStatus.progress}%`,
+                    height: '100%',
+                    borderRadius: 999,
+                    background: latestAgUiStatus.progress >= 100 && error ? 'crimson' : '#111',
+                    transition: 'width 220ms ease',
+                  }}
+                />
+              </div>
+              <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+                {agUiStatuses.map((status) => (
+                  <span
+                    key={`${status.at}-${status.label}`}
+                    style={{
+                      padding: '0.2rem 0.45rem',
+                      borderRadius: 999,
+                      background: '#eee',
+                      color: '#555',
+                      fontSize: 12,
+                    }}
+                  >
+                    {status.label}
+                  </span>
+                ))}
+              </div>
+            </section>
+          ) : null}
+
           {modelsError ? <p style={{ color: 'crimson', margin: 0 }}>{modelsError}</p> : null}
         </header>
 
@@ -455,7 +535,46 @@ export function Chat() {
                           }
 
                           if (part.type === 'text') {
-                            return <span key={index}>{part.content}</span>
+                            return (
+                              <ReactMarkdown
+                                key={index}
+                                remarkPlugins={[remarkGfm]}
+                                components={{
+                                  p: ({ children }) => <p style={{ margin: '0 0 0.6rem' }}>{children}</p>,
+                                  ul: ({ children }) => <ul style={{ margin: '0.4rem 0 0.7rem', paddingLeft: '1.25rem' }}>{children}</ul>,
+                                  ol: ({ children }) => <ol style={{ margin: '0.4rem 0 0.7rem', paddingLeft: '1.25rem' }}>{children}</ol>,
+                                  li: ({ children }) => <li style={{ margin: '0.2rem 0' }}>{children}</li>,
+                                  code: ({ children }) => (
+                                    <code
+                                      style={{
+                                        padding: '0.12rem 0.25rem',
+                                        borderRadius: 4,
+                                        background: isUser ? '#333' : '#e4e4e4',
+                                        fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+                                        fontSize: '0.92em',
+                                      }}
+                                    >
+                                      {children}
+                                    </code>
+                                  ),
+                                  pre: ({ children }) => (
+                                    <pre
+                                      style={{
+                                        overflowX: 'auto',
+                                        margin: '0.5rem 0',
+                                        padding: '0.65rem',
+                                        borderRadius: 8,
+                                        background: isUser ? '#333' : '#e4e4e4',
+                                      }}
+                                    >
+                                      {children}
+                                    </pre>
+                                  ),
+                                }}
+                              >
+                                {part.content}
+                              </ReactMarkdown>
+                            )
                           }
 
                           return null
