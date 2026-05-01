@@ -92,7 +92,6 @@ async function* withOpenRouterErrorMetadata(
       }
 
       if (chunk.type === 'RUN_FINISHED') {
-        yield createStatusEvent('Complete')
         yield {
           type: 'CUSTOM',
           name: 'f',
