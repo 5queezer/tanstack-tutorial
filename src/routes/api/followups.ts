@@ -27,9 +27,7 @@ export const Route = createFileRoute('/api/followups')({
           return json({ followUps: [] })
         }
 
-        const messages = (body.messages ?? [])
-          .filter((message) => message.role && message.content)
-          .slice(-8)
+        const messages = (body.messages ?? []).slice(-8)
 
         if (messages.length < 2) {
           return json({ followUps: [] })
