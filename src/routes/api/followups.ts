@@ -22,9 +22,8 @@ export const Route = createFileRoute('/api/followups')({
         }
 
         const body = (await request.json()) as { messages?: Array<FollowUpMessage>; model?: string }
-        const model = typeof body.model === 'string' ? body.model : undefined
 
-        if (!model) {
+        if (typeof body.model !== 'string') {
           return json({ followUps: [] })
         }
 
@@ -46,7 +45,7 @@ export const Route = createFileRoute('/api/followups')({
               'X-Title': process.env.OPENROUTER_APP_NAME ?? 'TanStack',
             },
             body: JSON.stringify({
-              model,
+              model: body.model,
               messages: [
                 {
                   role: 'system',
