@@ -434,8 +434,6 @@ export function Chat() {
     const text = input.trim()
     if (!text) return
 
-    setModelFollowUps([])
-    setAgUiFollowUps([])
     sendMessage(text)
     setInput('')
   }
