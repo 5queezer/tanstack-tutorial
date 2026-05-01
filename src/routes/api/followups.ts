@@ -89,8 +89,6 @@ function parseFollowUps(content: string) {
 
     return parsed.followUps
       .filter((item): item is string => typeof item === 'string')
-      .map((item) => item.trim())
-      .filter(Boolean)
       .slice(0, 3)
   } catch {
     return []
