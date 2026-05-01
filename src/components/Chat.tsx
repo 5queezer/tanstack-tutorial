@@ -403,7 +403,6 @@ export function Chat() {
 
     const serializableMessages = messages
       .map((message) => ({ role: message.role, content: getMessageText(message) }))
-      .filter((message) => message.content)
 
     const lastAssistant = [...serializableMessages].reverse().find((message) => message.role === 'assistant')
     if (!lastAssistant) return
