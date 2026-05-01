@@ -259,7 +259,7 @@ function ToolWidget({ toolName, input, output }: { toolName: string; input: unkn
         <div style={{ fontSize: 16, fontWeight: 800 }}>Results for “{result.query}”</div>
         {results.map((item, index) => {
           const searchResult = item
-          const url = String(searchResult.url)
+          const url = searchResult.url
 
           return (
             <a
