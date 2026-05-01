@@ -79,8 +79,8 @@ export function ToolWidget({ toolName, input, output }: { toolName: string; inpu
       <div style={{ display: 'grid', gap: '0.55rem' }}>
         <div style={{ fontSize: 16, fontWeight: 800 }}>Results for “{String(result.query)}”</div>
         {results.map((item, index) => {
-          const searchResult = item && typeof item === 'object' ? (item as Record<string, unknown>) : {}
-          const url = String(searchResult.url ?? '')
+          const searchResult = item as Record<string, unknown>
+          const url = String(searchResult.url)
 
           return (
             <a
