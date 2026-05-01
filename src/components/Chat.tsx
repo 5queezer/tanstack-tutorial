@@ -284,7 +284,6 @@ export function Chat() {
               <span>Model</span>
               <select
                 aria-label="Model"
-                title={selectedModel}
                 value={selectedModel}
                 onChange={(event) => {
                   const modelId = event.target.value
