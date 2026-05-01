@@ -51,3 +51,6 @@ For this repo, treat the chat app as an agent harness. Optimize the app/harness 
 - Kept: progressively trusted internal server/client contracts for known tool outputs and custom events, removing fallback parsing/validation/unused payload fields where inputs are controlled by this app.
 - Kept: inlined tiny single-use UI components after simplification (`TypingIndicator`, `AgUiStatusPanel`, `InteractiveSearchPrompt`, `FollowUps`). This reduced module/prop overhead but made `Chat.tsx` more monolithic; re-extract if complexity grows.
 - Kept: removed decorative UI bytes (emojis, animated typing keyframes, follow-up arrow) while preserving text affordances.
+- Correctness fix: direct `export default createStartHandler(...)` passed build/typecheck but broke Vite dev (`default.fetch is not a function`). Restored `{ fetch: createStartHandler(...) }` and added a backpressure check that imports `dist/server/server.js` and asserts `default.fetch` is a function.
+- Kept: removed most AG-UI status plumbing after simplifying status UI; tool cards/results and typing state preserve practical observability. Follow-up custom events remain.
+- Kept: simplified optional model follow-up request bookkeeping (no duplicate request key, no cancellation guard, trust internal response shape). This trades some stale/refetch protection for a leaner optional hint path.
