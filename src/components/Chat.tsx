@@ -44,11 +44,7 @@ setPendingSearchPrompt(input.prompt ?? 'What should I search for?')
     body: { model: selectedModel || undefined, showThinking: showThinking && thinkingAvailable },
     tools: [interactiveSearchTool],
     onCustomEvent: (eventName, value) => {
-      if (eventName === 'f') {
-        setAgUiFollowUps((value as { followUps: Array<string> }).followUps)
-        return
-      }
-
+      if (eventName === 'f') setAgUiFollowUps((value as { followUps: Array<string> }).followUps)
     },
   })
   const heuristicFollowUps = useMemo(() => {
