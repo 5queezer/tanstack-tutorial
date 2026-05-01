@@ -14,7 +14,6 @@ export const getWeatherDef = toolDefinition({
     temperatureC: z.number(),
     humidity: z.number(),
     windKph: z.number(),
-    observedAt: z.string(),
   }),
 })
 
@@ -31,7 +30,6 @@ export const getStockDef = toolDefinition({
     changePercent: z.number(),
     currency: z.string(),
     marketState: z.string(),
-    observedAt: z.string(),
   }),
 })
 
@@ -120,7 +118,6 @@ export const getWeather = getWeatherDef.server(async (args, context) => {
   return {
     city,
     ...weather,
-    observedAt: new Date().toISOString(),
   }
 })
 
@@ -148,7 +145,6 @@ export const getStockQuote = getStockDef.server(async (args, context) => {
   return {
     symbol: normalizedSymbol,
     ...quote,
-    observedAt: new Date().toISOString(),
   }
 })
 
