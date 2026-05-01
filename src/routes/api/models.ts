@@ -13,7 +13,7 @@ export const Route = createFileRoute('/api/models')({
         } catch (error) {
           return new Response(
             JSON.stringify({
-              error: error instanceof Error ? error.message : 'Models failed',
+              error: (error as Error).message,
             }),
             { status: 502 },
           )
