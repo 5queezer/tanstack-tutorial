@@ -32,16 +32,8 @@ export const Route = createFileRoute('/api/chat')({
             headers: { 'Content-Type': 'application/json' },
           })
         }
-        const selectedModel = await getOpenRouterModel(model)
-
-        if (!selectedModel) {
-          return new Response(JSON.stringify({ error: `Unsupported OpenRouter model: ${model}` }), {
-            status: 400,
-            headers: { 'Content-Type': 'application/json' },
-          })
-        }
-
-        const enableThinking = showThinking && Boolean(selectedModel.supportsThinking)
+        const selectedModel = showThinking ? await getOpenRouterModel(model) : undefined
+        const enableThinking = showThinking && Boolean(selectedModel?.supportsThinking)
         const abortController = new AbortController()
         const errorCapture = createOpenRouterErrorCaptureLogger()
 
