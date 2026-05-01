@@ -134,7 +134,7 @@ export const braveWebSearch = braveWebSearchDef.server(async (args) => {
     .map((result) => ({
       title: result.title,
       url: result.url,
-      description: result.description ?? '',
+      description: result.description,
 
     }))
 
