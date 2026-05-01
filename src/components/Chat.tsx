@@ -474,7 +474,7 @@ export function Chat() {
                                   fontSize: 13,
                                 }}
                               >
-                                <strong>{toolName === 'get_weather' ? '🌦️ Weather tool' : toolName === 'get_stock_quote' ? '📈 Stock tool' : toolName === 'brave_web_search' ? '🔎 Brave Search tool' : toolName === 'request_search_query' ? '💬 Search query request' : `🔧 ${toolName}`}</strong>
+                                <strong>{toolName === 'get_weather' ? '🌦️ Weather' : toolName === 'get_stock_quote' ? '📈 Stock' : toolName === 'brave_web_search' ? '🔎 Search' : toolName === 'request_search_query' ? '💬 Search query' : `🔧 ${toolName}`}</strong>
                                 <span style={{ color: isUser ? '#ddd' : '#555' }}>{state}</span>
                                 <ToolWidget toolName={toolName} input={toolInput} output={toolOutput} />
                               </div>
