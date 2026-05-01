@@ -73,7 +73,7 @@ export function ToolWidget({ toolName, input, output }: { toolName: string; inpu
   }
 
   if (toolName === 'brave_web_search') {
-    const results = Array.isArray(result.results) ? result.results.slice(0, 5) : []
+    const results = (result.results as Array<unknown>).slice(0, 5)
 
     return (
       <div style={{ display: 'grid', gap: '0.55rem' }}>
