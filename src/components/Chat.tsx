@@ -328,10 +328,7 @@ export function Chat() {
   const thinkingAvailable = Boolean(models.find((model) => model.id === selectedModel)?.supportsThinking)
   const interactiveSearchTool = useMemo(
     () => ({
-      __toolSide: 'client' as const,
       name: 'request_search_query',
-      description: '',
-      inputSchema: undefined,
       execute: (toolInput: { prompt?: string; suggestedQuery?: string }) => {
         setInteractiveSearchInput(toolInput.suggestedQuery ?? '')
         setPendingSearchPrompt(toolInput.prompt ?? 'What should I search for?')
@@ -340,7 +337,7 @@ export function Chat() {
           searchQueryResolverRef.current = resolve
         })
       },
-    }),
+    }) as any,
     [],
   )
   const { messages, sendMessage, isLoading, error, stop } = useChat({
