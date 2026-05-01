@@ -6,15 +6,13 @@ import {
   type OpenRouterModelResponse,
 } from './models'
 
-const MODEL_CACHE_TTL_MS = 6e5
-
 let cachedModels: Array<ChatModel> | undefined
 let cachedAt = 0
 
 export async function getOpenRouterModels() {
   const now = Date.now()
 
-  if (cachedModels && now - cachedAt < MODEL_CACHE_TTL_MS) {
+  if (cachedModels && now - cachedAt < 6e5) {
     return cachedModels
   }
 
