@@ -12,15 +12,6 @@ import { TypingIndicator } from './chat/TypingIndicator'
 import type { AgUiStatusEvent, FollowUpMode, PendingSearchQueryRequest, UiChatModel } from './chat/types'
 import { requestSearchQueryDef } from '../lib/request-search-tool'
 
-function isFollowUpsEventValue(value: unknown): value is { followUps: Array<string> } {
-  return Boolean(
-    value &&
-      typeof value === 'object' &&
-      Array.isArray((value as { followUps?: unknown }).followUps) &&
-      (value as { followUps: Array<unknown> }).followUps.every((item) => typeof item === 'string'),
-  )
-}
-
 function isFollowUpMode(value: string | undefined): value is FollowUpMode {
   return value === 'h' || value === 'm' || value === 'a' || value === 'o'
 }
@@ -67,8 +58,8 @@ export function Chat() {
     body: { model: selectedModel || undefined, showThinking: showThinking && thinkingAvailable },
     tools: [interactiveSearchTool],
     onCustomEvent: (eventName, value) => {
-      if (eventName === 'f' && isFollowUpsEventValue(value)) {
-        setAgUiFollowUps(value.followUps)
+      if (eventName === 'f') {
+        setAgUiFollowUps((value as { followUps: Array<string> }).followUps)
         return
       }
 
