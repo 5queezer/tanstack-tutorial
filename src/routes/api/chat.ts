@@ -158,7 +158,6 @@ function enrichRunErrorChunk(chunk: StreamChunk, capturedError: unknown): Stream
 function createRunErrorChunk(formatted: { message: string; code?: string }): StreamChunk {
   return {
     type: 'RUN_ERROR',
-    timestamp: Date.now(),
     message: formatted.message,
     code: formatted.code,
     error: {
