@@ -205,7 +205,7 @@ function Metric({ label, value }: { label: string; value: string }) {
 }
 
 function ToolWidget({ toolName, input, output }: { toolName: string; input: unknown; output: unknown }) {
-  const result = output as Record<string, unknown>
+  const result = output as any
 
   if (!result) {
     return input ? <div style={{ color: '#555', fontSize: 13 }}>Input: {JSON.stringify(input)}</div> : null
@@ -216,8 +216,8 @@ function ToolWidget({ toolName, input, output }: { toolName: string; input: unkn
       <div style={{ display: 'grid', gap: '0.55rem' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '1rem' }}>
           <div>
-            <div style={{ fontSize: 22, fontWeight: 800 }}>{String(result.city)}</div>
-            <div style={{ color: '#555' }}>{String(result.condition)}</div>
+            <div style={{ fontSize: 22, fontWeight: 800 }}>{result.city}</div>
+            <div style={{ color: '#555' }}>{result.condition}</div>
           </div>
           <div style={{ fontSize: 34, fontWeight: 800 }}>{formatNumber(result.temperatureC, 0)}°C</div>
         </div>
@@ -237,11 +237,11 @@ function ToolWidget({ toolName, input, output }: { toolName: string; input: unkn
       <div style={{ display: 'grid', gap: '0.55rem' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '1rem' }}>
           <div>
-            <div style={{ fontSize: 22, fontWeight: 800 }}>{String(result.symbol)}</div>
-            <div style={{ color: '#555' }}>{String(result.marketState)}</div>
+            <div style={{ fontSize: 22, fontWeight: 800 }}>{result.symbol}</div>
+            <div style={{ color: '#555' }}>{result.marketState}</div>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: 28, fontWeight: 800 }}>{String(result.currency)} {formatNumber(result.price, 2)}</div>
+            <div style={{ fontSize: 28, fontWeight: 800 }}>{result.currency} {formatNumber(result.price, 2)}</div>
             <div style={{ color: isUp ? '#147a35' : 'crimson', fontWeight: 700 }}>
               {isUp ? '▲' : '▼'} {formatNumber(Math.abs(change), 2)} ({formatNumber(Math.abs(Number(result.changePercent)), 2)}%)
             </div>
@@ -252,13 +252,13 @@ function ToolWidget({ toolName, input, output }: { toolName: string; input: unkn
   }
 
   if (toolName === 'brave_web_search') {
-    const results = result.results as Array<unknown>
+    const results = result.results as Array<any>
 
     return (
       <div style={{ display: 'grid', gap: '0.55rem' }}>
-        <div style={{ fontSize: 16, fontWeight: 800 }}>Results for “{String(result.query)}”</div>
+        <div style={{ fontSize: 16, fontWeight: 800 }}>Results for “{result.query}”</div>
         {results.map((item, index) => {
-          const searchResult = item as Record<string, unknown>
+          const searchResult = item
           const url = String(searchResult.url)
 
           return (
@@ -277,8 +277,8 @@ function ToolWidget({ toolName, input, output }: { toolName: string; input: unkn
                 textDecoration: 'none',
               }}
             >
-              <strong>{String(searchResult.title)}</strong>
-              <span style={{ color: '#555', fontSize: 13 }}>{String(searchResult.description)}</span>
+              <strong>{searchResult.title}</strong>
+              <span style={{ color: '#555', fontSize: 13 }}>{searchResult.description}</span>
               <span style={{ color: '#777', fontSize: 12 }}>{url}</span>
             </a>
           )
