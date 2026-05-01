@@ -11,7 +11,7 @@ export function getMessageText(message?: ChatMessage) {
 export function createFollowUps(userText = '', assistantText = '') {
   const cleanedUserText = userText.replace(/\s+/g, ' ').trim()
   const cleanedAssistantText = assistantText.replace(/\s+/g, ' ').trim()
-  const tooShortForSpecificFollowUps = cleanedUserText.length < 12 || /^(hi|hello|hey|yo|sup|thanks|thank you)[!.?\s]*$/i.test(cleanedUserText)
+  const tooShortForSpecificFollowUps = cleanedUserText.length < 12 || /^(hi|hello|hey|thanks|thank you)[!.?\s]*$/i.test(cleanedUserText)
 
   if (tooShortForSpecificFollowUps) {
     return [
