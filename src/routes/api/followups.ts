@@ -49,7 +49,6 @@ export const Route = createFileRoute('/api/followups')({
                   content: messages.map((message) => `${message.role}: ${message.content}`).join('\n\n'),
                 },
               ],
-              temperature: 0.5,
               max_tokens: 180,
               response_format: { type: 'json_object' },
             }),
