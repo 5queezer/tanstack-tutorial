@@ -11,11 +11,7 @@ export function readLocalStorage(key: string) {
 
 export function readLocalStorageBoolean(key: string, fallback = false) {
   const value = readLocalStorage(key)
-
-  if (value === 'true') return true
-  if (value === 'false') return false
-
-  return fallback
+  return value === 'true' || (value !== 'false' && fallback)
 }
 
 export function writeLocalStorage(key: string, value: string | boolean) {
