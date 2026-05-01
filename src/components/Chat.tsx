@@ -532,7 +532,6 @@ setPendingSearchPrompt(input.prompt ?? 'What should I search for?')
                   border: '1px solid #ccc',
                   borderRadius: 8,
                   background: '#fff',
-                  fontFamily: 'inherit',
                 }}
               >
                 {modelOptions.length === 0 ? <option value="">Loading...</option> : null}
@@ -556,7 +555,6 @@ setPendingSearchPrompt(input.prompt ?? 'What should I search for?')
                   border: '1px solid #ccc',
                   borderRadius: 8,
                   background: '#fff',
-                  fontFamily: 'inherit',
                 }}
               >
                 <option value="h">Heuristic</option>
@@ -573,7 +571,6 @@ setPendingSearchPrompt(input.prompt ?? 'What should I search for?')
               aria-pressed={freeOnly}
               aria-label="Free models"
               style={{
-                fontFamily: 'inherit',
                 padding: '0.55rem 0.75rem',
                 border: '1px solid #ccc',
                 borderRadius: 8,
@@ -592,7 +589,6 @@ setPendingSearchPrompt(input.prompt ?? 'What should I search for?')
               aria-pressed={showThinking}
               aria-label="Thinking"
               style={{
-                fontFamily: 'inherit',
                 padding: '0.55rem 0.75rem',
                 border: '1px solid #ccc',
                 borderRadius: 8,
@@ -758,8 +754,7 @@ setPendingSearchPrompt(input.prompt ?? 'What should I search for?')
                               padding: '0.65rem',
                               border: '1px solid #c8d8ee',
                               borderRadius: 10,
-                              fontFamily: 'inherit',
-                            }}
+                                        }}
                           />
                           <button
                             type="submit"
@@ -770,8 +765,7 @@ setPendingSearchPrompt(input.prompt ?? 'What should I search for?')
                               borderRadius: 10,
                               background: '#111',
                               color: '#fff',
-                              fontFamily: 'inherit',
-                              cursor: interactiveSearchInput.trim() ? 'pointer' : 'not-allowed',
+                                          cursor: interactiveSearchInput.trim() ? 'pointer' : 'not-allowed',
                             }}
                           >
                             Search
@@ -804,7 +798,6 @@ setPendingSearchPrompt(input.prompt ?? 'What should I search for?')
                             background: 'transparent',
                             color: '#222',
                             textAlign: 'left',
-                            font: 'inherit',
                             cursor: 'pointer',
                           }}
                         >
@@ -846,7 +839,7 @@ setPendingSearchPrompt(input.prompt ?? 'What should I search for?')
             onChange={(event) => setInput(event.target.value)}
             placeholder="Ask..."
             aria-label="Message"
-            style={{ flex: 1, padding: '0.75rem', border: '1px solid #ccc', borderRadius: 8, fontFamily: 'inherit' }}
+            style={{ flex: 1, padding: '0.75rem', border: '1px solid #ccc', borderRadius: 8 }}
           />
 
           <button
@@ -854,7 +847,6 @@ setPendingSearchPrompt(input.prompt ?? 'What should I search for?')
             onClick={isLoading ? stop : undefined}
             disabled={!isLoading && !selectedModel}
             style={{
-              fontFamily: 'inherit',
               padding: '0.75rem 1rem',
               border: 0,
               borderRadius: 8,
