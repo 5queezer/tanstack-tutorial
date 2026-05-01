@@ -398,7 +398,7 @@ export function Chat() {
   useEffect(() => {
     if (!settingsLoaded) return
 
-    if (selectedModel) localStorage.setItem(STORAGE_KEYS.selectedModel, selectedModel)
+    localStorage.setItem(STORAGE_KEYS.selectedModel, selectedModel)
     localStorage.setItem(STORAGE_KEYS.freeOnly, String(freeOnly))
     localStorage.setItem(STORAGE_KEYS.showThinking, String(showThinking))
     localStorage.setItem(STORAGE_KEYS.followUpMode, followUpMode)
