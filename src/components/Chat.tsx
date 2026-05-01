@@ -206,10 +206,9 @@ function Metric({ label, value }: { label: string; value: string }) {
 
 function ToolWidget({ toolName, input, output }: { toolName: string; input: unknown; output: unknown }) {
   const result = output as Record<string, unknown>
-  const args = input as Record<string, unknown>
 
   if (!result) {
-    return args ? <div style={{ color: '#555', fontSize: 13 }}>Input: {JSON.stringify(args)}</div> : null
+    return input ? <div style={{ color: '#555', fontSize: 13 }}>Input: {JSON.stringify(input)}</div> : null
   }
 
   if (toolName === 'get_weather') {
