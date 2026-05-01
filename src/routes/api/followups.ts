@@ -98,7 +98,5 @@ function parseFollowUps(content: string) {
 }
 
 function json(data: unknown) {
-  return new Response(JSON.stringify(data), {
-    headers: { 'Content-Type': 'application/json' },
-  })
+  return new Response(JSON.stringify(data))
 }
