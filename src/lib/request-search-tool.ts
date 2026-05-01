@@ -7,7 +7,6 @@ const requestSearchInputSchema = {
     suggestedQuery: { type: 'string' },
   },
   required: ['prompt'],
-  additionalProperties: false,
 } as const
 
 export const requestSearchQueryDef = toolDefinition({
