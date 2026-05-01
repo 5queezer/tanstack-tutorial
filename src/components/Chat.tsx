@@ -1,8 +1,41 @@
 import { fetchServerSentEvents, useChat } from '@tanstack/ai-react'
 import { useEffect, useMemo, useRef, useState, type ReactNode, type SubmitEventHandler } from 'react'
-import { createFollowUps, getMessageText } from './chat/followUps'
 import type { FollowUpMode, UiChatModel } from './chat/types'
 import { requestSearchQueryDef } from '../lib/request-search-tool'
+
+function getMessageText(message?: { parts?: Array<{ type?: string; content?: string }> }) {
+  return message?.parts
+    ?.filter((part) => part.type === 'text' && part.content)
+    .map((part) => part.content)
+    .join(' ')
+    .trim() ?? ''
+}
+
+function createFollowUps(userText = '', assistantText = '') {
+  const cleanedUserText = userText.replace(/\s+/g, ' ').trim()
+  const cleanedAssistantText = assistantText.replace(/\s+/g, ' ').trim()
+  const tooShortForSpecificFollowUps = cleanedUserText.length < 12 || /^(hi|hello|hey|thanks|thank you)[!.?\s]*$/i.test(cleanedUserText)
+
+  if (tooShortForSpecificFollowUps) {
+    return [
+      'What can you help with?',
+      'Give example prompts',
+      'Help me brainstorm',
+      'Explain something simply',
+    ]
+  }
+
+  const topic = cleanedUserText.length > 80 ? `${cleanedUserText.slice(0, 77)}...` : cleanedUserText
+  const assistantMentionsSteps = /step|first|next|then|finally|start|begin/i.test(cleanedAssistantText)
+
+  return [
+    assistantMentionsSteps ? 'Turn that into a checklist?' : 'Give a concrete example?',
+    `Explain more about “${topic}”?`,
+    'What are the trade-offs?',
+    'What should I ask next?',
+  ]
+}
+
 
 const STORAGE_KEYS = {
   selectedModel: 'tc:m',

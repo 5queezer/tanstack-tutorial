@@ -4,10 +4,5 @@ export type UiChatModel = ChatModel & {
   supportsThinking?: boolean
 }
 
-export type ChatMessage = {
-  role: string
-  parts?: Array<{ type?: string; content?: string }>
-}
-
 
 export type FollowUpMode = 'h' | 'm' | 'a' | 'o'
