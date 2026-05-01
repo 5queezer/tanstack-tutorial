@@ -51,7 +51,7 @@ export function ToolWidget({ toolName, input, output }: { toolName: string; inpu
   }
 
   if (toolName === 'get_stock_quote') {
-    const change = typeof result.change === 'number' ? result.change : 0
+    const change = Number(result.change)
     const isUp = change >= 0
 
     return (
@@ -64,7 +64,7 @@ export function ToolWidget({ toolName, input, output }: { toolName: string; inpu
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontSize: 28, fontWeight: 800 }}>{String(result.currency)} {formatNumber(result.price, 2)}</div>
             <div style={{ color: isUp ? '#147a35' : 'crimson', fontWeight: 700 }}>
-              {isUp ? '▲' : '▼'} {formatNumber(Math.abs(change), 2)} ({formatNumber(Math.abs(Number(result.changePercent ?? 0)), 2)}%)
+              {isUp ? '▲' : '▼'} {formatNumber(Math.abs(change), 2)} ({formatNumber(Math.abs(Number(result.changePercent)), 2)}%)
             </div>
           </div>
         </div>
