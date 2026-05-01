@@ -9,18 +9,13 @@ export const Route = createFileRoute('/api/models')({
         try {
           const models = await getOpenRouterModels()
 
-          return new Response(JSON.stringify({ models }), {
-            headers: { 'Content-Type': 'application/json' },
-          })
+          return new Response(JSON.stringify({ models }))
         } catch (error) {
           return new Response(
             JSON.stringify({
               error: error instanceof Error ? error.message : 'Model fetch failed',
             }),
-            {
-              status: 502,
-              headers: { 'Content-Type': 'application/json' },
-            },
+            { status: 502 },
           )
         }
       },
