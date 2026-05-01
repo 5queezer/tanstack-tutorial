@@ -13,9 +13,9 @@ export function TypingIndicator() {
           background: '#f2f2f2',
         }}
       >
-        <span style={{ width: 7, height: 7, borderRadius: 999, background: '#555', animation: 'chat-dot-bounce 1.1s infinite ease-in-out' }} />
-        <span style={{ width: 7, height: 7, borderRadius: 999, background: '#555', animation: 'chat-dot-bounce 1.1s infinite ease-in-out', animationDelay: '0.16s' }} />
-        <span style={{ width: 7, height: 7, borderRadius: 999, background: '#555', animation: 'chat-dot-bounce 1.1s infinite ease-in-out', animationDelay: '0.32s' }} />
+        <span style={{ width: 7, height: 7, borderRadius: 999, background: '#555' }} />
+        <span style={{ width: 7, height: 7, borderRadius: 999, background: '#555' }} />
+        <span style={{ width: 7, height: 7, borderRadius: 999, background: '#555' }} />
       </div>
     </article>
   )

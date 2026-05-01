@@ -11,7 +11,6 @@ import { TypingIndicator } from './chat/TypingIndicator'
 import type { AgUiStatusEvent, FollowUpMode, PendingSearchQueryRequest, UiChatModel } from './chat/types'
 import { requestSearchQueryDef } from '../lib/request-search-tool'
 
-const thinkingDotKeyframes = '@keyframes chat-dot-bounce{0%,80%,100%{transform:translateY(0);opacity:.35}40%{transform:translateY(-4px);opacity:1}}'
 function isFollowUpMode(value: string | undefined): value is FollowUpMode {
   return value === 'h' || value === 'm' || value === 'a' || value === 'o'
 }
@@ -247,7 +246,6 @@ export function Chat() {
 
   return (
     <>
-      <style>{thinkingDotKeyframes}</style>
       <main
         style={{
           height: '100vh',
