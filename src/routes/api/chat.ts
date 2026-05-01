@@ -74,9 +74,6 @@ async function* withOpenRouterErrorMetadata(
   let sawFirstToken = false
   let accumulatedContent = ''
 
-  yield createStatusEvent('Model ready')
-  yield createStatusEvent('Request sent')
-
   try {
     for await (const chunk of stream) {
       if (chunk.type === 'RUN_STARTED') {
