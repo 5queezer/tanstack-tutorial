@@ -6,7 +6,7 @@ export function AgUiStatusPanel({ statuses, hasError }: { statuses: Array<AgUiSt
 
   return (
     <section
-      aria-label="AG-UI stream status"
+      aria-label="Status"
       style={{
         display: 'grid',
         gap: '0.45rem',
