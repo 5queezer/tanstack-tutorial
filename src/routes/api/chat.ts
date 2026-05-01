@@ -74,38 +74,38 @@ async function* withOpenRouterErrorMetadata(
   let sawFirstToken = false
   let accumulatedContent = ''
 
-  yield createStatusEvent('Model validated', 15)
-  yield createStatusEvent('Request sent to OpenRouter', 35)
+  yield createStatusEvent('Model validated')
+  yield createStatusEvent('Request sent to OpenRouter')
 
   try {
     for await (const chunk of stream) {
       if (chunk.type === 'RUN_STARTED') {
-        yield createStatusEvent('AG-UI run started', 50)
+        yield createStatusEvent('AG-UI run started')
       }
 
       if (chunk.type === 'TEXT_MESSAGE_CONTENT') {
         accumulatedContent += chunk.delta ?? ''
         if (!sawFirstToken) {
           sawFirstToken = true
-          yield createStatusEvent('First token received', 70)
+          yield createStatusEvent('First token received')
         }
       }
 
       if (chunk.type === 'RUN_ERROR') {
-        yield createStatusEvent('Provider error', 100)
+        yield createStatusEvent('Provider error')
         yield enrichRunErrorChunk(chunk, errorCapture.lastError)
         continue
       }
 
       if (chunk.type === 'RUN_FINISHED') {
-        yield createStatusEvent('Run complete', 100)
+        yield createStatusEvent('Run complete')
         yield createFollowUpsEvent(createServerFollowUps(accumulatedContent))
       }
 
       yield chunk
     }
   } catch (error) {
-    yield createStatusEvent('Provider error', 100)
+    yield createStatusEvent('Provider error')
     yield createRunErrorChunk(formatOpenRouterError(errorCapture.lastError ?? error))
   }
 }
@@ -137,12 +137,12 @@ function createServerFollowUps(assistantText: string) {
   return ['Give a concrete example?', 'Turn that into steps?', 'What should I ask next?']
 }
 
-function createStatusEvent(label: string, progress: number): StreamChunk {
+function createStatusEvent(label: string): StreamChunk {
   return {
     type: 'CUSTOM',
     name: 's',
     timestamp: Date.now(),
-    value: { label, progress },
+    value: { label },
   } as StreamChunk
 }
 

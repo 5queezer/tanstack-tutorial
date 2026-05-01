@@ -76,7 +76,6 @@ export const getWeather = getWeatherDef.server(async (args, context) => {
   const { city } = args as WeatherInput
   context?.emitCustomEvent('t', {
     label: `Weather: ${city}`,
-    progress: 25,
   })
   const key = city.toLowerCase().trim()
   const weather = weatherByCity[key] ?? {
@@ -88,7 +87,6 @@ export const getWeather = getWeatherDef.server(async (args, context) => {
 
   context?.emitCustomEvent('t', {
     label: `Weather ready: ${city}`,
-    progress: 100,
   })
 
   return {
@@ -103,7 +101,6 @@ export const getStockQuote = getStockDef.server(async (args, context) => {
 
   context?.emitCustomEvent('t', {
     label: `Quote: ${normalizedSymbol}`,
-    progress: 25,
   })
   const quote = stockBySymbol[normalizedSymbol] ?? {
     price: 100 + normalizedSymbol.length * 7.13,
@@ -115,7 +112,6 @@ export const getStockQuote = getStockDef.server(async (args, context) => {
 
   context?.emitCustomEvent('t', {
     label: `Quote ready: ${normalizedSymbol}`,
-    progress: 100,
   })
 
   return {
@@ -133,7 +129,6 @@ export const braveWebSearch = braveWebSearchDef.server(async (args, context) => 
 
   context?.emitCustomEvent('t', {
     label: `Search: ${query}`,
-    progress: 20,
   })
 
   const url = new URL('https://api.search.brave.com/res/v1/web/search')
@@ -154,7 +149,6 @@ export const braveWebSearch = braveWebSearchDef.server(async (args, context) => 
 
   context?.emitCustomEvent('t', {
     label: 'Results received',
-    progress: 75,
   })
 
   const payload = (await response.json()) as BraveSearchResponse
@@ -170,7 +164,6 @@ export const braveWebSearch = braveWebSearchDef.server(async (args, context) => 
 
   context?.emitCustomEvent('t', {
     label: `${results.length} results ready`,
-    progress: 100,
   })
 
   return {

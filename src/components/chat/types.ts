@@ -11,7 +11,6 @@ export type ChatMessage = {
 
 export type AgUiStatusEvent = {
   label: string
-  progress: number
 }
 
 
