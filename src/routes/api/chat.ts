@@ -75,10 +75,6 @@ async function* withOpenRouterErrorMetadata(
 
   try {
     for await (const chunk of stream) {
-      if (chunk.type === 'RUN_STARTED') {
-        yield createStatusEvent('Run started')
-      }
-
       if (chunk.type === 'TEXT_MESSAGE_CONTENT') {
         accumulatedContent += chunk.delta ?? ''
 
