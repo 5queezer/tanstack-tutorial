@@ -47,9 +47,8 @@ function readLocalStorage(key: string) {
   return localStorage.getItem(key) ?? undefined
 }
 
-function readLocalStorageBoolean(key: string, fallback = false) {
-  const value = readLocalStorage(key)
-  return value === 'true' || (value !== 'false' && fallback)
+function readLocalStorageBoolean(key: string) {
+  return readLocalStorage(key) === 'true'
 }
 
 function writeLocalStorage(key: string, value: string | boolean) {
