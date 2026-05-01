@@ -2,7 +2,7 @@ export function TypingIndicator() {
   return (
     <article style={{ display: 'flex', justifyContent: 'flex-start' }}>
       <div
-        aria-label="Assistant is typing"
+        aria-label="Typing"
         style={{
           display: 'inline-flex',
           gap: 5,

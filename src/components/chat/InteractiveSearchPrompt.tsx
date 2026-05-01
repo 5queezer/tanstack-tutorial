@@ -30,14 +30,14 @@ export function InteractiveSearchPrompt({
         }}
       >
         <div>
-          <strong>🔎 What should I search for?</strong>
+          <strong>🔎 Search query?</strong>
           <p style={{ margin: '0.35rem 0 0', color: '#555' }}>{request.prompt}</p>
         </div>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           <input
             value={value}
             onChange={(event) => onChange(event.target.value)}
-            placeholder="Enter a search query..."
+            placeholder="Search..."
             autoFocus
             style={{
               flex: 1,
