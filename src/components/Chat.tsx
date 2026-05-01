@@ -1,6 +1,6 @@
 import { fetchServerSentEvents, useChat } from '@tanstack/ai-react'
 import { useEffect, useMemo, useRef, useState, type SubmitEventHandler } from 'react'
-import { thinkingDotKeyframes, isStatusEventValue } from './chat/agui'
+import { thinkingDotKeyframes } from './chat/agui'
 import { createFollowUps, getMessageText } from './chat/followUps'
 import { readLocalStorage, readLocalStorageBoolean, STORAGE_KEYS, writeLocalStorage } from './chat/storage'
 import { AgUiStatusPanel } from './chat/AgUiStatusPanel'
@@ -63,12 +63,12 @@ export function Chat() {
         return
       }
 
-      if (!['s', 't'].includes(eventName) || !isStatusEventValue(value)) return
+      if (!['s', 't'].includes(eventName)) return
 
       setAgUiStatuses((current) => [
         ...current.slice(-5),
         {
-          ...value,
+          ...(value as Omit<AgUiStatusEvent, 'at'>),
           at: Date.now(),
         },
       ])
