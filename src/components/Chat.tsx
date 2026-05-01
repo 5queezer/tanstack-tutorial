@@ -25,8 +25,7 @@ export function Chat() {
   const [interactiveSearchInput, setInteractiveSearchInput] = useState('')
   const searchQueryResolverRef = useRef<((result: { query: string }) => void) | undefined>(undefined)
   const modelOptions = models.filter((model) => !freeOnly || model.free)
-  const selectedModelInfo = models.find((model) => model.id === selectedModel)
-  const thinkingAvailable = Boolean(selectedModelInfo?.supportsThinking)
+  const thinkingAvailable = Boolean(models.find((model) => model.id === selectedModel)?.supportsThinking)
   const interactiveSearchTool = useMemo(
     () => requestSearchQueryDef.client((toolInput) => {
       const input = toolInput as { prompt?: string; suggestedQuery?: string }
