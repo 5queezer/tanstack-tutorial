@@ -356,16 +356,7 @@ setPendingSearchPrompt(input.prompt ?? 'What should I search for?')
               }}
             >
               <div style={{ color: '#666', fontSize: 13 }}>{latestStatus.label}</div>
-              <div style={{ height: 6, overflow: 'hidden', borderRadius: 999, background: '#e8e8e8' }}>
-                <div
-                  style={{
-                    width: `${latestStatus.progress}%`,
-                    height: '100%',
-                    borderRadius: 999,
-                    background: '#111',
-                  }}
-                />
-              </div>
+
 
             </section>
           ) : null}
