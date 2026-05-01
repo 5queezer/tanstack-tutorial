@@ -60,3 +60,19 @@ test('summarizes github_get requests for PR status details', () => {
     ['Items', '1'],
   ])
 })
+
+test('summarizes github_search output even when tool input is absent', () => {
+  const summary = summarizeToolActivity('github_search', undefined, {
+    type: 'repos',
+    query: 'stars:>10000 pushed:>2026-04-01',
+    results: [{ title: 'owner/repo', url: 'https://github.com/owner/repo' }],
+  })
+
+  assert.equal(summary.title, 'GitHub search')
+  assert.deepEqual(summary.rows, [
+    ['Type', 'repos'],
+    ['Query', 'stars:>10000 pushed:>2026-04-01'],
+    ['Repo', 'any'],
+    ['Results', '1'],
+  ])
+})

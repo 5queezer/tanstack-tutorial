@@ -27,9 +27,9 @@ export function summarizeToolActivity(toolName: string, input: any, output: any)
     return {
       title: 'GitHub search',
       rows: [
-        ['Type', String(input.type ?? output.type ?? 'issues')],
-        ['Query', String(input.query ?? output.query)],
-        ['Repo', String(input.repo ?? 'any')],
+        ['Type', String(input?.type ?? output.type ?? 'issues')],
+        ['Query', String(input?.query ?? output.query)],
+        ['Repo', String(input?.repo ?? 'any')],
         ['Results', String(results.length)],
       ],
       links: results
@@ -44,11 +44,11 @@ export function summarizeToolActivity(toolName: string, input: any, output: any)
     return {
       title: 'GitHub details',
       rows: [
-        ['Resource', String(input.resource)],
-        ['Repo', `${input.owner}/${input.repo}`],
-        ...(input.number ? [['Number', String(input.number)] as [string, string]] : []),
-        ...(input.ref ? [['Ref', String(input.ref)] as [string, string]] : []),
-        ...(input.runId ? [['Run', String(input.runId)] as [string, string]] : []),
+        ['Resource', String(input?.resource ?? 'details')],
+        ['Repo', input ? `${input.owner}/${input.repo}` : 'unknown'],
+        ...(input?.number ? [['Number', String(input.number)] as [string, string]] : []),
+        ...(input?.ref ? [['Ref', String(input.ref)] as [string, string]] : []),
+        ...(input?.runId ? [['Run', String(input.runId)] as [string, string]] : []),
         ['Items', String(Array.isArray(items) ? items.length : 1)],
       ],
     }
