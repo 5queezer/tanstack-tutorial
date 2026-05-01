@@ -1,4 +1,4 @@
-import type { FormEventHandler } from 'react'
+import type { SubmitEventHandler } from 'react'
 import type { PendingSearchQueryRequest } from './types'
 
 export function InteractiveSearchPrompt({
@@ -10,7 +10,7 @@ export function InteractiveSearchPrompt({
   request?: PendingSearchQueryRequest
   value: string
   onChange: (value: string) => void
-  onSubmit: FormEventHandler<HTMLFormElement>
+  onSubmit: SubmitEventHandler<HTMLFormElement>
 }) {
   if (!request) return null
 

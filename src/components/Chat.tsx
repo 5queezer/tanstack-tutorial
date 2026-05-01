@@ -5,7 +5,7 @@ import * as ScrollArea from '@radix-ui/react-scroll-area'
 import * as Select from '@radix-ui/react-select'
 import * as Toggle from '@radix-ui/react-toggle'
 import * as Tooltip from '@radix-ui/react-tooltip'
-import { useEffect, useMemo, useRef, useState, type FormEventHandler } from 'react'
+import { useEffect, useMemo, useRef, useState, type SubmitEventHandler } from 'react'
 import { thinkingDotKeyframes, isStatusEventValue } from './chat/agui'
 import { createFollowUps, getMessageText } from './chat/followUps'
 import { readLocalStorage, readLocalStorageBoolean, STORAGE_KEYS, writeLocalStorage } from './chat/storage'
@@ -15,8 +15,21 @@ import { InteractiveSearchPrompt } from './chat/InteractiveSearchPrompt'
 import { MarkdownContent } from './chat/MarkdownContent'
 import { ToolWidget } from './chat/ToolWidget'
 import { TypingIndicator } from './chat/TypingIndicator'
-import type { AgUiStatusEvent, PendingSearchQueryRequest, UiChatModel } from './chat/types'
+import type { AgUiStatusEvent, FollowUpMode, PendingSearchQueryRequest, UiChatModel } from './chat/types'
 import { requestSearchQueryDef } from '../lib/tools'
+
+function isFollowUpsEventValue(value: unknown): value is { followUps: Array<string> } {
+  return Boolean(
+    value &&
+      typeof value === 'object' &&
+      Array.isArray((value as { followUps?: unknown }).followUps) &&
+      (value as { followUps: Array<unknown> }).followUps.every((item) => typeof item === 'string'),
+  )
+}
+
+function isFollowUpMode(value: string | undefined): value is FollowUpMode {
+  return value === 'heuristic' || value === 'model' || value === 'ag-ui' || value === 'off'
+}
 
 export function Chat() {
   const [input, setInput] = useState('')
@@ -27,6 +40,11 @@ export function Chat() {
   const [showThinking, setShowThinking] = useState(false)
   const [settingsLoaded, setSettingsLoaded] = useState(false)
   const [agUiStatuses, setAgUiStatuses] = useState<Array<AgUiStatusEvent>>([])
+  const [followUpMode, setFollowUpMode] = useState<FollowUpMode>('heuristic')
+  const [modelFollowUps, setModelFollowUps] = useState<Array<string>>([])
+  const [agUiFollowUps, setAgUiFollowUps] = useState<Array<string>>([])
+  const [isLoadingFollowUps, setIsLoadingFollowUps] = useState(false)
+  const followUpRequestKeyRef = useRef('')
   const [pendingSearchQuery, setPendingSearchQuery] = useState<PendingSearchQueryRequest | undefined>()
   const [interactiveSearchInput, setInteractiveSearchInput] = useState('')
   const searchQueryResolverRef = useRef<((result: { query: string }) => void) | undefined>(undefined)
@@ -59,6 +77,11 @@ export function Chat() {
     body: { model: selectedModel || undefined, showThinking: showThinking && thinkingAvailable },
     tools: clientTools(interactiveSearchTool),
     onCustomEvent: (eventName, value) => {
+      if (eventName === 'followups.generated' && isFollowUpsEventValue(value)) {
+        setAgUiFollowUps(value.followUps)
+        return
+      }
+
       if (!['demo.status', 'tool.status'].includes(eventName) || !isStatusEventValue(value)) return
 
       setAgUiStatuses((current) => [
@@ -71,7 +94,7 @@ export function Chat() {
     },
   })
   const latestAgUiStatus = agUiStatuses.at(-1)
-  const followUps = useMemo(() => {
+  const heuristicFollowUps = useMemo(() => {
     if (isLoading || messages.length === 0) return []
 
     const lastAssistant = [...messages].reverse().find((message) => message.role === 'assistant')
@@ -84,11 +107,20 @@ export function Chat() {
 
     return createFollowUps(lastUserText, lastAssistantText)
   }, [isLoading, messages])
+  const followUps = followUpMode === 'off'
+    ? []
+    : followUpMode === 'model'
+      ? modelFollowUps
+      : followUpMode === 'ag-ui'
+        ? agUiFollowUps
+        : heuristicFollowUps
 
   useEffect(() => {
     setSelectedModel(readLocalStorage(STORAGE_KEYS.selectedModel) ?? '')
     setFreeOnly(readLocalStorageBoolean(STORAGE_KEYS.freeOnly))
     setShowThinking(readLocalStorageBoolean(STORAGE_KEYS.showThinking))
+    const storedFollowUpMode = readLocalStorage(STORAGE_KEYS.followUpMode)
+    setFollowUpMode(isFollowUpMode(storedFollowUpMode) ? storedFollowUpMode : 'heuristic')
     setSettingsLoaded(true)
   }, [])
 
@@ -154,6 +186,57 @@ export function Chat() {
     }
   }, [showThinking, settingsLoaded])
 
+  useEffect(() => {
+    if (settingsLoaded) {
+      writeLocalStorage(STORAGE_KEYS.followUpMode, followUpMode)
+    }
+  }, [followUpMode, settingsLoaded])
+
+  useEffect(() => {
+    if (followUpMode !== 'model' || isLoading || !selectedModel || messages.length === 0) return
+
+    const serializableMessages = messages
+      .map((message) => ({ role: message.role, content: getMessageText(message) }))
+      .filter((message) => message.content)
+
+    const lastAssistant = [...serializableMessages].reverse().find((message) => message.role === 'assistant')
+    if (!lastAssistant) return
+
+    const requestKey = JSON.stringify({ selectedModel, serializableMessages })
+    if (requestKey === followUpRequestKeyRef.current) return
+    followUpRequestKeyRef.current = requestKey
+
+    let cancelled = false
+    setIsLoadingFollowUps(true)
+    setModelFollowUps([])
+
+    fetch('/api/followups', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: selectedModel, messages: serializableMessages }),
+    })
+      .then((response) => (response.ok ? response.json() : { followUps: [] }))
+      .then((payload: { followUps?: Array<string> }) => {
+        if (!cancelled) {
+          setModelFollowUps(Array.isArray(payload.followUps) ? payload.followUps : [])
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setModelFollowUps([])
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setIsLoadingFollowUps(false)
+        }
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [followUpMode, isLoading, messages, selectedModel])
+
   function handleFreeOnlyChange(pressed: boolean) {
     setFreeOnly(pressed)
 
@@ -164,13 +247,15 @@ export function Chat() {
     }
   }
 
-  const handleSubmit: FormEventHandler<HTMLFormElement> = (event) => {
+  const handleSubmit: SubmitEventHandler<HTMLFormElement> = (event) => {
     event.preventDefault()
 
     const text = input.trim()
     if (!text) return
 
     setAgUiStatuses([])
+    setModelFollowUps([])
+    setAgUiFollowUps([])
     sendMessage(text)
     setInput('')
   }
@@ -178,10 +263,12 @@ export function Chat() {
   function handleFollowUpClick(question: string) {
     if (isLoading) return
     setAgUiStatuses([])
+    setModelFollowUps([])
+    setAgUiFollowUps([])
     sendMessage(question)
   }
 
-  const handleInteractiveSearchSubmit: FormEventHandler<HTMLFormElement> = (event) => {
+  const handleInteractiveSearchSubmit: SubmitEventHandler<HTMLFormElement> = (event) => {
     event.preventDefault()
 
     const query = interactiveSearchInput.trim()
@@ -316,6 +403,28 @@ export function Chat() {
                   </Select.Content>
                 </Select.Portal>
               </Select.Root>
+            </div>
+
+            <div style={{ display: 'grid', gap: 4, fontSize: 14 }}>
+              <span>Follow-ups</span>
+              <select
+                value={followUpMode}
+                onChange={(event) => setFollowUpMode(event.target.value as FollowUpMode)}
+                disabled={isLoading}
+                style={{
+                  height: 38,
+                  padding: '0 0.65rem',
+                  border: '1px solid #ccc',
+                  borderRadius: 8,
+                  background: '#fff',
+                  fontFamily: 'inherit',
+                }}
+              >
+                <option value="heuristic">Heuristic</option>
+                <option value="model">Model call</option>
+                <option value="ag-ui">AG-UI event</option>
+                <option value="off">Off</option>
+              </select>
             </div>
 
             <Toggle.Root
@@ -489,6 +598,9 @@ export function Chat() {
                   />
 
                   {!isLoading ? <FollowUps questions={followUps} onSelect={handleFollowUpClick} /> : null}
+                  {!isLoading && followUpMode === 'model' && isLoadingFollowUps ? (
+                    <p style={{ margin: '0.25rem 0', color: '#666' }}>Generating follow-ups…</p>
+                  ) : null}
 
                   {isLoading ? <TypingIndicator /> : null}
                 </>

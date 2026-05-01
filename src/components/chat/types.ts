@@ -21,3 +21,5 @@ export type PendingSearchQueryRequest = {
   prompt: string
   suggestedQuery: string
 }
+
+export type FollowUpMode = 'heuristic' | 'model' | 'ag-ui' | 'off'

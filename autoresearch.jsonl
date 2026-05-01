@@ -1,0 +1,1 @@
+{"type":"config","name":"Apply AHE to TanStack chat harness while keeping bundle lean","metricName":"bundle_gzip_kb","metricUnit":"kb","bestDirection":"lower"}

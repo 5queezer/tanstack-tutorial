@@ -91,6 +91,7 @@ async function* withOpenRouterErrorMetadata(
   context: { model: string; thinking: boolean },
 ): AsyncIterable<StreamChunk> {
   let sawFirstToken = false
+  let accumulatedContent = ''
 
   yield createStatusEvent('Model validated', 15, context)
   yield createStatusEvent('Request sent to OpenRouter', 35, context)
@@ -101,9 +102,12 @@ async function* withOpenRouterErrorMetadata(
         yield createStatusEvent('AG-UI run started', 50, context)
       }
 
-      if (chunk.type === 'TEXT_MESSAGE_CONTENT' && !sawFirstToken) {
-        sawFirstToken = true
-        yield createStatusEvent('First token received', 70, context)
+      if (chunk.type === 'TEXT_MESSAGE_CONTENT') {
+        accumulatedContent += chunk.delta ?? ''
+        if (!sawFirstToken) {
+          sawFirstToken = true
+          yield createStatusEvent('First token received', 70, context)
+        }
       }
 
       if (chunk.type === 'RUN_ERROR') {
@@ -114,6 +118,7 @@ async function* withOpenRouterErrorMetadata(
 
       if (chunk.type === 'RUN_FINISHED') {
         yield createStatusEvent('Run complete', 100, context)
+        yield createFollowUpsEvent(createServerFollowUps(accumulatedContent))
       }
 
       yield chunk
@@ -122,6 +127,33 @@ async function* withOpenRouterErrorMetadata(
     yield createStatusEvent('Provider error', 100, context)
     yield createRunErrorChunk(formatOpenRouterError(errorCapture.lastError ?? error))
   }
+}
+
+function createFollowUpsEvent(followUps: Array<string>): StreamChunk {
+  return {
+    type: 'CUSTOM',
+    name: 'followups.generated',
+    timestamp: Date.now(),
+    value: { followUps },
+  } as StreamChunk
+}
+
+function createServerFollowUps(assistantText: string) {
+  const text = assistantText.toLowerCase()
+
+  if (text.includes('weather')) {
+    return ['Should I compare another city?', 'What should I wear today?', 'Do I need an umbrella?']
+  }
+
+  if (text.includes('stock') || text.includes('price') || text.includes('market')) {
+    return ['Can you compare it with another ticker?', 'What are the main risks?', 'Show me recent news about this company']
+  }
+
+  if (text.includes('search') || text.includes('source') || text.includes('http')) {
+    return ['Open the most relevant source', 'Search for newer results', 'Summarize the sources as a table']
+  }
+
+  return ['Can you give me a concrete example?', 'Can you turn that into steps?', 'What should I ask next?']
 }
 
 function createStatusEvent(
