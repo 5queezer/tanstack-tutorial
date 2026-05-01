@@ -104,7 +104,6 @@ const stockBySymbol: Record<string, StockOutput> = {
 export const getWeather = getWeatherDef.server(async (args, context) => {
   const { city } = args as WeatherInput
   context?.emitCustomEvent('t', {
-    tool: 'weather',
     label: `Weather: ${city}`,
     progress: 25,
   })
@@ -117,7 +116,6 @@ export const getWeather = getWeatherDef.server(async (args, context) => {
   }
 
   context?.emitCustomEvent('t', {
-    tool: 'weather',
     label: `Weather ready: ${city}`,
     progress: 100,
   })
@@ -134,7 +132,6 @@ export const getStockQuote = getStockDef.server(async (args, context) => {
   const normalizedSymbol = symbol.toUpperCase().trim()
 
   context?.emitCustomEvent('t', {
-    tool: 'stock',
     label: `Quote: ${normalizedSymbol}`,
     progress: 25,
   })
@@ -147,7 +144,6 @@ export const getStockQuote = getStockDef.server(async (args, context) => {
   }
 
   context?.emitCustomEvent('t', {
-    tool: 'stock',
     label: `Quote ready: ${normalizedSymbol}`,
     progress: 100,
   })
@@ -171,7 +167,6 @@ export const braveWebSearch = braveWebSearchDef.server(async (args, context) => 
   const safeQuery = query.slice(0, 400)
 
   context?.emitCustomEvent('t', {
-    tool: 'web-search',
     label: `Search: ${safeQuery}`,
     progress: 20,
   })
@@ -194,7 +189,6 @@ export const braveWebSearch = braveWebSearchDef.server(async (args, context) => 
   }
 
   context?.emitCustomEvent('t', {
-    tool: 'web-search',
     label: 'Results received',
     progress: 75,
   })
@@ -212,7 +206,6 @@ export const braveWebSearch = braveWebSearchDef.server(async (args, context) => 
     }))
 
   context?.emitCustomEvent('t', {
-    tool: 'web-search',
     label: `${results.length} results ready`,
     progress: 100,
   })
