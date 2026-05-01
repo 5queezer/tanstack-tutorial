@@ -7,10 +7,6 @@ import { ToolWidget } from './chat/ToolWidget'
 import type { AgUiStatusEvent, FollowUpMode, UiChatModel } from './chat/types'
 import { requestSearchQueryDef } from '../lib/request-search-tool'
 
-function isFollowUpMode(value: string | undefined): value is FollowUpMode {
-  return value === 'h' || value === 'm' || value === 'a' || value === 'o'
-}
-
 export function Chat() {
   const [input, setInput] = useState('')
   const [models, setModels] = useState<Array<UiChatModel>>([])
@@ -92,8 +88,7 @@ setPendingSearchPrompt(input.prompt ?? 'What should I search for?')
     setSelectedModel(readLocalStorage(STORAGE_KEYS.selectedModel) ?? '')
     setFreeOnly(readLocalStorageBoolean(STORAGE_KEYS.freeOnly))
     setShowThinking(readLocalStorageBoolean(STORAGE_KEYS.showThinking))
-    const storedFollowUpMode = readLocalStorage(STORAGE_KEYS.followUpMode)
-    setFollowUpMode(isFollowUpMode(storedFollowUpMode) ? storedFollowUpMode : 'h')
+    setFollowUpMode((readLocalStorage(STORAGE_KEYS.followUpMode) as FollowUpMode) ?? 'h')
     setSettingsLoaded(true)
   }, [])
 
