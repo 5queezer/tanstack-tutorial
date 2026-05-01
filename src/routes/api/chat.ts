@@ -55,13 +55,6 @@ export const Route = createFileRoute('/api/chat')({
           ],
           tools: serverTools,
           debug: {
-            provider: false,
-            output: false,
-            middleware: false,
-            tools: false,
-            agentLoop: false,
-            config: false,
-            request: false,
             errors: true,
             logger: errorCapture.logger,
           },
