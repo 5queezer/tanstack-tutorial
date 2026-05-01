@@ -24,7 +24,7 @@ export async function getOpenRouterModels() {
   })
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch OpenRouter models: ${response.status} ${response.statusText}`)
+    throw new Error(`OpenRouter models failed: ${response.status}`)
   }
 
   const payload = (await response.json()) as OpenRouterModelResponse
