@@ -84,9 +84,10 @@ export function Chat() {
   const [input, setInput] = useState('')
   const [models, setModels] = useState<Array<UiChatModel>>([])
   const [modelsError, setModelsError] = useState<string | undefined>()
-  const [selectedModel, setSelectedModel] = useState(() => readLocalStorage(STORAGE_KEYS.selectedModel) ?? '')
-  const [freeOnly, setFreeOnly] = useState(() => readLocalStorageBoolean(STORAGE_KEYS.freeOnly))
-  const [showThinking, setShowThinking] = useState(() => readLocalStorageBoolean(STORAGE_KEYS.showThinking))
+  const [selectedModel, setSelectedModel] = useState('')
+  const [freeOnly, setFreeOnly] = useState(false)
+  const [showThinking, setShowThinking] = useState(false)
+  const [settingsLoaded, setSettingsLoaded] = useState(false)
   const modelOptions = useMemo(
     () => models.filter((model) => !freeOnly || model.free),
     [freeOnly, models],
@@ -94,7 +95,7 @@ export function Chat() {
   const selectedModelInfo = models.find((model) => model.id === selectedModel)
   const selectedModelLabel = selectedModelInfo?.label ?? 'Loading models...'
   const thinkingAvailable = Boolean(selectedModelInfo?.supportsThinking)
-  const { messages, sendMessage, isLoading, error } = useChat({
+  const { messages, sendMessage, isLoading, error, stop } = useChat({
     connection: fetchServerSentEvents('/api/chat'),
     body: { model: selectedModel || undefined, showThinking: showThinking && thinkingAvailable },
   })
@@ -112,6 +113,15 @@ export function Chat() {
   }, [isLoading, messages])
 
   useEffect(() => {
+    setSelectedModel(readLocalStorage(STORAGE_KEYS.selectedModel) ?? '')
+    setFreeOnly(readLocalStorageBoolean(STORAGE_KEYS.freeOnly))
+    setShowThinking(readLocalStorageBoolean(STORAGE_KEYS.showThinking))
+    setSettingsLoaded(true)
+  }, [])
+
+  useEffect(() => {
+    if (!settingsLoaded) return
+
     let cancelled = false
 
     async function loadModels() {
@@ -145,7 +155,7 @@ export function Chat() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [freeOnly, settingsLoaded])
 
   useEffect(() => {
     if (!thinkingAvailable) {
@@ -154,16 +164,22 @@ export function Chat() {
   }, [thinkingAvailable])
 
   useEffect(() => {
-    writeLocalStorage(STORAGE_KEYS.selectedModel, selectedModel)
-  }, [selectedModel])
+    if (settingsLoaded && selectedModel) {
+      writeLocalStorage(STORAGE_KEYS.selectedModel, selectedModel)
+    }
+  }, [selectedModel, settingsLoaded])
 
   useEffect(() => {
-    writeLocalStorage(STORAGE_KEYS.freeOnly, freeOnly)
-  }, [freeOnly])
+    if (settingsLoaded) {
+      writeLocalStorage(STORAGE_KEYS.freeOnly, freeOnly)
+    }
+  }, [freeOnly, settingsLoaded])
 
   useEffect(() => {
-    writeLocalStorage(STORAGE_KEYS.showThinking, showThinking)
-  }, [showThinking])
+    if (settingsLoaded) {
+      writeLocalStorage(STORAGE_KEYS.showThinking, showThinking)
+    }
+  }, [showThinking, settingsLoaded])
 
   function handleFreeOnlyChange(pressed: boolean) {
     setFreeOnly(pressed)
@@ -540,8 +556,9 @@ export function Chat() {
           <Tooltip.Root>
             <Tooltip.Trigger asChild>
               <button
-                type="submit"
-                disabled={isLoading || !selectedModel}
+                type={isLoading ? 'button' : 'submit'}
+                onClick={isLoading ? stop : undefined}
+                disabled={!isLoading && !selectedModel}
                 style={{
                   fontFamily: 'inherit',
                   padding: '0.75rem 1rem',
@@ -549,10 +566,10 @@ export function Chat() {
                   borderRadius: 8,
                   color: '#fff',
                   background: isLoading ? '#888' : '#111',
-                  cursor: isLoading ? 'not-allowed' : 'pointer',
+                  cursor: 'pointer',
                 }}
               >
-                {isLoading ? 'Sending...' : 'Send'}
+                {isLoading ? 'Stop' : 'Send'}
               </button>
             </Tooltip.Trigger>
             <Tooltip.Portal>
@@ -566,7 +583,7 @@ export function Chat() {
                   fontSize: 12,
                 }}
               >
-                Send your message
+                {isLoading ? 'Stop the response' : 'Send your message'}
                 <Tooltip.Arrow style={{ fill: '#111' }} />
               </Tooltip.Content>
             </Tooltip.Portal>

@@ -3,6 +3,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import type { StreamChunk } from '@tanstack/ai'
 
 import { getChatModel } from '../../lib/ai'
+import { getOpenRouterModel } from '../../lib/openrouter-models'
 
 export const Route = createFileRoute('/api/chat')({
   server: {
@@ -30,6 +31,16 @@ export const Route = createFileRoute('/api/chat')({
             headers: { 'Content-Type': 'application/json' },
           })
         }
+        const selectedModel = await getOpenRouterModel(model)
+
+        if (!selectedModel) {
+          return new Response(JSON.stringify({ error: `Unsupported OpenRouter model: ${model}` }), {
+            status: 400,
+            headers: { 'Content-Type': 'application/json' },
+          })
+        }
+
+        const enableThinking = showThinking && Boolean(selectedModel.supportsThinking)
         const abortController = new AbortController()
 
         const stream = withOpenRouterErrorMetadata(chat({
@@ -37,11 +48,12 @@ export const Route = createFileRoute('/api/chat')({
           messages,
           conversationId,
           abortController,
-          modelOptions: showThinking
+          modelOptions: enableThinking
             ? {
                 reasoning: {
                   effort: 'medium',
-                  summary: 'auto',
+                  max_tokens: 1024,
+                  exclude: false,
                 },
               }
             : undefined,
