@@ -455,7 +455,6 @@ export function Chat() {
 
     searchQueryResolverRef.current!({ query })
     setPendingSearchPrompt(undefined)
-    setInteractiveSearchInput('')
   }
 
   return (
