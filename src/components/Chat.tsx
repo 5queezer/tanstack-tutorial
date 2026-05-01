@@ -713,7 +713,6 @@ export function Chat() {
                                         }}
                           />
                           <button
-                            type="submit"
                             disabled={!interactiveSearchInput.trim()}
                             style={{
                               padding: '0.65rem 0.85rem',
