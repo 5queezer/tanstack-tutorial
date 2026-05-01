@@ -1,9 +1,29 @@
 import { fetchServerSentEvents, useChat } from '@tanstack/ai-react'
 import { useEffect, useMemo, useRef, useState, type ReactNode, type SubmitEventHandler } from 'react'
 import { createFollowUps, getMessageText } from './chat/followUps'
-import { readLocalStorage, readLocalStorageBoolean, STORAGE_KEYS, writeLocalStorage } from './chat/storage'
 import type { FollowUpMode, UiChatModel } from './chat/types'
 import { requestSearchQueryDef } from '../lib/request-search-tool'
+
+const STORAGE_KEYS = {
+  selectedModel: 'tc:m',
+  freeOnly: 'tc:f',
+  showThinking: 'tc:t',
+  followUpMode: 'tc:u',
+} as const
+
+function readLocalStorage(key: string) {
+  return localStorage.getItem(key) ?? undefined
+}
+
+function readLocalStorageBoolean(key: string, fallback = false) {
+  const value = readLocalStorage(key)
+  return value === 'true' || (value !== 'false' && fallback)
+}
+
+function writeLocalStorage(key: string, value: string | boolean) {
+  localStorage.setItem(key, String(value))
+}
+
 
 type MarkdownBlock =
   | { t: 'c'; c: string }
