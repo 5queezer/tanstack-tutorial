@@ -58,6 +58,16 @@ When spawning multiple agents, the orchestrator must provide each worker with a 
 
 A single integrator remains responsible for merging outputs, resolving conflicts, and deciding whether the result satisfies the validation gate.
 
+## Implementation
+
+Implemented in `src/lib/subagent-router.ts` as a deterministic routing policy plus the server-side TanStack AI tool `route_subagents`.
+
+The implementation returns the routing note fields required by this ADR: prompt class, complexity, domain breadth, subtask independence, verification burden, cost/latency/privacy risk, chosen action, rationale, and validation gate.
+
+The tool is registered in `src/lib/tools.ts` and advertised to the chat model in `src/routes/api/chat.ts`. It does not spawn workers by itself; it is the required decision gate before an orchestrator or future worker-spawning layer dispatches subagents.
+
+Behavior is covered by `tests/subagent-router.test.ts`.
+
 ## Consequences
 
 Benefits:
