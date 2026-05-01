@@ -130,11 +130,10 @@ export const braveWebSearch = braveWebSearchDef.server(async (args) => {
 
   const payload = (await response.json()) as BraveSearchResponse
   const results = (payload.web?.results ?? [])
-    .filter((result) => result.title && result.url)
     .slice(0, count)
     .map((result) => ({
-      title: result.title!,
-      url: result.url!,
+      title: result.title,
+      url: result.url,
       description: result.description ?? '',
 
     }))
