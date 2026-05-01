@@ -20,14 +20,14 @@ export const Route = createFileRoute('/api/followups')({
     handlers: {
       POST: async ({ request }) => {
         if (!process.env.OPENROUTER_API_KEY) {
-          return json({ followUps: [] }, 200)
+          return json({ followUps: [] })
         }
 
         const body = (await request.json()) as { messages?: Array<FollowUpMessage>; model?: string }
         const model = typeof body.model === 'string' ? body.model : undefined
 
         if (!model || !(await getOpenRouterModel(model))) {
-          return json({ followUps: [] }, 200)
+          return json({ followUps: [] })
         }
 
         const messages = (body.messages ?? [])
@@ -35,7 +35,7 @@ export const Route = createFileRoute('/api/followups')({
           .slice(-8)
 
         if (messages.length < 2) {
-          return json({ followUps: [] }, 200)
+          return json({ followUps: [] })
         }
 
         try {
@@ -68,16 +68,16 @@ export const Route = createFileRoute('/api/followups')({
           })
 
           if (!response.ok) {
-            return json({ followUps: [] }, 200)
+            return json({ followUps: [] })
           }
 
           const payload = (await response.json()) as OpenRouterFollowUpResponse
           const content = payload.choices?.[0]?.message?.content ?? ''
           const followUps = parseFollowUps(content)
 
-          return json({ followUps }, 200)
+          return json({ followUps })
         } catch {
-          return json({ followUps: [] }, 200)
+          return json({ followUps: [] })
         }
       },
     },
@@ -99,9 +99,8 @@ function parseFollowUps(content: string) {
   }
 }
 
-function json(data: unknown, status: number) {
+function json(data: unknown) {
   return new Response(JSON.stringify(data), {
-    status,
     headers: { 'Content-Type': 'application/json' },
   })
 }
