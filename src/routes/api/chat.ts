@@ -110,7 +110,10 @@ async function* withOpenRouterErrorMetadata(
     }
   } catch (error) {
     yield createStatusEvent('Error')
-    yield createRunErrorChunk(formatOpenRouterError(errorCapture.lastError ?? error))
+    yield {
+      type: 'RUN_ERROR',
+      message: formatOpenRouterError(errorCapture.lastError ?? error),
+    } as StreamChunk
   }
 }
 
@@ -146,13 +149,6 @@ function enrichRunErrorChunk(chunk: StreamChunk, capturedError: unknown): Stream
   return {
     ...chunk,
     message: formatOpenRouterError(capturedError),
-  } as StreamChunk
-}
-
-function createRunErrorChunk(message: string): StreamChunk {
-  return {
-    type: 'RUN_ERROR',
-    message,
   } as StreamChunk
 }
 
