@@ -192,7 +192,7 @@ function renderInline(text: string, isUser: boolean): Array<ReactNode> {
 
 
 function parseToolPayload(value: unknown) {
-  return value && typeof value === 'object' ? (value as Record<string, unknown>) : undefined
+  return value as Record<string, unknown>
 }
 
 function formatNumber(value: unknown, digits = 1) {
