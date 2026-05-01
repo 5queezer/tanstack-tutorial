@@ -15,8 +15,5 @@ export type AgUiStatusEvent = {
   at: number
 }
 
-export type PendingSearchQueryRequest = {
-  prompt: string
-}
 
 export type FollowUpMode = 'h' | 'm' | 'a' | 'o'

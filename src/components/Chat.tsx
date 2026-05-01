@@ -4,7 +4,7 @@ import { createFollowUps, getMessageText } from './chat/followUps'
 import { readLocalStorage, readLocalStorageBoolean, STORAGE_KEYS, writeLocalStorage } from './chat/storage'
 import { MarkdownContent } from './chat/MarkdownContent'
 import { ToolWidget } from './chat/ToolWidget'
-import type { AgUiStatusEvent, FollowUpMode, PendingSearchQueryRequest, UiChatModel } from './chat/types'
+import type { AgUiStatusEvent, FollowUpMode, UiChatModel } from './chat/types'
 import { requestSearchQueryDef } from '../lib/request-search-tool'
 
 function isFollowUpMode(value: string | undefined): value is FollowUpMode {
@@ -25,7 +25,7 @@ export function Chat() {
   const [agUiFollowUps, setAgUiFollowUps] = useState<Array<string>>([])
   const [isLoadingFollowUps, setIsLoadingFollowUps] = useState(false)
   const followUpRequestKeyRef = useRef('')
-  const [pendingSearchQuery, setPendingSearchQuery] = useState<PendingSearchQueryRequest | undefined>()
+  const [pendingSearchPrompt, setPendingSearchPrompt] = useState<string | undefined>()
   const [interactiveSearchInput, setInteractiveSearchInput] = useState('')
   const searchQueryResolverRef = useRef<((result: { query: string }) => void) | undefined>(undefined)
   const modelOptions = models.filter((model) => !freeOnly || model.free)
@@ -37,9 +37,7 @@ export function Chat() {
       const suggestedQuery = input.suggestedQuery ?? ''
 
       setInteractiveSearchInput(suggestedQuery)
-      setPendingSearchQuery({
-        prompt: input.prompt ?? 'What should I search for?',
-      })
+setPendingSearchPrompt(input.prompt ?? 'What should I search for?')
 
       return new Promise<{ query: string }>((resolve) => {
         searchQueryResolverRef.current = resolve
@@ -236,7 +234,7 @@ export function Chat() {
 
     searchQueryResolverRef.current({ query })
     searchQueryResolverRef.current = undefined
-    setPendingSearchQuery(undefined)
+    setPendingSearchPrompt(undefined)
     setInteractiveSearchInput('')
   }
 
@@ -523,7 +521,7 @@ export function Chat() {
                     )
                   })}
 
-                  {pendingSearchQuery ? (
+                  {pendingSearchPrompt ? (
                     <article style={{ display: 'flex', justifyContent: 'flex-start' }}>
                       <form
                         onSubmit={handleInteractiveSearchSubmit}
@@ -540,7 +538,7 @@ export function Chat() {
                       >
                         <div>
                           <strong>Search query?</strong>
-                          <p style={{ margin: '0.35rem 0 0', color: '#555' }}>{pendingSearchQuery.prompt}</p>
+                          <p style={{ margin: '0.35rem 0 0', color: '#555' }}>{pendingSearchPrompt}</p>
                         </div>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
                           <input
