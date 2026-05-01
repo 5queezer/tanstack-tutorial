@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react'
 
 type MarkdownBlock =
-  | { type: 'code'; content: string }
-  | { type: 'list'; ordered: boolean; items: Array<string> }
-  | { type: 'paragraph'; content: string }
+  | { type: 'c'; content: string }
+  | { type: 'l'; ordered: boolean; items: Array<string> }
+  | { type: 'p'; content: string }
 
 const linkPattern = /(`[^`]+`|\[([^\]]+)\]\((https?:\/\/[^\s)]+)\))/g
 
@@ -18,7 +18,7 @@ function parseBlocks(content: string): Array<MarkdownBlock> {
 
   function flushParagraph() {
     if (paragraph.length === 0) return
-    blocks.push({ type: 'paragraph', content: paragraph.join(' ') })
+    blocks.push({ type: 'p', content: paragraph.join(' ') })
     paragraph = []
   }
 
@@ -34,7 +34,7 @@ function parseBlocks(content: string): Array<MarkdownBlock> {
         codeLines.push(lines[index])
         index += 1
       }
-      blocks.push({ type: 'code', content: codeLines.join('\n') })
+      blocks.push({ type: 'c', content: codeLines.join('\n') })
       continue
     }
 
@@ -58,7 +58,7 @@ function parseBlocks(content: string): Array<MarkdownBlock> {
         index += 1
       }
 
-      blocks.push({ type: 'list', ordered: isOrdered, items: listItems })
+      blocks.push({ type: 'l', ordered: isOrdered, items: listItems })
       continue
     }
 
@@ -70,7 +70,7 @@ function parseBlocks(content: string): Array<MarkdownBlock> {
 }
 
 function renderBlock(block: MarkdownBlock, isUser: boolean, key: number) {
-  if (block.type === 'code') {
+  if (block.type === 'c') {
     return (
       <pre
         key={key}
@@ -87,7 +87,7 @@ function renderBlock(block: MarkdownBlock, isUser: boolean, key: number) {
     )
   }
 
-  if (block.type === 'list') {
+  if (block.type === 'l') {
     const ListTag = block.ordered ? 'ol' : 'ul'
     return (
       <ListTag key={key} style={{ margin: '0.4rem 0 0.7rem', paddingLeft: '1.25rem' }}>
