@@ -8,13 +8,6 @@ export const getWeatherDef = toolDefinition({
   inputSchema: z.object({
     city: z.string().describe('City or location'),
   }),
-  outputSchema: z.object({
-    city: z.string(),
-    condition: z.string(),
-    temperatureC: z.number(),
-    humidity: z.number(),
-    windKph: z.number(),
-  }),
 })
 
 export const getStockDef = toolDefinition({
@@ -22,14 +15,6 @@ export const getStockDef = toolDefinition({
   description: 'Get a demo stock quote for a ticker symbol.',
   inputSchema: z.object({
     symbol: z.string().describe('Ticker symbol'),
-  }),
-  outputSchema: z.object({
-    symbol: z.string(),
-    price: z.number(),
-    change: z.number(),
-    changePercent: z.number(),
-    currency: z.string(),
-    marketState: z.string(),
   }),
 })
 
@@ -39,15 +24,6 @@ export const braveWebSearchDef = toolDefinition({
   inputSchema: z.object({
     query: z.string().max(400).describe('Search'),
     count: z.number().int().min(1).max(10).optional().describe('Result count, default 5'),
-  }),
-  outputSchema: z.object({
-    query: z.string(),
-    results: z.array(z.object({
-      title: z.string(),
-      url: z.string(),
-      description: z.string(),
-
-    })),
   }),
 })
 
