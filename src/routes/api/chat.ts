@@ -135,18 +135,18 @@ function createServerFollowUps(assistantText: string) {
   const text = assistantText.toLowerCase()
 
   if (text.includes('weather')) {
-    return ['Should I compare another city?', 'What should I wear today?', 'Do I need an umbrella?']
+    return ['Compare another city?', 'What should I wear?', 'Do I need an umbrella?']
   }
 
   if (text.includes('stock') || text.includes('price') || text.includes('market')) {
-    return ['Can you compare it with another ticker?', 'What are the main risks?', 'Show me recent news about this company']
+    return ['Compare another ticker?', 'What are the risks?', 'Show recent company news']
   }
 
   if (text.includes('search') || text.includes('source') || text.includes('http')) {
-    return ['Open the most relevant source', 'Search for newer results', 'Summarize the sources as a table']
+    return ['Open the top source', 'Search newer results', 'Summarize sources as a table']
   }
 
-  return ['Can you give me a concrete example?', 'Can you turn that into steps?', 'What should I ask next?']
+  return ['Give a concrete example?', 'Turn that into steps?', 'What should I ask next?']
 }
 
 function createStatusEvent(
