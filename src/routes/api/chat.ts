@@ -148,10 +148,6 @@ function enrichRunErrorChunk(chunk: StreamChunk, capturedError: unknown): Stream
     ...chunk,
     message: formatted.message,
     code: formatted.code,
-    error: {
-      message: formatted.message,
-      code: formatted.code,
-    },
   } as StreamChunk
 }
 
@@ -160,10 +156,6 @@ function createRunErrorChunk(formatted: { message: string; code?: string }): Str
     type: 'RUN_ERROR',
     message: formatted.message,
     code: formatted.code,
-    error: {
-      message: formatted.message,
-      code: formatted.code,
-    },
   } as StreamChunk
 }
 
