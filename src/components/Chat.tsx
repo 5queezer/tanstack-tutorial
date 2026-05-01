@@ -412,7 +412,7 @@ export function Chat() {
       method: 'POST',
       body: JSON.stringify({ model: selectedModel, messages: serializableMessages }),
     })
-      .then((response) => (response.ok ? response.json() : undefined))
+      .then((response) => response.json())
       .then((payload?: { followUps?: Array<string> }) => {
         setModelFollowUps(payload?.followUps ?? [])
       })
