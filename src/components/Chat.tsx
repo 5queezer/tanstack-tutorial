@@ -440,7 +440,7 @@ setPendingSearchPrompt(input.prompt ?? 'What should I search for?')
     })
       .then((response) => (response.ok ? response.json() : undefined))
       .then((payload?: { followUps?: Array<string> }) => {
-        setModelFollowUps(Array.isArray(payload?.followUps) ? payload.followUps : [])
+        setModelFollowUps(payload?.followUps ?? [])
       })
       .catch(() => setModelFollowUps([]))
       .finally(() => {
