@@ -158,28 +158,13 @@ export function Chat() {
   }, [thinkingAvailable])
 
   useEffect(() => {
-    if (settingsLoaded && selectedModel) {
-      writeLocalStorage(STORAGE_KEYS.selectedModel, selectedModel)
-    }
-  }, [selectedModel, settingsLoaded])
+    if (!settingsLoaded) return
 
-  useEffect(() => {
-    if (settingsLoaded) {
-      writeLocalStorage(STORAGE_KEYS.freeOnly, freeOnly)
-    }
-  }, [freeOnly, settingsLoaded])
-
-  useEffect(() => {
-    if (settingsLoaded) {
-      writeLocalStorage(STORAGE_KEYS.showThinking, showThinking)
-    }
-  }, [showThinking, settingsLoaded])
-
-  useEffect(() => {
-    if (settingsLoaded) {
-      writeLocalStorage(STORAGE_KEYS.followUpMode, followUpMode)
-    }
-  }, [followUpMode, settingsLoaded])
+    if (selectedModel) writeLocalStorage(STORAGE_KEYS.selectedModel, selectedModel)
+    writeLocalStorage(STORAGE_KEYS.freeOnly, freeOnly)
+    writeLocalStorage(STORAGE_KEYS.showThinking, showThinking)
+    writeLocalStorage(STORAGE_KEYS.followUpMode, followUpMode)
+  }, [selectedModel, freeOnly, showThinking, followUpMode, settingsLoaded])
 
   useEffect(() => {
     if (followUpMode !== 'm' || isLoading || !selectedModel || messages.length === 0) return
