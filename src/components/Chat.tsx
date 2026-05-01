@@ -47,10 +47,6 @@ function readLocalStorage(key: string) {
   return localStorage.getItem(key)
 }
 
-function readLocalStorageBoolean(key: string) {
-  return readLocalStorage(key) === 'true'
-}
-
 function writeLocalStorage(key: string, value: string | boolean) {
   localStorage.setItem(key, String(value))
 }
@@ -367,8 +363,8 @@ export function Chat() {
 
   useEffect(() => {
     setSelectedModel(readLocalStorage(STORAGE_KEYS.selectedModel) ?? '')
-    setFreeOnly(readLocalStorageBoolean(STORAGE_KEYS.freeOnly))
-    setShowThinking(readLocalStorageBoolean(STORAGE_KEYS.showThinking))
+    setFreeOnly(readLocalStorage(STORAGE_KEYS.freeOnly) === 'true')
+    setShowThinking(readLocalStorage(STORAGE_KEYS.showThinking) === 'true')
     setFollowUpMode((readLocalStorage(STORAGE_KEYS.followUpMode) as FollowUpMode) ?? 'h')
     setSettingsLoaded(true)
   }, [])
