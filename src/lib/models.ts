@@ -55,8 +55,6 @@ export function supportsOpenRouterThinking(model: {
 }) {
   const searchable = `${model.id ?? ''} ${model.name ?? ''}`.toLowerCase()
 
-  return Boolean(
-    model.supported_parameters?.some((parameter) => parameter.includes('reasoning')) ||
-    ['reasoning', 'thinking', 'gpt-5', 'claude', 'gemini', 'qwen3'].some((term) => searchable.includes(term)),
-  )
+  return model.supported_parameters?.some((parameter) => parameter.includes('reasoning')) ||
+    ['reasoning', 'thinking', 'gpt-5', 'claude', 'gemini', 'qwen3'].some((term) => searchable.includes(term))
 }
