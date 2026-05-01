@@ -13,7 +13,6 @@ function getMessageText(message?: { parts: Array<{ type?: string; content?: stri
 
 function createFollowUps(userText = '', assistantText = '') {
   const cleanedUserText = userText.replace(/\s+/g, ' ').trim()
-  const cleanedAssistantText = assistantText.replace(/\s+/g, ' ').trim()
   const tooShortForSpecificFollowUps = cleanedUserText.length < 12 || /^(hi|hello|hey|thanks|thank you)[!.?\s]*$/i.test(cleanedUserText)
 
   if (tooShortForSpecificFollowUps) {
@@ -26,7 +25,7 @@ function createFollowUps(userText = '', assistantText = '') {
   }
 
   const topic = cleanedUserText.length > 80 ? `${cleanedUserText.slice(0, 77)}...` : cleanedUserText
-  const assistantMentionsSteps = /step|first|next|then|finally|start|begin/i.test(cleanedAssistantText)
+  const assistantMentionsSteps = /step|first|next|then|finally|start|begin/i.test(assistantText)
 
   return [
     assistantMentionsSteps ? 'Turn that into a checklist?' : 'Give a concrete example?',
