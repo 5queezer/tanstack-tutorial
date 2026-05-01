@@ -93,7 +93,6 @@ async function* withOpenRouterErrorMetadata(
       if (chunk.type === 'RUN_FINISHED') {
         yield {
           type: 'CUSTOM',
-          name: 'f',
           value: createServerFollowUps(accumulatedContent),
         } as StreamChunk
       }
