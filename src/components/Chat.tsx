@@ -11,7 +11,7 @@ import { MarkdownContent } from './chat/MarkdownContent'
 import { ToolWidget } from './chat/ToolWidget'
 import { TypingIndicator } from './chat/TypingIndicator'
 import type { AgUiStatusEvent, FollowUpMode, PendingSearchQueryRequest, UiChatModel } from './chat/types'
-import { requestSearchQueryDef } from '../lib/tools'
+import { requestSearchQueryDef } from '../lib/request-search-tool'
 
 function isFollowUpsEventValue(value: unknown): value is { followUps: Array<string> } {
   return Boolean(
