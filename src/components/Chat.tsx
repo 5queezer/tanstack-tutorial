@@ -243,7 +243,7 @@ function ToolWidget({ toolName, input, output }: { toolName: string; input: unkn
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontSize: 28, fontWeight: 800 }}>{result.currency} {formatNumber(result.price, 2)}</div>
             <div style={{ color: isUp ? '#147a35' : 'crimson', fontWeight: 700 }}>
-              {isUp ? '▲' : '▼'} {formatNumber(Math.abs(change), 2)} ({formatNumber(Math.abs(Number(result.changePercent)), 2)}%)
+              {isUp ? '▲' : '▼'} {formatNumber(Math.abs(change), 2)} ({formatNumber(Math.abs(result.changePercent), 2)}%)
             </div>
           </div>
         </div>
