@@ -325,20 +325,17 @@ export function Chat() {
   const searchQueryResolverRef = useRef<((result: { query: string }) => void) | undefined>(undefined)
   const modelOptions = models.filter((model) => !freeOnly || model.free)
   const thinkingAvailable = !!models.find((model) => model.id === selectedModel)?.supportsThinking
-  const interactiveSearchTool = useMemo(
-    () => ({
-      name: 'request_search_query',
-      execute: (toolInput: { prompt?: string; suggestedQuery?: string }) => {
-        setInteractiveSearchInput(toolInput.suggestedQuery ?? '')
-        setPendingSearchPrompt(toolInput.prompt ?? 'What should I search for?')
+  const interactiveSearchTool = {
+    name: 'request_search_query',
+    execute: (toolInput: { prompt?: string; suggestedQuery?: string }) => {
+      setInteractiveSearchInput(toolInput.suggestedQuery ?? '')
+      setPendingSearchPrompt(toolInput.prompt ?? 'What should I search for?')
 
-        return new Promise<{ query: string }>((resolve) => {
-          searchQueryResolverRef.current = resolve
-        })
-      },
-    }) as any,
-    [],
-  )
+      return new Promise<{ query: string }>((resolve) => {
+        searchQueryResolverRef.current = resolve
+      })
+    },
+  } as any
   const { messages, sendMessage, isLoading, error, stop } = useChat({
     connection: fetchServerSentEvents('/api/chat'),
     body: { model: selectedModel || undefined, showThinking: showThinking && thinkingAvailable },
