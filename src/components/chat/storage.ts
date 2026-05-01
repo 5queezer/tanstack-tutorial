@@ -1,8 +1,8 @@
 export const STORAGE_KEYS = {
-  selectedModel: 'tc:model',
-  freeOnly: 'tc:free',
-  showThinking: 'tc:think',
-  followUpMode: 'tc:followups',
+  selectedModel: 'tc:m',
+  freeOnly: 'tc:f',
+  showThinking: 'tc:t',
+  followUpMode: 'tc:u',
 } as const
 
 export function readLocalStorage(key: string) {
