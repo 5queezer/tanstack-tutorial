@@ -436,7 +436,6 @@ setPendingSearchPrompt(input.prompt ?? 'What should I search for?')
 
     fetch('/api/followups', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ model: selectedModel, messages: serializableMessages }),
     })
       .then((response) => (response.ok ? response.json() : { followUps: [] }))
