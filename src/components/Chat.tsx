@@ -1,6 +1,7 @@
 import { fetchServerSentEvents, useChat } from '@tanstack/ai-react'
 import { useEffect, useMemo, useRef, useState, type ReactNode, type SubmitEventHandler } from 'react'
 import type { FollowUpMode, UiChatModel } from './chat/types'
+import { summarizeToolActivity, type ToolActivitySummary } from '../lib/ag-ui-tool-activity'
 
 function getMessageText(message?: { parts: Array<{ type?: string; content?: string }> }) {
   if (!message) return ''
@@ -204,12 +205,34 @@ function Metric({ label, value }: { label: string; value: string }) {
   )
 }
 
+function ActivitySummary({ summary }: { summary: ToolActivitySummary }) {
+  return (
+    <div style={{ display: 'grid', gap: '0.4rem', padding: '0.55rem', borderRadius: 10, background: '#fff' }}>
+      <strong>{summary.title}</strong>
+      <div style={{ display: 'grid', gap: 3 }}>
+        {summary.rows.map(([label, value]) => (
+          <div key={label} style={{ display: 'grid', gridTemplateColumns: '8rem 1fr', gap: '0.5rem' }}>
+            <span style={{ color: '#666' }}>{label}</span>
+            <span>{value}</span>
+          </div>
+        ))}
+      </div>
+      {summary.links?.map(([label, url]) => (
+        <a key={url} href={url} target="_blank" rel="noreferrer" style={{ color: '#0645ad' }}>{label}</a>
+      ))}
+    </div>
+  )
+}
+
 function ToolWidget({ toolName, input, output }: { toolName: string; input: unknown; output: unknown }) {
   const result = output as any
 
   if (!result) {
     return input ? <div style={{ color: '#555', fontSize: 13 }}>Input: {JSON.stringify(input)}</div> : null
   }
+
+  const activity = summarizeToolActivity(toolName, input, result)
+  if (activity) return <ActivitySummary summary={activity} />
 
   if (toolName === 'get_weather') {
     return (
@@ -649,7 +672,7 @@ export function Chat() {
                                   fontSize: 13,
                                 }}
                               >
-                                <strong>{toolName === 'get_weather' ? 'Weather' : toolName === 'get_stock_quote' ? 'Stock' : toolName === 'brave_web_search' ? 'Search' : toolName === 'request_search_query' ? 'Search query' : toolName}</strong>
+                                <strong>{toolName === 'get_weather' ? 'Weather' : toolName === 'get_stock_quote' ? 'Stock' : toolName === 'brave_web_search' ? 'Search' : toolName === 'github_search' ? 'GitHub search' : toolName === 'github_get' ? 'GitHub details' : toolName === 'route_subagents' ? 'Subagent routing' : toolName === 'request_search_query' ? 'Search query' : toolName}</strong>
                                 <span style={{ color: isUser ? '#ddd' : '#555' }}>{tool.state}</span>
                                 <ToolWidget toolName={toolName} input={tool.input} output={tool.output} />
                               </div>

@@ -1,0 +1,62 @@
+import assert from 'node:assert/strict'
+import { test } from 'node:test'
+
+import { summarizeToolActivity } from '../src/lib/ag-ui-tool-activity.ts'
+
+test('summarizes subagent routing decisions as AG-UI activity rows', () => {
+  const summary = summarizeToolActivity('route_subagents', { prompt: 'review frontend and backend' }, {
+    chosenAction: 'spawn_multiple_specialists',
+    promptClass: 'review',
+    complexity: 'high',
+    domainBreadth: 'multi-domain',
+    subtaskIndependence: 'high',
+    verificationBurden: 'medium',
+    costLatencyPrivacyRisk: 'medium',
+    rationale: 'Review work is separable.',
+    validationGate: 'Integrator validates findings.',
+  })
+
+  assert.equal(summary.title, 'Subagent routing')
+  assert.deepEqual(summary.rows.slice(0, 4), [
+    ['Action', 'spawn_multiple_specialists'],
+    ['Class', 'review'],
+    ['Complexity', 'high'],
+    ['Domains', 'multi-domain'],
+  ])
+  assert.deepEqual(summary.rows.at(-1), ['Validation', 'Integrator validates findings.'])
+})
+
+test('summarizes github_search with query, type, repo, and result count', () => {
+  const summary = summarizeToolActivity('github_search', { query: 'default.fetch', type: 'prs', repo: 'TanStack/router' }, {
+    results: [
+      { title: 'Fix server fetch', url: 'https://github.com/TanStack/router/pull/1' },
+      { title: 'Dev server issue', url: 'https://github.com/TanStack/router/issues/2' },
+    ],
+  })
+
+  assert.equal(summary.title, 'GitHub search')
+  assert.deepEqual(summary.rows, [
+    ['Type', 'prs'],
+    ['Query', 'default.fetch'],
+    ['Repo', 'TanStack/router'],
+    ['Results', '2'],
+  ])
+  assert.deepEqual(summary.links, [
+    ['Fix server fetch', 'https://github.com/TanStack/router/pull/1'],
+    ['Dev server issue', 'https://github.com/TanStack/router/issues/2'],
+  ])
+})
+
+test('summarizes github_get requests for PR status details', () => {
+  const summary = summarizeToolActivity('github_get', { resource: 'check_runs', owner: 'TanStack', repo: 'router', ref: 'abc123' }, {
+    check_runs: [{ name: 'test', status: 'completed', conclusion: 'success' }],
+  })
+
+  assert.equal(summary.title, 'GitHub details')
+  assert.deepEqual(summary.rows, [
+    ['Resource', 'check_runs'],
+    ['Repo', 'TanStack/router'],
+    ['Ref', 'abc123'],
+    ['Items', '1'],
+  ])
+})
