@@ -38,7 +38,7 @@ export function ToolWidget({ toolName, input, output }: { toolName: string; inpu
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '1rem' }}>
           <div>
             <div style={{ fontSize: 22, fontWeight: 800 }}>{String(result.city ?? 'Weather')}</div>
-            <div style={{ color: '#555' }}>{String(result.condition ?? 'Conditions unavailable')}</div>
+            <div style={{ color: '#555' }}>{String(result.condition ?? 'Unavailable')}</div>
           </div>
           <div style={{ fontSize: 34, fontWeight: 800 }}>{formatNumber(result.temperatureC, 0)}°C</div>
         </div>
@@ -59,7 +59,7 @@ export function ToolWidget({ toolName, input, output }: { toolName: string; inpu
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '1rem' }}>
           <div>
             <div style={{ fontSize: 22, fontWeight: 800 }}>{String(result.symbol ?? 'QUOTE')}</div>
-            <div style={{ color: '#555' }}>{String(result.marketState ?? 'Demo quote')}</div>
+            <div style={{ color: '#555' }}>{String(result.marketState ?? 'Demo')}</div>
           </div>
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontSize: 28, fontWeight: 800 }}>{String(result.currency ?? 'USD')} {formatNumber(result.price, 2)}</div>
@@ -77,7 +77,7 @@ export function ToolWidget({ toolName, input, output }: { toolName: string; inpu
 
     return (
       <div style={{ display: 'grid', gap: '0.55rem' }}>
-        <div style={{ fontSize: 16, fontWeight: 800 }}>Search results for “{String(result.query ?? args?.query ?? '')}”</div>
+        <div style={{ fontSize: 16, fontWeight: 800 }}>Results for “{String(result.query ?? args?.query ?? '')}”</div>
         {results.map((item, index) => {
           const searchResult = item && typeof item === 'object' ? (item as Record<string, unknown>) : {}
           const url = String(searchResult.url ?? '')
@@ -98,7 +98,7 @@ export function ToolWidget({ toolName, input, output }: { toolName: string; inpu
                 textDecoration: 'none',
               }}
             >
-              <strong>{String(searchResult.title ?? 'Untitled')}</strong>
+              <strong>{String(searchResult.title ?? 'Result')}</strong>
               <span style={{ color: '#555', fontSize: 13 }}>{String(searchResult.description ?? '')}</span>
               <span style={{ color: '#777', fontSize: 12 }}>{url}</span>
             </a>
