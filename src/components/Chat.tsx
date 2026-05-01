@@ -321,7 +321,7 @@ export function Chat() {
   } as any
   const { messages, sendMessage, isLoading, error, stop } = useChat({
     connection: fetchServerSentEvents('/api/chat'),
-    body: { model: selectedModel || undefined, showThinking: showThinking && thinkingAvailable },
+    body: { model: selectedModel, showThinking: showThinking && thinkingAvailable },
     tools: [interactiveSearchTool],
     onCustomEvent(_eventName, value) {
       setAgUiFollowUps(value as Array<string>)
