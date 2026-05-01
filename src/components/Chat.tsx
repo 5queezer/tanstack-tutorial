@@ -773,10 +773,6 @@ export function Chat() {
                       ))}
                     </section>
                   ) : null}
-                  {!isLoading && followUpMode === 'm' && isLoadingFollowUps ? (
-                    <p style={{ margin: '0.25rem 0', color: '#666' }}>Generating…</p>
-                  ) : null}
-
                   {isLoading ? (
                     <article style={{ display: 'flex', justifyContent: 'flex-start' }}>
                       <div
