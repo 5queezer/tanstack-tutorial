@@ -5,7 +5,7 @@ type MarkdownBlock =
   | { type: 'list'; ordered: boolean; items: Array<string>; key: string }
   | { type: 'paragraph'; content: string; key: string }
 
-const linkPattern = /(`[^`]+`|\[([^\]]+)\]\((https?:\/\/[^\s)]+|mailto:[^\s)]+)\))/g
+const linkPattern = /(`[^`]+`|\[([^\]]+)\]\((https?:\/\/[^\s)]+)\))/g
 
 export function MarkdownContent({ content, isUser }: { content: string; isUser: boolean }) {
   return <>{parseBlocks(content).map((block) => renderBlock(block, isUser))}</>
