@@ -7,7 +7,6 @@ import { FollowUps } from './chat/FollowUps'
 import { InteractiveSearchPrompt } from './chat/InteractiveSearchPrompt'
 import { MarkdownContent } from './chat/MarkdownContent'
 import { ToolWidget } from './chat/ToolWidget'
-import { TypingIndicator } from './chat/TypingIndicator'
 import type { AgUiStatusEvent, FollowUpMode, PendingSearchQueryRequest, UiChatModel } from './chat/types'
 import { requestSearchQueryDef } from '../lib/request-search-tool'
 
@@ -496,7 +495,22 @@ export function Chat() {
                     <p style={{ margin: '0.25rem 0', color: '#666' }}>Generating…</p>
                   ) : null}
 
-                  {isLoading ? <TypingIndicator /> : null}
+                  {isLoading ? (
+                    <article style={{ display: 'flex', justifyContent: 'flex-start' }}>
+                      <div
+                        aria-label="Typing"
+                        style={{
+                          padding: '0.8rem 0.95rem',
+                          borderRadius: 18,
+                          borderBottomLeftRadius: 4,
+                          background: '#f2f2f2',
+                          color: '#555',
+                        }}
+                      >
+                        ...
+                      </div>
+                    </article>
+                  ) : null}
                 </>
               )}
             </div>
