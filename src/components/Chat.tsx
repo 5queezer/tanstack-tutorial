@@ -376,22 +376,7 @@ setPendingSearchPrompt(input.prompt ?? 'What should I search for?')
                   }}
                 />
               </div>
-              <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-                {agUiStatuses.map((status) => (
-                  <span
-                    key={`${status.at}-${status.label}`}
-                    style={{
-                      padding: '0.2rem 0.45rem',
-                      borderRadius: 999,
-                      background: '#eee',
-                      color: '#555',
-                      fontSize: 12,
-                    }}
-                  >
-                    {status.label}
-                  </span>
-                ))}
-              </div>
+
             </section>
           ) : null}
 
