@@ -7,6 +7,5 @@ export function getChatModel(modelId: string) {
 
   return createOpenRouterText(modelId as any, process.env.OPENROUTER_API_KEY, {
     httpReferer: process.env.OPENROUTER_SITE_URL ?? 'http://localhost:3000',
-    appTitle: process.env.OPENROUTER_APP_NAME ?? 'TanStack',
   })
 }
