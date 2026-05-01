@@ -16,18 +16,8 @@ const requestSearchInputSchema = {
   additionalProperties: false,
 } as const
 
-const requestSearchOutputSchema = {
-  type: 'object',
-  properties: {
-    query: { type: 'string' },
-  },
-  required: ['query'],
-  additionalProperties: false,
-} as const
-
 export const requestSearchQueryDef = toolDefinition({
   name: 'request_search_query',
   description: 'Ask the user for a missing or ambiguous query before brave_web_search.',
   inputSchema: requestSearchInputSchema,
-  outputSchema: requestSearchOutputSchema,
 })
