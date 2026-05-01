@@ -596,11 +596,7 @@ export function Chat() {
           }}
         >
             <div style={{ display: 'grid', gap: '0.75rem', padding: '1rem' }}>
-              {messages.length === 0 ? (
-                <p style={{ margin: 0, color: '#666' }}>Ask something to start.</p>
-              ) : (
-                <>
-                  {messages.map((message) => {
+              {messages.map((message) => {
                     const isUser = message.role === 'user'
 
                     return (
@@ -798,8 +794,6 @@ export function Chat() {
                       </div>
                     </article>
                   ) : null}
-                </>
-              )}
             </div>
         </section>
 
