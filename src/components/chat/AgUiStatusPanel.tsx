@@ -6,7 +6,6 @@ export function AgUiStatusPanel({ statuses, hasError }: { statuses: Array<AgUiSt
 
   return (
     <section
-      aria-label="Status"
       style={{
         display: 'grid',
         gap: '0.45rem',
