@@ -358,7 +358,7 @@ export function Chat() {
               disabled={isLoading || !thinkingAvailable}
               aria-pressed={showThinking}
               aria-label="Show model thinking"
-              title={thinkingAvailable ? 'Show model thinking/reasoning when available' : 'Selected model does not advertise thinking support'}
+              title={thinkingAvailable ? 'Show thinking' : 'Thinking unavailable'}
               style={{
                 fontFamily: 'inherit',
                 padding: '0.55rem 0.75rem',
@@ -530,7 +530,7 @@ export function Chat() {
             type={isLoading ? 'button' : 'submit'}
             onClick={isLoading ? stop : undefined}
             disabled={!isLoading && !selectedModel}
-            title={isLoading ? 'Stop the response' : 'Send your message'}
+            title={isLoading ? 'Stop' : 'Send'}
             style={{
               fontFamily: 'inherit',
               padding: '0.75rem 1rem',
