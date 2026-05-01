@@ -327,8 +327,8 @@ export function Chat() {
                 }}
               >
                 <option value="h">Heuristic</option>
-                <option value="m">Model call</option>
-                <option value="a">AG-UI event</option>
+                <option value="m">Model</option>
+                <option value="a">AG-UI</option>
                 <option value="o">Off</option>
               </select>
             </div>
