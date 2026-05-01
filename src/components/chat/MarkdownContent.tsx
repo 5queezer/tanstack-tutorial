@@ -93,7 +93,7 @@ function renderBlock(block: MarkdownBlock, isUser: boolean, key: number) {
       <ListTag key={key} style={{ margin: '0.4rem 0 0.7rem', paddingLeft: '1.25rem' }}>
         {block.items.map((item, index) => (
           <li key={index} style={{ margin: '0.2rem 0' }}>
-            {renderInline(item, isUser, `${key}-${index}`)}
+            {renderInline(item, isUser)}
           </li>
         ))}
       </ListTag>
@@ -102,12 +102,12 @@ function renderBlock(block: MarkdownBlock, isUser: boolean, key: number) {
 
   return (
     <p key={key} style={{ margin: '0 0 0.6rem' }}>
-      {renderInline(block.content, isUser, String(key))}
+      {renderInline(block.content, isUser)}
     </p>
   )
 }
 
-function renderInline(text: string, isUser: boolean, keyPrefix: string): Array<ReactNode> {
+function renderInline(text: string, isUser: boolean): Array<ReactNode> {
   const nodes: Array<ReactNode> = []
   let lastIndex = 0
 
@@ -119,7 +119,7 @@ function renderInline(text: string, isUser: boolean, keyPrefix: string): Array<R
     if (token.startsWith('`')) {
       nodes.push(
         <code
-          key={`${keyPrefix}-code-${match.index}`}
+          key={match.index}
           style={{
             padding: '0.12rem 0.25rem',
             borderRadius: 4,
@@ -133,7 +133,7 @@ function renderInline(text: string, isUser: boolean, keyPrefix: string): Array<R
       )
     } else {
       nodes.push(
-        <a key={`${keyPrefix}-link-${match.index}`} href={match[3]} target="_blank" rel="noreferrer" style={{ color: 'inherit', textDecoration: 'underline' }}>
+        <a key={match.index} href={match[3]} target="_blank" rel="noreferrer" style={{ color: 'inherit', textDecoration: 'underline' }}>
           {match[2]}
         </a>,
       )
