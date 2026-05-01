@@ -115,7 +115,6 @@ export const braveWebSearch = braveWebSearchDef.server(async (args) => {
   const url = new URL('https://api.search.brave.com/res/v1/web/search')
   url.searchParams.set('q', query)
   url.searchParams.set('count', String(count))
-  url.searchParams.set('text_decorations', 'false')
 
   const response = await fetch(url, {
     headers: {
