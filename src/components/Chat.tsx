@@ -149,7 +149,7 @@ export function Chat() {
     return () => {
       cancelled = true
     }
-  }, [freeOnly, settingsLoaded])
+  }, [settingsLoaded])
 
   useEffect(() => {
     if (!thinkingAvailable) {
