@@ -546,7 +546,6 @@ export function Chat() {
                 borderRadius: 8,
                 background: freeOnly ? '#111' : '#fff',
                 color: freeOnly ? '#fff' : '#111',
-                cursor: isLoading ? 'not-allowed' : 'pointer',
               }}
             >
               Free only
@@ -565,7 +564,6 @@ export function Chat() {
                 background: showThinking ? '#111' : '#fff',
                 color: showThinking ? '#fff' : '#111',
                 opacity: thinkingAvailable ? 1 : 0.55,
-                cursor: isLoading || !thinkingAvailable ? 'not-allowed' : 'pointer',
               }}
             >
               Thinking
@@ -756,7 +754,6 @@ export function Chat() {
                             background: 'transparent',
                             color: '#222',
                             textAlign: 'left',
-                            cursor: 'pointer',
                           }}
                         >
                           {question}
@@ -804,7 +801,6 @@ export function Chat() {
               borderRadius: 8,
               color: '#fff',
               background: isLoading ? '#888' : '#111',
-              cursor: 'pointer',
             }}
           >
             {isLoading ? 'Stop' : 'Send'}
