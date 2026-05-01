@@ -30,7 +30,7 @@ export function InteractiveSearchPrompt({
         }}
       >
         <div>
-          <strong>🔎 Search query?</strong>
+          <strong>Search query?</strong>
           <p style={{ margin: '0.35rem 0 0', color: '#555' }}>{request.prompt}</p>
         </div>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
