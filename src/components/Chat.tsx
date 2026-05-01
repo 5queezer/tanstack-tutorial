@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode, type SubmitEventH
 import type { FollowUpMode, UiChatModel } from './chat/types'
 import { summarizeToolActivity, type ToolActivitySummary } from '../lib/ag-ui-tool-activity'
 import { parseMarkdownBlocks, parseMarkdownInline, type MarkdownBlock } from '../lib/markdown-lite'
+import { typingDotDelays } from '../lib/typing-indicator'
 
 function getMessageText(message?: { parts: Array<{ type?: string; content?: string }> }) {
   if (!message) return ''
@@ -407,6 +408,7 @@ export function Chat() {
 
   return (
     <>
+      <style>{`@keyframes typing-dot{0%,80%,100%{opacity:.35;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}`}</style>
       <main
         style={{
           height: '100vh',
@@ -707,6 +709,8 @@ export function Chat() {
                       <div
                         aria-label="Typing"
                         style={{
+                          display: 'flex',
+                          gap: 4,
                           padding: '0.8rem 0.95rem',
                           borderRadius: 18,
                           borderBottomLeftRadius: 4,
@@ -714,7 +718,9 @@ export function Chat() {
                           color: '#555',
                         }}
                       >
-                        ...
+                        {typingDotDelays.map((delay) => (
+                          <span key={delay} style={{ animation: 'typing-dot 1s infinite', animationDelay: delay }}>•</span>
+                        ))}
                       </div>
                     </article>
                   ) : null}
