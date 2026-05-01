@@ -30,7 +30,7 @@ export async function getOpenRouterModels() {
   const payload = (await response.json()) as OpenRouterModelResponse
   const models = (payload.data ?? [])
     .filter((model): model is NonNullable<typeof payload.data>[number] & { id: string } =>
-      Boolean(model.id) && isTextChatOpenRouterModel(model),
+      !!model.id && isTextChatOpenRouterModel(model),
     )
     .map<ChatModel>((model) => ({
       id: model.id,
