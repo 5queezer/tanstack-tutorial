@@ -413,8 +413,8 @@ export function Chat() {
       body: JSON.stringify({ model: selectedModel, messages: serializableMessages }),
     })
       .then((response) => response.json())
-      .then((payload?: { followUps?: Array<string> }) => {
-        setModelFollowUps(payload?.followUps ?? [])
+      .then((payload: { followUps: Array<string> }) => {
+        setModelFollowUps(payload.followUps)
       })
       .catch(() => {})
   }, [followUpMode, isLoading, messages, selectedModel])
