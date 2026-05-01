@@ -4,7 +4,7 @@ import { createFollowUps, getMessageText } from './chat/followUps'
 import { readLocalStorage, readLocalStorageBoolean, STORAGE_KEYS, writeLocalStorage } from './chat/storage'
 import { MarkdownContent } from './chat/MarkdownContent'
 import { ToolWidget } from './chat/ToolWidget'
-import type { AgUiStatusEvent, FollowUpMode, UiChatModel } from './chat/types'
+import type { FollowUpMode, UiChatModel } from './chat/types'
 import { requestSearchQueryDef } from '../lib/request-search-tool'
 
 export function Chat() {
@@ -15,7 +15,6 @@ export function Chat() {
   const [freeOnly, setFreeOnly] = useState(false)
   const [showThinking, setShowThinking] = useState(false)
   const [settingsLoaded, setSettingsLoaded] = useState(false)
-  const [agUiStatus, setAgUiStatus] = useState<AgUiStatusEvent>()
   const [followUpMode, setFollowUpMode] = useState<FollowUpMode>('h')
   const [modelFollowUps, setModelFollowUps] = useState<Array<string>>([])
   const [agUiFollowUps, setAgUiFollowUps] = useState<Array<string>>([])
@@ -50,9 +49,6 @@ setPendingSearchPrompt(input.prompt ?? 'What should I search for?')
         return
       }
 
-      if (eventName !== 't') return
-
-      setAgUiStatus(value as AgUiStatusEvent)
     },
   })
   const heuristicFollowUps = useMemo(() => {
@@ -198,7 +194,6 @@ setPendingSearchPrompt(input.prompt ?? 'What should I search for?')
     const text = input.trim()
     if (!text) return
 
-    setAgUiStatus(undefined)
     setModelFollowUps([])
     setAgUiFollowUps([])
     sendMessage(text)
@@ -207,7 +202,6 @@ setPendingSearchPrompt(input.prompt ?? 'What should I search for?')
 
   function handleFollowUpClick(question: string) {
     if (isLoading) return
-    setAgUiStatus(undefined)
     setModelFollowUps([])
     setAgUiFollowUps([])
     sendMessage(question)
@@ -342,7 +336,6 @@ setPendingSearchPrompt(input.prompt ?? 'What should I search for?')
             </button>
           </div>
 
-          {agUiStatus ? <p style={{ color: '#666', fontSize: 13, margin: 0 }}>{agUiStatus.label}</p> : null}
 
           {modelsError ? <p style={{ color: 'crimson', margin: 0 }}>{modelsError}</p> : null}
         </header>

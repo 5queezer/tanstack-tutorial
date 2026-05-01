@@ -9,9 +9,5 @@ export type ChatMessage = {
   parts?: Array<{ type?: string; content?: string }>
 }
 
-export type AgUiStatusEvent = {
-  label: string
-}
-
 
 export type FollowUpMode = 'h' | 'm' | 'a' | 'o'

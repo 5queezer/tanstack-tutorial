@@ -74,9 +74,6 @@ const stockBySymbol: Record<string, StockOutput> = {
 
 export const getWeather = getWeatherDef.server(async (args, context) => {
   const { city } = args as WeatherInput
-  context?.emitCustomEvent('t', {
-    label: `Weather ${city}`,
-  })
   const key = city.toLowerCase().trim()
   const weather = weatherByCity[key] ?? {
     condition: 'Mild and clear',
@@ -94,10 +91,6 @@ export const getWeather = getWeatherDef.server(async (args, context) => {
 export const getStockQuote = getStockDef.server(async (args, context) => {
   const { symbol } = args as StockInput
   const normalizedSymbol = symbol.toUpperCase().trim()
-
-  context?.emitCustomEvent('t', {
-    label: `Quote ${normalizedSymbol}`,
-  })
   const quote = stockBySymbol[normalizedSymbol] ?? {
     price: 100 + normalizedSymbol.length * 7.13,
     change: 1.24,
@@ -118,10 +111,6 @@ export const braveWebSearch = braveWebSearchDef.server(async (args, context) => 
   if (!process.env.BRAVE_API_KEY) {
     throw new Error('BRAVE_API_KEY not configured')
   }
-
-  context?.emitCustomEvent('t', {
-    label: `Search ${query}`,
-  })
 
   const url = new URL('https://api.search.brave.com/res/v1/web/search')
   url.searchParams.set('q', query)
