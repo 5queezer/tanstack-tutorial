@@ -629,7 +629,7 @@ export function Chat() {
                                   fontSize: 13,
                                 }}
                               >
-                                <summary style={{ cursor: 'pointer' }}>Thinking</summary>
+                                <summary>Thinking</summary>
                                 <pre
                                   style={{
                                     maxHeight: 160,
