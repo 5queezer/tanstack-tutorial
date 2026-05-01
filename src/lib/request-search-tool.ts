@@ -12,6 +12,6 @@ const requestSearchInputSchema = {
 
 export const requestSearchQueryDef = toolDefinition({
   name: 'request_search_query',
-  description: 'Ask the user for a missing search query.',
+  description: 'Ask for a search query.',
   inputSchema: requestSearchInputSchema,
 })
