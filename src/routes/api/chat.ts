@@ -70,7 +70,7 @@ async function* withOpenRouterErrorMetadata(
   try {
     for await (const chunk of stream) {
       if (chunk.type === 'TEXT_MESSAGE_CONTENT') {
-        accumulatedContent += chunk.delta ?? ''
+        accumulatedContent += chunk.delta
 
       }
 
