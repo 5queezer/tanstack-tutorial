@@ -49,7 +49,6 @@ export const Route = createFileRoute('/api/chat')({
                 reasoning: {
                   effort: 'medium',
                   max_tokens: 1024,
-                  exclude: false,
                 },
               }
             : undefined,
