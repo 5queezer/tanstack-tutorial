@@ -338,7 +338,7 @@ export function Chat() {
               onClick={() => handleFreeOnlyChange(!freeOnly)}
               disabled={isLoading || models.length === 0}
               aria-pressed={freeOnly}
-              aria-label="Show free models only"
+              aria-label="Free models"
               style={{
                 fontFamily: 'inherit',
                 padding: '0.55rem 0.75rem',
@@ -357,7 +357,7 @@ export function Chat() {
               onClick={() => setShowThinking(!showThinking)}
               disabled={isLoading || !thinkingAvailable}
               aria-pressed={showThinking}
-              aria-label="Show model thinking"
+              aria-label="Thinking"
               title={thinkingAvailable ? 'Show thinking' : 'Thinking unavailable'}
               style={{
                 fontFamily: 'inherit',
@@ -522,7 +522,7 @@ export function Chat() {
             value={input}
             onChange={(event) => setInput(event.target.value)}
             placeholder="Ask..."
-            aria-label="Chat message"
+            aria-label="Message"
             style={{ flex: 1, padding: '0.75rem', border: '1px solid #ccc', borderRadius: 8, fontFamily: 'inherit' }}
           />
 
