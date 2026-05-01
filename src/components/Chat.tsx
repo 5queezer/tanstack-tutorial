@@ -43,10 +43,6 @@ const STORAGE_KEYS = {
   followUpMode: 'tc:u',
 } as const
 
-function writeLocalStorage(key: string, value: string | boolean) {
-  localStorage.setItem(key, String(value))
-}
-
 
 type MarkdownBlock =
   | { t: 'c'; c: string }
@@ -402,10 +398,10 @@ export function Chat() {
   useEffect(() => {
     if (!settingsLoaded) return
 
-    if (selectedModel) writeLocalStorage(STORAGE_KEYS.selectedModel, selectedModel)
-    writeLocalStorage(STORAGE_KEYS.freeOnly, freeOnly)
-    writeLocalStorage(STORAGE_KEYS.showThinking, showThinking)
-    writeLocalStorage(STORAGE_KEYS.followUpMode, followUpMode)
+    if (selectedModel) localStorage.setItem(STORAGE_KEYS.selectedModel, selectedModel)
+    localStorage.setItem(STORAGE_KEYS.freeOnly, String(freeOnly))
+    localStorage.setItem(STORAGE_KEYS.showThinking, String(showThinking))
+    localStorage.setItem(STORAGE_KEYS.followUpMode, followUpMode)
   }, [selectedModel, freeOnly, showThinking, followUpMode, settingsLoaded])
 
   useEffect(() => {
