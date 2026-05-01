@@ -451,9 +451,9 @@ export function Chat() {
     event.preventDefault()
 
     const query = interactiveSearchInput.trim()
-    if (!query || !searchQueryResolverRef.current) return
+    if (!query) return
 
-    searchQueryResolverRef.current({ query })
+    searchQueryResolverRef.current?.({ query })
     searchQueryResolverRef.current = undefined
     setPendingSearchPrompt(undefined)
     setInteractiveSearchInput('')
