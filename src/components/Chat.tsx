@@ -725,7 +725,6 @@ export function Chat() {
                               borderRadius: 10,
                               background: '#111',
                               color: '#fff',
-                                          cursor: interactiveSearchInput.trim() ? 'pointer' : 'not-allowed',
                             }}
                           >
                             Search
