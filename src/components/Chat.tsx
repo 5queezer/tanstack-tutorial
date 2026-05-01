@@ -665,7 +665,7 @@ export function Chat() {
 
                             return (
                               <div
-                                key={tool.id}
+                                key={index}
                                 style={{
                                   display: 'grid',
                                   gap: '0.35rem',
