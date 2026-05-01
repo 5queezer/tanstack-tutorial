@@ -4,7 +4,7 @@ import { requestSearchQueryDef } from './request-search-tool'
 
 export const getWeatherDef = toolDefinition({
   name: 'get_weather',
-  description: 'Get demo city weather: temperature, condition, humidity, and wind.',
+  description: 'Get demo city weather.',
   inputSchema: z.object({
     city: z.string(),
   }),
@@ -12,7 +12,7 @@ export const getWeatherDef = toolDefinition({
 
 export const getStockDef = toolDefinition({
   name: 'get_stock_quote',
-  description: 'Get a demo stock quote for a ticker symbol.',
+  description: 'Get a demo stock quote.',
   inputSchema: z.object({
     symbol: z.string(),
   }),
@@ -20,7 +20,7 @@ export const getStockDef = toolDefinition({
 
 export const braveWebSearchDef = toolDefinition({
   name: 'brave_web_search',
-  description: 'Search the live web with Brave for current, recent, news, or docs questions. Cite URLs.',
+  description: 'Search the live web with Brave. Cite URLs.',
   inputSchema: z.object({
     query: z.string().max(400),
     count: z.number().int().min(1).max(10).optional(),
