@@ -2,6 +2,7 @@ import { fetchServerSentEvents, useChat } from '@tanstack/ai-react'
 import { useEffect, useMemo, useRef, useState, type ReactNode, type SubmitEventHandler } from 'react'
 import type { FollowUpMode, UiChatModel } from './chat/types'
 import { summarizeToolActivity, type ToolActivitySummary } from '../lib/ag-ui-tool-activity'
+import { parseMarkdownBlocks, parseMarkdownInline, type MarkdownBlock } from '../lib/markdown-lite'
 
 function getMessageText(message?: { parts: Array<{ type?: string; content?: string }> }) {
   if (!message) return ''
@@ -45,73 +46,8 @@ const STORAGE_KEYS = {
 } as const
 
 
-type MarkdownBlock =
-  | { t: 'c'; c: string }
-  | { t: 'l'; o: boolean; i: Array<string> }
-  | { t: 'p'; c: string }
-
-const linkPattern = /(`[^`]+`|\[([^\]]+)\]\((https?:\/\/[^\s)]+)\))/g
-
 function MarkdownContent({ content, isUser }: { content: string; isUser: boolean }) {
-  return <>{parseBlocks(content).map((block, index) => renderBlock(block, isUser, index))}</>
-}
-
-function parseBlocks(content: string): Array<MarkdownBlock> {
-  const lines = content.split('\n')
-  const blocks: Array<MarkdownBlock> = []
-  let paragraph: Array<string> = []
-
-  function flushParagraph() {
-    if (paragraph.length === 0) return
-    blocks.push({ t: 'p', c: paragraph.join(' ') })
-    paragraph = []
-  }
-
-  for (let index = 0; index < lines.length; index += 1) {
-    const line = lines[index]
-    const trimmed = line.trim()
-
-    if (trimmed.startsWith('```')) {
-      flushParagraph()
-      const codeLines: Array<string> = []
-      index += 1
-      while (index < lines.length && !lines[index].trim().startsWith('```')) {
-        codeLines.push(lines[index])
-        index += 1
-      }
-      blocks.push({ t: 'c', c: codeLines.join('\n') })
-      continue
-    }
-
-    if (!trimmed) {
-      flushParagraph()
-      continue
-    }
-
-    const unordered = /^-\s+(.+)$/.exec(trimmed)
-    const ordered = /^\d+\.\s+(.+)$/.exec(trimmed)
-    if (unordered || ordered) {
-      flushParagraph()
-      const listItems = [unordered?.[1] ?? ordered?.[1] ?? '']
-      const isOrdered = !!ordered
-
-      while (index + 1 < lines.length) {
-        const nextTrimmed = lines[index + 1].trim()
-        const nextMatch = isOrdered ? /^\d+\.\s+(.+)$/.exec(nextTrimmed) : /^-\s+(.+)$/.exec(nextTrimmed)
-        if (!nextMatch) break
-        listItems.push(nextMatch[1])
-        index += 1
-      }
-
-      blocks.push({ t: 'l', o: isOrdered, i: listItems })
-      continue
-    }
-
-    paragraph.push(trimmed)
-  }
-
-  flushParagraph()
-  return blocks
+  return <>{parseMarkdownBlocks(content).map((block, index) => renderBlock(block, isUser, index))}</>
 }
 
 function renderBlock(block: MarkdownBlock, isUser: boolean, key: number) {
@@ -129,6 +65,15 @@ function renderBlock(block: MarkdownBlock, isUser: boolean, key: number) {
       >
         <code style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace' }}>{block.c}</code>
       </pre>
+    )
+  }
+
+  if (block.t === 'h') {
+    const HeadingTag = `h${block.l}` as 'h1' | 'h2' | 'h3'
+    return (
+      <HeadingTag key={key} style={{ margin: '0.7rem 0 0.4rem', fontSize: block.l === 1 ? 22 : block.l === 2 ? 18 : 16 }}>
+        {renderInline(block.c, isUser)}
+      </HeadingTag>
     )
   }
 
@@ -153,16 +98,9 @@ function renderBlock(block: MarkdownBlock, isUser: boolean, key: number) {
 }
 
 function renderInline(text: string, isUser: boolean): Array<ReactNode> {
-  const nodes: Array<ReactNode> = []
-  let lastIndex = 0
-
-  for (const match of text.matchAll(linkPattern)) {
-    const index = match.index!
-    if (index > lastIndex) nodes.push(text.slice(lastIndex, index))
-
-    const token = match[0]
-    if (token.startsWith('`')) {
-      nodes.push(
+  return parseMarkdownInline(text).map((segment, index) => {
+    if (segment.t === 'code') {
+      return (
         <code
           key={index}
           style={{
@@ -173,22 +111,19 @@ function renderInline(text: string, isUser: boolean): Array<ReactNode> {
             fontSize: '0.92em',
           }}
         >
-          {token.slice(1, -1)}
-        </code>,
-      )
-    } else {
-      nodes.push(
-        <a key={index} href={match[3]} target="_blank" rel="noreferrer" style={{ color: 'inherit', textDecoration: 'underline' }}>
-          {match[2]}
-        </a>,
+          {segment.c}
+        </code>
       )
     }
 
-    lastIndex = index + token.length
-  }
+    if (segment.t === 'strong') return <strong key={index}>{renderInline(segment.c, isUser)}</strong>
+    if (segment.t === 'em') return <em key={index}>{renderInline(segment.c, isUser)}</em>
+    if (segment.t === 'link') {
+      return <a key={index} href={segment.href} target="_blank" rel="noreferrer" style={{ color: 'inherit', textDecoration: 'underline' }}>{segment.c}</a>
+    }
 
-  if (lastIndex < text.length) nodes.push(text.slice(lastIndex))
-  return nodes
+    return segment.c
+  })
 }
 
 
