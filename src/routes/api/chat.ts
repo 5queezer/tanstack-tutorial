@@ -143,7 +143,7 @@ function formatOpenRouterError(error: unknown) {
     getErrorNumber(error, 'code')
   const raw = getErrorString(metadata, 'raw')
   const fallbackMessage = getErrorString(payload, 'message')
-  const message = raw ?? fallbackMessage ?? (error instanceof Error ? error.message : 'Unknown OpenRouter error')
+  const message = raw ?? fallbackMessage ?? (error instanceof Error ? error.message : 'OpenRouter error')
 
   return status ? `${status} ${message}` : message
 }
