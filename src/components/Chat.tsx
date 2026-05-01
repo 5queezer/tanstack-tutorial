@@ -2,7 +2,6 @@ import { fetchServerSentEvents, useChat } from '@tanstack/ai-react'
 import { useEffect, useMemo, useRef, useState, type SubmitEventHandler } from 'react'
 import { createFollowUps, getMessageText } from './chat/followUps'
 import { readLocalStorage, readLocalStorageBoolean, STORAGE_KEYS, writeLocalStorage } from './chat/storage'
-import { FollowUps } from './chat/FollowUps'
 import { MarkdownContent } from './chat/MarkdownContent'
 import { ToolWidget } from './chat/ToolWidget'
 import type { AgUiStatusEvent, FollowUpMode, PendingSearchQueryRequest, UiChatModel } from './chat/types'
@@ -578,7 +577,38 @@ export function Chat() {
                     </article>
                   ) : null}
 
-                  {!isLoading ? <FollowUps questions={followUps} onSelect={handleFollowUpClick} /> : null}
+                  {!isLoading && followUps.length > 0 ? (
+                    <section
+                      style={{
+                        display: 'grid',
+                        gap: '0.35rem',
+                        justifySelf: 'stretch',
+                        maxWidth: 760,
+                        margin: '0.5rem 0 0.25rem',
+                      }}
+                    >
+                      <h2 style={{ margin: '0 0 0.35rem', fontSize: 16 }}>Follow-ups</h2>
+                      {followUps.map((question) => (
+                        <button
+                          key={question}
+                          type="button"
+                          onClick={() => handleFollowUpClick(question)}
+                          style={{
+                            padding: '0.7rem 0',
+                            border: 0,
+                            borderTop: '1px solid #e7e7e7',
+                            background: 'transparent',
+                            color: '#222',
+                            textAlign: 'left',
+                            font: 'inherit',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          {question}
+                        </button>
+                      ))}
+                    </section>
+                  ) : null}
                   {!isLoading && followUpMode === 'm' && isLoadingFollowUps ? (
                     <p style={{ margin: '0.25rem 0', color: '#666' }}>Generating…</p>
                   ) : null}
