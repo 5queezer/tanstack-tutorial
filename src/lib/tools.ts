@@ -85,10 +85,6 @@ export const getWeather = getWeatherDef.server(async (args, context) => {
     windKph: 12,
   }
 
-  context?.emitCustomEvent('t', {
-    label: `Weather ready`,
-  })
-
   return {
     city,
     ...weather,
@@ -109,10 +105,6 @@ export const getStockQuote = getStockDef.server(async (args, context) => {
     currency: 'USD',
     marketState: 'Demo delayed',
   }
-
-  context?.emitCustomEvent('t', {
-    label: `Quote ready`,
-  })
 
   return {
     symbol: normalizedSymbol,
@@ -147,10 +139,6 @@ export const braveWebSearch = braveWebSearchDef.server(async (args, context) => 
     throw new Error(`Brave Search failed: ${response.status} ${response.statusText}`)
   }
 
-  context?.emitCustomEvent('t', {
-    label: 'Results',
-  })
-
   const payload = (await response.json()) as BraveSearchResponse
   const results = (payload.web?.results ?? [])
     .filter((result) => result.title && result.url)
@@ -161,10 +149,6 @@ export const braveWebSearch = braveWebSearchDef.server(async (args, context) => 
       description: result.description ?? '',
 
     }))
-
-  context?.emitCustomEvent('t', {
-    label: `${results.length} results`,
-  })
 
   return {
     query: payload.query?.original ?? query,
