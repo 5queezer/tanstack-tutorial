@@ -152,7 +152,7 @@ function getOpenRouterErrorPayload(error: unknown): Record<string, unknown> | un
   if (getErrorRecord(error, 'error')) return getErrorRecord(error, 'error')
 
   const response = getErrorRecord(error, 'response')
-  const body = getErrorString(response, 'body$') ?? getErrorString(error, 'body$')
+  const body = getErrorString(response, 'body$') || getErrorString(error, 'body$')
   if (!body) return undefined
 
   try {
