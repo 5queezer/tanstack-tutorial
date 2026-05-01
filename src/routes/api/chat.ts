@@ -147,15 +147,13 @@ function enrichRunErrorChunk(chunk: StreamChunk, capturedError: unknown): Stream
   return {
     ...chunk,
     message: formatted.message,
-    code: formatted.code,
   } as StreamChunk
 }
 
-function createRunErrorChunk(formatted: { message: string; code?: string }): StreamChunk {
+function createRunErrorChunk(formatted: { message: string }): StreamChunk {
   return {
     type: 'RUN_ERROR',
     message: formatted.message,
-    code: formatted.code,
   } as StreamChunk
 }
 
