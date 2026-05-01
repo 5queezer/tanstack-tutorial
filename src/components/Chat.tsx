@@ -453,7 +453,7 @@ export function Chat() {
     const query = interactiveSearchInput.trim()
     if (!query) return
 
-    searchQueryResolverRef.current?.({ query })
+    searchQueryResolverRef.current!({ query })
     searchQueryResolverRef.current = undefined
     setPendingSearchPrompt(undefined)
     setInteractiveSearchInput('')
