@@ -3,14 +3,8 @@ import { toolDefinition } from '@tanstack/ai'
 const requestSearchInputSchema = {
   type: 'object',
   properties: {
-    prompt: {
-      type: 'string',
-      description: 'Question asking what to search for',
-    },
-    suggestedQuery: {
-      type: 'string',
-      description: 'Optional editable suggested query',
-    },
+    prompt: { type: 'string' },
+    suggestedQuery: { type: 'string' },
   },
   required: ['prompt'],
   additionalProperties: false,
