@@ -15,17 +15,78 @@ const thinkingDotKeyframes = `
 }
 `
 
+const STORAGE_KEYS = {
+  selectedModel: 'tanstack-chat:selected-model',
+  freeOnly: 'tanstack-chat:free-only',
+  showThinking: 'tanstack-chat:show-thinking',
+} as const
+
 type UiChatModel = ChatModel & {
   supportsThinking?: boolean
+}
+
+type ChatMessage = {
+  role: string
+  parts?: Array<{ type?: string; content?: string }>
+}
+
+function getMessageText(message?: ChatMessage) {
+  return message?.parts
+    ?.filter((part) => part.type === 'text' && part.content)
+    .map((part) => part.content)
+    .join(' ')
+    .trim() ?? ''
+}
+
+function readLocalStorage(key: string) {
+  if (typeof window === 'undefined') return undefined
+
+  return window.localStorage.getItem(key) ?? undefined
+}
+
+function readLocalStorageBoolean(key: string, fallback = false) {
+  const value = readLocalStorage(key)
+
+  if (value === 'true') return true
+  if (value === 'false') return false
+
+  return fallback
+}
+
+function writeLocalStorage(key: string, value: string | boolean) {
+  if (typeof window === 'undefined') return
+
+  window.localStorage.setItem(key, String(value))
+}
+
+function createFollowUps(topic: string) {
+  const cleanedTopic = topic.replace(/\s+/g, ' ').trim()
+  const subject = cleanedTopic.length > 90 ? `${cleanedTopic.slice(0, 87)}...` : cleanedTopic
+
+  if (!subject) {
+    return [
+      'Can you give me a concrete example?',
+      'What are the trade-offs?',
+      'Can you explain that more simply?',
+      'What should I do next?',
+    ]
+  }
+
+  return [
+    `Can you give me a concrete example for ${subject}?`,
+    `What are the main trade-offs around ${subject}?`,
+    `How would I get started with ${subject}?`,
+    `What are common mistakes with ${subject}?`,
+  ]
 }
 
 export function Chat() {
   const [input, setInput] = useState('')
   const [models, setModels] = useState<Array<UiChatModel>>([])
   const [modelsError, setModelsError] = useState<string | undefined>()
-  const [selectedModel, setSelectedModel] = useState('')
-  const [freeOnly, setFreeOnly] = useState(false)
-  const [showThinking, setShowThinking] = useState(false)
+  const [selectedModel, setSelectedModel] = useState(() => readLocalStorage(STORAGE_KEYS.selectedModel) ?? '')
+  const [freeOnly, setFreeOnly] = useState(() => readLocalStorageBoolean(STORAGE_KEYS.freeOnly))
+  const [showThinking, setShowThinking] = useState(() => readLocalStorageBoolean(STORAGE_KEYS.showThinking))
   const modelOptions = useMemo(
     () => models.filter((model) => !freeOnly || model.free),
     [freeOnly, models],
@@ -37,6 +98,18 @@ export function Chat() {
     connection: fetchServerSentEvents('/api/chat'),
     body: { model: selectedModel || undefined, showThinking: showThinking && thinkingAvailable },
   })
+  const followUps = useMemo(() => {
+    if (isLoading || messages.length === 0) return []
+
+    const lastAssistant = [...messages].reverse().find((message) => message.role === 'assistant')
+    if (!lastAssistant || !getMessageText(lastAssistant).trim()) return []
+
+    const lastUserText = getMessageText(
+      [...messages].reverse().find((message) => message.role === 'user'),
+    )
+
+    return createFollowUps(lastUserText)
+  }, [isLoading, messages])
 
   useEffect(() => {
     let cancelled = false
@@ -54,7 +127,12 @@ export function Chat() {
         if (cancelled) return
 
         setModels(nextModels)
-        setSelectedModel((current) => current || nextModels.find((model) => model.free)?.id || nextModels[0]?.id || '')
+        setSelectedModel((current) => {
+          const currentModel = nextModels.find((model) => model.id === current)
+          if (currentModel && (!freeOnly || currentModel.free)) return current
+
+          return (freeOnly ? nextModels.find((model) => model.free)?.id : undefined) ?? nextModels.find((model) => model.free)?.id ?? nextModels[0]?.id ?? ''
+        })
       } catch (err) {
         if (!cancelled) {
           setModelsError(err instanceof Error ? err.message : 'Failed to load OpenRouter models')
@@ -68,6 +146,24 @@ export function Chat() {
       cancelled = true
     }
   }, [])
+
+  useEffect(() => {
+    if (!thinkingAvailable) {
+      setShowThinking(false)
+    }
+  }, [thinkingAvailable])
+
+  useEffect(() => {
+    writeLocalStorage(STORAGE_KEYS.selectedModel, selectedModel)
+  }, [selectedModel])
+
+  useEffect(() => {
+    writeLocalStorage(STORAGE_KEYS.freeOnly, freeOnly)
+  }, [freeOnly])
+
+  useEffect(() => {
+    writeLocalStorage(STORAGE_KEYS.showThinking, showThinking)
+  }, [showThinking])
 
   function handleFreeOnlyChange(pressed: boolean) {
     setFreeOnly(pressed)
@@ -87,6 +183,11 @@ export function Chat() {
 
     sendMessage(text)
     setInput('')
+  }
+
+  function handleFollowUpClick(question: string) {
+    if (isLoading) return
+    sendMessage(question)
   }
 
   return (
@@ -342,6 +443,45 @@ export function Chat() {
                     </article>
                     )
                   })}
+
+                  {!isLoading && followUps.length > 0 ? (
+                    <section
+                      aria-label="Follow-up questions"
+                      style={{
+                        display: 'grid',
+                        gap: '0.35rem',
+                        justifySelf: 'stretch',
+                        maxWidth: 760,
+                        margin: '0.5rem 0 0.25rem',
+                      }}
+                    >
+                      <h2 style={{ margin: '0 0 0.35rem', fontSize: 16 }}>Follow-ups</h2>
+                      {followUps.map((question) => (
+                        <button
+                          key={question}
+                          type="button"
+                          onClick={() => handleFollowUpClick(question)}
+                          style={{
+                            display: 'grid',
+                            gridTemplateColumns: '20px minmax(0, 1fr)',
+                            gap: '0.5rem',
+                            alignItems: 'center',
+                            padding: '0.7rem 0',
+                            border: 0,
+                            borderTop: '1px solid #e7e7e7',
+                            background: 'transparent',
+                            color: '#222',
+                            textAlign: 'left',
+                            font: 'inherit',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <span aria-hidden="true" style={{ color: '#777' }}>↳</span>
+                          <span>{question}</span>
+                        </button>
+                      ))}
+                    </section>
+                  ) : null}
 
                   {isLoading ? (
                     <article style={{ display: 'flex', justifyContent: 'flex-start' }}>
