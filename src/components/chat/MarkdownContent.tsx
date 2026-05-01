@@ -12,7 +12,7 @@ export function MarkdownContent({ content, isUser }: { content: string; isUser: 
 }
 
 function parseBlocks(content: string): Array<MarkdownBlock> {
-  const lines = content.replace(/\r\n/g, '\n').split('\n')
+  const lines = content.split('\n')
   const blocks: Array<MarkdownBlock> = []
   let paragraph: Array<string> = []
 
