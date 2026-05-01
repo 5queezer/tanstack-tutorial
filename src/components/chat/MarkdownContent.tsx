@@ -112,14 +112,14 @@ function renderInline(text: string, isUser: boolean): Array<ReactNode> {
   let lastIndex = 0
 
   for (const match of text.matchAll(linkPattern)) {
-    if (match.index === undefined) continue
-    if (match.index > lastIndex) nodes.push(text.slice(lastIndex, match.index))
+    const index = match.index!
+    if (index > lastIndex) nodes.push(text.slice(lastIndex, index))
 
     const token = match[0]
     if (token.startsWith('`')) {
       nodes.push(
         <code
-          key={match.index}
+          key={index}
           style={{
             padding: '0.12rem 0.25rem',
             borderRadius: 4,
@@ -133,13 +133,13 @@ function renderInline(text: string, isUser: boolean): Array<ReactNode> {
       )
     } else {
       nodes.push(
-        <a key={match.index} href={match[3]} target="_blank" rel="noreferrer" style={{ color: 'inherit', textDecoration: 'underline' }}>
+        <a key={index} href={match[3]} target="_blank" rel="noreferrer" style={{ color: 'inherit', textDecoration: 'underline' }}>
           {match[2]}
         </a>,
       )
     }
 
-    lastIndex = match.index + token.length
+    lastIndex = index + token.length
   }
 
   if (lastIndex < text.length) nodes.push(text.slice(lastIndex))
