@@ -6,9 +6,7 @@ export const STORAGE_KEYS = {
 } as const
 
 export function readLocalStorage(key: string) {
-  if (typeof window === 'undefined') return undefined
-
-  return window.localStorage.getItem(key) ?? undefined
+  return localStorage.getItem(key) ?? undefined
 }
 
 export function readLocalStorageBoolean(key: string, fallback = false) {
@@ -21,7 +19,5 @@ export function readLocalStorageBoolean(key: string, fallback = false) {
 }
 
 export function writeLocalStorage(key: string, value: string | boolean) {
-  if (typeof window === 'undefined') return
-
-  window.localStorage.setItem(key, String(value))
+  localStorage.setItem(key, String(value))
 }
