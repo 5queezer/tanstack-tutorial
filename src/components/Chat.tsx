@@ -366,7 +366,6 @@ setPendingSearchPrompt(input.prompt ?? 'What should I search for?')
                     height: '100%',
                     borderRadius: 999,
                     background: latestStatus.progress >= 100 && error ? 'crimson' : '#111',
-                    transition: 'width 220ms ease',
                   }}
                 />
               </div>
