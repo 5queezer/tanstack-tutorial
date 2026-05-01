@@ -347,7 +347,7 @@ export function Chat() {
       setAgUiFollowUps(value as Array<string>)
     },
   })
-  const heuristicFollowUps = useMemo(() => {
+  const heuristicFollowUps = (() => {
     if (isLoading || messages.length === 0) return []
 
     const lastAssistant = [...messages].reverse().find((message) => message.role === 'assistant')
@@ -359,7 +359,7 @@ export function Chat() {
     )
 
     return createFollowUps(lastUserText, lastAssistantText)
-  }, [isLoading, messages])
+  })()
   const followUps = followUpMode === 'o'
     ? []
     : followUpMode === 'm'
