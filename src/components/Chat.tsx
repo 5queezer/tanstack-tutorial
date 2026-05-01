@@ -529,7 +529,6 @@ export function Chat() {
             type={isLoading ? 'button' : 'submit'}
             onClick={isLoading ? stop : undefined}
             disabled={!isLoading && !selectedModel}
-            title={isLoading ? 'Stop' : 'Send'}
             style={{
               fontFamily: 'inherit',
               padding: '0.75rem 1rem',
