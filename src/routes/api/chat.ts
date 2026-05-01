@@ -149,8 +149,7 @@ function formatOpenRouterError(error: unknown) {
 }
 
 function getOpenRouterErrorPayload(error: unknown): Record<string, unknown> | undefined {
-  const directPayload = getErrorRecord(error, 'error')
-  if (directPayload) return directPayload
+  if (getErrorRecord(error, 'error')) return getErrorRecord(error, 'error')
 
   const response = getErrorRecord(error, 'response')
   const body = getErrorString(response, 'body$') ?? getErrorString(error, 'body$')
