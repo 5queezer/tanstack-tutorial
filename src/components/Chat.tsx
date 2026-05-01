@@ -382,8 +382,6 @@ setPendingSearchPrompt(input.prompt ?? 'What should I search for?')
   useEffect(() => {
     if (!settingsLoaded) return
 
-    let cancelled = false
-
     async function loadModels() {
       try {
         const response = await fetch('/api/models')
@@ -394,8 +392,6 @@ setPendingSearchPrompt(input.prompt ?? 'What should I search for?')
 
         const { models: nextModels } = (await response.json()) as { models: Array<UiChatModel> }
 
-        if (cancelled) return
-
         setModels(nextModels)
         setSelectedModel((current) => {
           const currentModel = nextModels.find((model) => model.id === current)
@@ -404,17 +400,11 @@ setPendingSearchPrompt(input.prompt ?? 'What should I search for?')
           return (freeOnly ? nextModels.find((model) => model.free)?.id : undefined) ?? nextModels.find((model) => model.free)?.id ?? nextModels[0]?.id ?? ''
         })
       } catch (err) {
-        if (!cancelled) {
-          setModelsError(err instanceof Error ? err.message : 'Model load failed')
-        }
+        setModelsError(err instanceof Error ? err.message : 'Model load failed')
       }
     }
 
     loadModels()
-
-    return () => {
-      cancelled = true
-    }
   }, [settingsLoaded])
 
   useEffect(() => {
