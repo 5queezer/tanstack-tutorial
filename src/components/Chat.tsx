@@ -1,7 +1,6 @@
 import { fetchServerSentEvents, useChat } from '@tanstack/ai-react'
 import { useEffect, useMemo, useRef, useState, type ReactNode, type SubmitEventHandler } from 'react'
 import type { FollowUpMode, UiChatModel } from './chat/types'
-import { requestSearchQueryDef } from '../lib/request-search-tool'
 
 function getMessageText(message?: { parts?: Array<{ type?: string; content?: string }> }) {
   return message?.parts
@@ -328,16 +327,19 @@ export function Chat() {
   const modelOptions = models.filter((model) => !freeOnly || model.free)
   const thinkingAvailable = Boolean(models.find((model) => model.id === selectedModel)?.supportsThinking)
   const interactiveSearchTool = useMemo(
-    () => requestSearchQueryDef.client((toolInput) => {
-      const input = toolInput as { prompt?: string; suggestedQuery?: string }
-      const suggestedQuery = input.suggestedQuery ?? ''
+    () => ({
+      __toolSide: 'client' as const,
+      name: 'request_search_query',
+      description: '',
+      inputSchema: undefined,
+      execute: (toolInput: { prompt?: string; suggestedQuery?: string }) => {
+        setInteractiveSearchInput(toolInput.suggestedQuery ?? '')
+        setPendingSearchPrompt(toolInput.prompt ?? 'What should I search for?')
 
-      setInteractiveSearchInput(suggestedQuery)
-setPendingSearchPrompt(input.prompt ?? 'What should I search for?')
-
-      return new Promise<{ query: string }>((resolve) => {
-        searchQueryResolverRef.current = resolve
-      })
+        return new Promise<{ query: string }>((resolve) => {
+          searchQueryResolverRef.current = resolve
+        })
+      },
     }),
     [],
   )
