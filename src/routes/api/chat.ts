@@ -21,13 +21,13 @@ export const Route = createFileRoute('/api/chat')({
         const { messages } = body
         const conversationId = body.conversationId ?? body.data?.conversationId
         const model = body.model ?? body.data?.model
-        const showThinking = Boolean(body.showThinking ?? body.data?.showThinking)
+        const showThinking = !!(body.showThinking ?? body.data?.showThinking)
 
         if (typeof model !== 'string' || !model) {
           return new Response(JSON.stringify({ error: 'No OpenRouter model selected' }), { status: 400 })
         }
         const selectedModel = showThinking ? await getOpenRouterModel(model) : undefined
-        const enableThinking = showThinking && Boolean(selectedModel?.supportsThinking)
+        const enableThinking = showThinking && !!selectedModel?.supportsThinking
         const abortController = new AbortController()
         const errorCapture = createOpenRouterErrorCaptureLogger()
 

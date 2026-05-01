@@ -105,7 +105,7 @@ function parseBlocks(content: string): Array<MarkdownBlock> {
     if (unordered || ordered) {
       flushParagraph()
       const listItems = [unordered?.[1] ?? ordered?.[1] ?? '']
-      const isOrdered = Boolean(ordered)
+      const isOrdered = !!ordered
 
       while (index + 1 < lines.length) {
         const nextTrimmed = lines[index + 1].trim()
@@ -453,7 +453,7 @@ export function Chat() {
     if (pressed && !models.find((model) => model.id === selectedModel)?.free) {
       const nextModel = models.find((model) => model.free)
       setSelectedModel(nextModel?.id ?? '')
-      setShowThinking((current) => current && Boolean(nextModel?.supportsThinking))
+      setShowThinking((current) => current && !!nextModel?.supportsThinking)
     }
   }
 
@@ -521,7 +521,7 @@ export function Chat() {
                 onChange={(event) => {
                   const modelId = event.target.value
                   setSelectedModel(modelId)
-                  setShowThinking((current) => current && Boolean(models.find((model) => model.id === modelId)?.supportsThinking))
+                  setShowThinking((current) => current && !!models.find((model) => model.id === modelId)?.supportsThinking)
                 }}
                 disabled={isLoading || modelOptions.length === 0}
                 style={{
@@ -652,7 +652,7 @@ export function Chat() {
 
                             const hasTextAfterThinking = message.parts
                               .slice(index + 1)
-                              .some((nextPart) => nextPart.type === 'text' && Boolean(nextPart.content))
+                              .some((nextPart) => nextPart.type === 'text' && !!nextPart.content)
 
                             return (
                               <details
