@@ -438,10 +438,6 @@ export function Chat() {
     setInput('')
   }
 
-  function handleFollowUpClick(question: string) {
-    sendMessage(question)
-  }
-
   const handleInteractiveSearchSubmit: SubmitEventHandler<HTMLFormElement> = (event) => {
     event.preventDefault()
 
@@ -734,7 +730,7 @@ export function Chat() {
                       {followUps.map((question) => (
                         <button
                           key={question}
-                                      onClick={() => handleFollowUpClick(question)}
+                                      onClick={() => sendMessage(question)}
                           style={{
                             padding: '0.7rem 0',
                             border: 0,
