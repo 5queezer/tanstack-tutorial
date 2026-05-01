@@ -1,14 +1,5 @@
 function parseToolPayload(value: unknown) {
-  if (!value) return undefined
-  if (typeof value === 'object') return value as Record<string, unknown>
-  if (typeof value !== 'string') return undefined
-
-  try {
-    const parsed = JSON.parse(value) as unknown
-    return parsed && typeof parsed === 'object' ? (parsed as Record<string, unknown>) : undefined
-  } catch {
-    return undefined
-  }
+  return value && typeof value === 'object' ? (value as Record<string, unknown>) : undefined
 }
 
 function formatNumber(value: unknown, digits = 1) {
