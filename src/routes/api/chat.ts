@@ -24,7 +24,7 @@ export const Route = createFileRoute('/api/chat')({
         const showThinking = !!(body.showThinking ?? body.data?.showThinking)
 
         if (typeof model !== 'string' || !model) {
-          return new Response(JSON.stringify({ error: 'No OpenRouter model selected' }), { status: 400 })
+          return new Response(JSON.stringify({ error: 'No model selected' }), { status: 400 })
         }
         const selectedModel = showThinking ? await getOpenRouterModel(model) : undefined
         const enableThinking = showThinking && !!selectedModel?.supportsThinking
