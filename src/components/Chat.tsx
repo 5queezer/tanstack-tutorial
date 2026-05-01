@@ -711,7 +711,6 @@ export function Chat() {
                                         }}
                           />
                           <button
-                            disabled={!interactiveSearchInput}
                             style={{
                               padding: '0.65rem 0.85rem',
                               border: 0,
