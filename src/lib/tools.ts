@@ -125,7 +125,7 @@ export const braveWebSearch = braveWebSearchDef.server(async (args) => {
   })
 
   if (!response.ok) {
-    throw new Error(`Brave Search failed: ${response.status} ${response.statusText}`)
+    throw new Error(`Brave failed: ${response.status}`)
   }
 
   const payload = (await response.json()) as BraveSearchResponse
