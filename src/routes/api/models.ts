@@ -15,7 +15,7 @@ export const Route = createFileRoute('/api/models')({
         } catch (error) {
           return new Response(
             JSON.stringify({
-              error: error instanceof Error ? error.message : 'Failed to fetch OpenRouter models',
+              error: error instanceof Error ? error.message : 'Model fetch failed',
             }),
             {
               status: 502,

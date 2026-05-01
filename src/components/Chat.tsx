@@ -123,7 +123,7 @@ export function Chat() {
         const response = await fetch('/api/models')
 
         if (!response.ok) {
-          throw new Error('Failed to load OpenRouter models')
+          throw new Error('Model load failed')
         }
 
         const { models: nextModels } = (await response.json()) as { models: Array<UiChatModel> }
@@ -139,7 +139,7 @@ export function Chat() {
         })
       } catch (err) {
         if (!cancelled) {
-          setModelsError(err instanceof Error ? err.message : 'Failed to load OpenRouter models')
+          setModelsError(err instanceof Error ? err.message : 'Model load failed')
         }
       }
     }
