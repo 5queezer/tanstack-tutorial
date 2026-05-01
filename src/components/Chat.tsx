@@ -22,7 +22,7 @@ function isFollowUpsEventValue(value: unknown): value is { followUps: Array<stri
 }
 
 function isFollowUpMode(value: string | undefined): value is FollowUpMode {
-  return value === 'heuristic' || value === 'model' || value === 'ag-ui' || value === 'off'
+  return value === 'h' || value === 'm' || value === 'a' || value === 'o'
 }
 
 export function Chat() {
@@ -34,7 +34,7 @@ export function Chat() {
   const [showThinking, setShowThinking] = useState(false)
   const [settingsLoaded, setSettingsLoaded] = useState(false)
   const [agUiStatuses, setAgUiStatuses] = useState<Array<AgUiStatusEvent>>([])
-  const [followUpMode, setFollowUpMode] = useState<FollowUpMode>('heuristic')
+  const [followUpMode, setFollowUpMode] = useState<FollowUpMode>('h')
   const [modelFollowUps, setModelFollowUps] = useState<Array<string>>([])
   const [agUiFollowUps, setAgUiFollowUps] = useState<Array<string>>([])
   const [isLoadingFollowUps, setIsLoadingFollowUps] = useState(false)
@@ -96,11 +96,11 @@ export function Chat() {
 
     return createFollowUps(lastUserText, lastAssistantText)
   }, [isLoading, messages])
-  const followUps = followUpMode === 'off'
+  const followUps = followUpMode === 'o'
     ? []
-    : followUpMode === 'model'
+    : followUpMode === 'm'
       ? modelFollowUps
-      : followUpMode === 'ag-ui'
+      : followUpMode === 'a'
         ? agUiFollowUps
         : heuristicFollowUps
 
@@ -109,7 +109,7 @@ export function Chat() {
     setFreeOnly(readLocalStorageBoolean(STORAGE_KEYS.freeOnly))
     setShowThinking(readLocalStorageBoolean(STORAGE_KEYS.showThinking))
     const storedFollowUpMode = readLocalStorage(STORAGE_KEYS.followUpMode)
-    setFollowUpMode(isFollowUpMode(storedFollowUpMode) ? storedFollowUpMode : 'heuristic')
+    setFollowUpMode(isFollowUpMode(storedFollowUpMode) ? storedFollowUpMode : 'h')
     setSettingsLoaded(true)
   }, [])
 
@@ -182,7 +182,7 @@ export function Chat() {
   }, [followUpMode, settingsLoaded])
 
   useEffect(() => {
-    if (followUpMode !== 'model' || isLoading || !selectedModel || messages.length === 0) return
+    if (followUpMode !== 'm' || isLoading || !selectedModel || messages.length === 0) return
 
     const serializableMessages = messages
       .map((message) => ({ role: message.role, content: getMessageText(message) }))
@@ -341,10 +341,10 @@ export function Chat() {
                   fontFamily: 'inherit',
                 }}
               >
-                <option value="heuristic">Heuristic</option>
-                <option value="model">Model call</option>
-                <option value="ag-ui">AG-UI event</option>
-                <option value="off">Off</option>
+                <option value="h">Heuristic</option>
+                <option value="m">Model call</option>
+                <option value="a">AG-UI event</option>
+                <option value="o">Off</option>
               </select>
             </div>
 
@@ -520,7 +520,7 @@ export function Chat() {
                   />
 
                   {!isLoading ? <FollowUps questions={followUps} onSelect={handleFollowUpClick} /> : null}
-                  {!isLoading && followUpMode === 'model' && isLoadingFollowUps ? (
+                  {!isLoading && followUpMode === 'm' && isLoadingFollowUps ? (
                     <p style={{ margin: '0.25rem 0', color: '#666' }}>Generating follow-ups…</p>
                   ) : null}
 

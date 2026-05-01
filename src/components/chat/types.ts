@@ -22,4 +22,4 @@ export type PendingSearchQueryRequest = {
   suggestedQuery: string
 }
 
-export type FollowUpMode = 'heuristic' | 'model' | 'ag-ui' | 'off'
+export type FollowUpMode = 'h' | 'm' | 'a' | 'o'
