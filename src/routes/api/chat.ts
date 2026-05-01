@@ -191,7 +191,6 @@ function formatOpenRouterError(error: unknown) {
 
   return {
     message: status ? `${status} ${message}` : message,
-    code: status ? String(status) : undefined,
   }
 }
 
