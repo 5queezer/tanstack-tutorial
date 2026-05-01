@@ -3,7 +3,6 @@ import { useEffect, useMemo, useRef, useState, type SubmitEventHandler } from 'r
 import { createFollowUps, getMessageText } from './chat/followUps'
 import { readLocalStorage, readLocalStorageBoolean, STORAGE_KEYS, writeLocalStorage } from './chat/storage'
 import { FollowUps } from './chat/FollowUps'
-import { InteractiveSearchPrompt } from './chat/InteractiveSearchPrompt'
 import { MarkdownContent } from './chat/MarkdownContent'
 import { ToolWidget } from './chat/ToolWidget'
 import type { AgUiStatusEvent, FollowUpMode, PendingSearchQueryRequest, UiChatModel } from './chat/types'
@@ -526,12 +525,58 @@ export function Chat() {
                     )
                   })}
 
-                  <InteractiveSearchPrompt
-                    request={pendingSearchQuery}
-                    value={interactiveSearchInput}
-                    onChange={setInteractiveSearchInput}
-                    onSubmit={handleInteractiveSearchSubmit}
-                  />
+                  {pendingSearchQuery ? (
+                    <article style={{ display: 'flex', justifyContent: 'flex-start' }}>
+                      <form
+                        onSubmit={handleInteractiveSearchSubmit}
+                        style={{
+                          display: 'grid',
+                          gap: '0.65rem',
+                          width: 'min(560px, 100%)',
+                          padding: '0.9rem',
+                          borderRadius: 18,
+                          borderBottomLeftRadius: 4,
+                          background: '#e8f2ff',
+                          color: '#111',
+                        }}
+                      >
+                        <div>
+                          <strong>Search query?</strong>
+                          <p style={{ margin: '0.35rem 0 0', color: '#555' }}>{pendingSearchQuery.prompt}</p>
+                        </div>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          <input
+                            value={interactiveSearchInput}
+                            onChange={(event) => setInteractiveSearchInput(event.target.value)}
+                            placeholder="Search..."
+                            autoFocus
+                            style={{
+                              flex: 1,
+                              padding: '0.65rem',
+                              border: '1px solid #c8d8ee',
+                              borderRadius: 10,
+                              fontFamily: 'inherit',
+                            }}
+                          />
+                          <button
+                            type="submit"
+                            disabled={!interactiveSearchInput.trim()}
+                            style={{
+                              padding: '0.65rem 0.85rem',
+                              border: 0,
+                              borderRadius: 10,
+                              background: '#111',
+                              color: '#fff',
+                              fontFamily: 'inherit',
+                              cursor: interactiveSearchInput.trim() ? 'pointer' : 'not-allowed',
+                            }}
+                          >
+                            Search
+                          </button>
+                        </div>
+                      </form>
+                    </article>
+                  ) : null}
 
                   {!isLoading ? <FollowUps questions={followUps} onSelect={handleFollowUpClick} /> : null}
                   {!isLoading && followUpMode === 'm' && isLoadingFollowUps ? (
