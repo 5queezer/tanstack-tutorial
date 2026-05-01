@@ -56,7 +56,6 @@ setPendingSearchPrompt(input.prompt ?? 'What should I search for?')
       setAgUiStatus(value as AgUiStatusEvent)
     },
   })
-  const latestStatus = agUiStatus
   const heuristicFollowUps = useMemo(() => {
     if (isLoading || messages.length === 0) return []
 
@@ -344,7 +343,7 @@ setPendingSearchPrompt(input.prompt ?? 'What should I search for?')
             </button>
           </div>
 
-          {latestStatus ? <p style={{ color: '#666', fontSize: 13, margin: 0 }}>{latestStatus.label}</p> : null}
+          {agUiStatus ? <p style={{ color: '#666', fontSize: 13, margin: 0 }}>{agUiStatus.label}</p> : null}
 
           {modelsError ? <p style={{ color: 'crimson', margin: 0 }}>{modelsError}</p> : null}
         </header>
