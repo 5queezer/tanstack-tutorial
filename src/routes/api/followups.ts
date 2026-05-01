@@ -84,10 +84,7 @@ export const Route = createFileRoute('/api/followups')({
 
 function parseFollowUps(content: string) {
   try {
-    const parsed = JSON.parse(content) as { followUps?: unknown }
-    if (!Array.isArray(parsed.followUps)) return []
-
-    return parsed.followUps.slice(0, 3)
+    return (JSON.parse(content) as { followUps: Array<string> }).followUps.slice(0, 3)
   } catch {
     return []
   }
