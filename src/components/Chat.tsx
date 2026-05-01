@@ -364,7 +364,7 @@ export function Chat() {
         const response = await fetch('/api/models')
 
         if (!response.ok) {
-          throw new Error('Model load failed')
+          throw Error('Models failed')
         }
 
         const { models: nextModels } = (await response.json()) as { models: Array<UiChatModel> }
