@@ -211,7 +211,7 @@ function ToolWidget({ toolName, input, output }: { toolName: string; input: unkn
   }
 
   if (toolName === 'brave_web_search') {
-    const results = result.results as Array<any>
+    const results = (result.results ?? []) as Array<any>
 
     return (
       <div style={{ display: 'grid', gap: '0.55rem' }}>
