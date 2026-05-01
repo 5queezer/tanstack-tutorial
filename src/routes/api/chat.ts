@@ -143,17 +143,16 @@ function createStatusEvent(label: string): StreamChunk {
 function enrichRunErrorChunk(chunk: StreamChunk, capturedError: unknown): StreamChunk {
   if (!capturedError) return chunk
 
-  const formatted = formatOpenRouterError(capturedError)
   return {
     ...chunk,
-    message: formatted.message,
+    message: formatOpenRouterError(capturedError),
   } as StreamChunk
 }
 
-function createRunErrorChunk(formatted: { message: string }): StreamChunk {
+function createRunErrorChunk(message: string): StreamChunk {
   return {
     type: 'RUN_ERROR',
-    message: formatted.message,
+    message,
   } as StreamChunk
 }
 
@@ -189,9 +188,7 @@ function formatOpenRouterError(error: unknown) {
     ? `${providerName ? `${providerName}: ` : ''}${raw}`
     : fallbackMessage ?? (error instanceof Error ? error.message : 'Unknown OpenRouter error')
 
-  return {
-    message: status ? `${status} ${message}` : message,
-  }
+  return status ? `${status} ${message}` : message
 }
 
 function getOpenRouterErrorPayload(error: unknown): Record<string, unknown> | undefined {
