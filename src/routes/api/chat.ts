@@ -12,7 +12,7 @@ export const Route = createFileRoute('/api/chat')({
       async POST({ request }) {
         if (!process.env.OPENROUTER_API_KEY) {
           return new Response(
-            JSON.stringify({ error: 'OPENROUTER_API_KEY not configured' }),
+            JSON.stringify({ error: 'OPENROUTER_API_KEY missing' }),
             { status: 500 },
           )
         }

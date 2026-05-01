@@ -109,7 +109,7 @@ export const braveWebSearch = braveWebSearchDef.server(async (args) => {
   const { query, count = 5 } = args as BraveWebSearchInput
 
   if (!process.env.BRAVE_API_KEY) {
-    throw new Error('BRAVE_API_KEY not configured')
+    throw new Error('BRAVE_API_KEY missing')
   }
 
   const url = new URL('https://api.search.brave.com/res/v1/web/search')
