@@ -123,10 +123,10 @@ function createOpenRouterErrorCaptureLogger() {
   const capture = {
     lastError: undefined as unknown,
     logger: {
-      debug: () => {},
-      info: () => {},
-      warn: () => {},
-      error: (_message: string, meta?: Record<string, unknown>) => {
+      debug() {},
+      info() {},
+      warn() {},
+      error(_message: string, meta?: Record<string, unknown>) {
         capture.lastError = meta?.error ?? capture.lastError
       },
     },
