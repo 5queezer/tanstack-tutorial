@@ -87,9 +87,7 @@ function parseFollowUps(content: string) {
     const parsed = JSON.parse(content) as { followUps?: unknown }
     if (!Array.isArray(parsed.followUps)) return []
 
-    return parsed.followUps
-      .filter((item): item is string => typeof item === 'string')
-      .slice(0, 3)
+    return parsed.followUps.slice(0, 3)
   } catch {
     return []
   }
