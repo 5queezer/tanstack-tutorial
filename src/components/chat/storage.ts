@@ -1,8 +1,8 @@
 export const STORAGE_KEYS = {
-  selectedModel: 'tanstack-chat:selected-model',
-  freeOnly: 'tanstack-chat:free-only',
-  showThinking: 'tanstack-chat:show-thinking',
-  followUpMode: 'tanstack-chat:follow-up-mode',
+  selectedModel: 'tc:model',
+  freeOnly: 'tc:free',
+  showThinking: 'tc:think',
+  followUpMode: 'tc:followups',
 } as const
 
 export function readLocalStorage(key: string) {
