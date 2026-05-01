@@ -431,7 +431,6 @@ setPendingSearchPrompt(input.prompt ?? 'What should I search for?')
     const lastAssistant = [...serializableMessages].reverse().find((message) => message.role === 'assistant')
     if (!lastAssistant) return
 
-    let cancelled = false
     setIsLoadingFollowUps(true)
     setModelFollowUps([])
 
@@ -442,24 +441,14 @@ setPendingSearchPrompt(input.prompt ?? 'What should I search for?')
     })
       .then((response) => (response.ok ? response.json() : { followUps: [] }))
       .then((payload: { followUps?: Array<string> }) => {
-        if (!cancelled) {
-          setModelFollowUps(Array.isArray(payload.followUps) ? payload.followUps : [])
-        }
+        setModelFollowUps(Array.isArray(payload.followUps) ? payload.followUps : [])
       })
       .catch(() => {
-        if (!cancelled) {
-          setModelFollowUps([])
-        }
+        setModelFollowUps([])
       })
       .finally(() => {
-        if (!cancelled) {
-          setIsLoadingFollowUps(false)
-        }
+        setIsLoadingFollowUps(false)
       })
-
-    return () => {
-      cancelled = true
-    }
   }, [followUpMode, isLoading, messages, selectedModel])
 
   function handleFreeOnlyChange(pressed: boolean) {
