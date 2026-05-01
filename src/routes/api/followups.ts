@@ -56,10 +56,6 @@ export const Route = createFileRoute('/api/followups')({
             signal: AbortSignal.timeout(12e3),
           })
 
-          if (!response.ok) {
-            return json({ followUps: [] })
-          }
-
           const payload = (await response.json()) as OpenRouterFollowUpResponse
           const content = payload.choices?.[0]?.message?.content ?? ''
           const followUps = parseFollowUps(content)
