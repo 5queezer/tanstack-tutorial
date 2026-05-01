@@ -438,13 +438,11 @@ setPendingSearchPrompt(input.prompt ?? 'What should I search for?')
       method: 'POST',
       body: JSON.stringify({ model: selectedModel, messages: serializableMessages }),
     })
-      .then((response) => (response.ok ? response.json() : { followUps: [] }))
-      .then((payload: { followUps?: Array<string> }) => {
-        setModelFollowUps(Array.isArray(payload.followUps) ? payload.followUps : [])
+      .then((response) => (response.ok ? response.json() : undefined))
+      .then((payload?: { followUps?: Array<string> }) => {
+        setModelFollowUps(Array.isArray(payload?.followUps) ? payload.followUps : [])
       })
-      .catch(() => {
-        setModelFollowUps([])
-      })
+      .catch(() => setModelFollowUps([]))
       .finally(() => {
         setIsLoadingFollowUps(false)
       })
