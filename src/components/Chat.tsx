@@ -2,12 +2,13 @@ import { fetchServerSentEvents, useChat } from '@tanstack/ai-react'
 import { useEffect, useMemo, useRef, useState, type ReactNode, type SubmitEventHandler } from 'react'
 import type { FollowUpMode, UiChatModel } from './chat/types'
 
-function getMessageText(message?: { parts?: Array<{ type?: string; content?: string }> }) {
-  return message?.parts
-    ?.filter((part) => part.type === 'text' && part.content)
+function getMessageText(message?: { parts: Array<{ type?: string; content?: string }> }) {
+  if (!message) return ''
+  return message.parts
+    .filter((part) => part.type === 'text' && part.content)
     .map((part) => part.content)
     .join(' ')
-    .trim() ?? ''
+    .trim()
 }
 
 function createFollowUps(userText = '', assistantText = '') {
