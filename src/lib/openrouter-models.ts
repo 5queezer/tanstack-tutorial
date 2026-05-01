@@ -6,7 +6,6 @@ import {
   type OpenRouterModelResponse,
 } from './models'
 
-const OPENROUTER_MODELS_URL = 'https://openrouter.ai/api/v1/models'
 const MODEL_CACHE_TTL_MS = 6e5
 
 let cachedModels: Array<ChatModel> | undefined
@@ -19,7 +18,7 @@ export async function getOpenRouterModels() {
     return cachedModels
   }
 
-  const response = await fetch(OPENROUTER_MODELS_URL, {
+  const response = await fetch('https://openrouter.ai/api/v1/models', {
     headers: process.env.OPENROUTER_API_KEY
       ? { Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}` }
       : undefined,
