@@ -103,7 +103,7 @@ const stockBySymbol: Record<string, StockOutput> = {
 
 export const getWeather = getWeatherDef.server(async (args, context) => {
   const { city } = args as WeatherInput
-  context?.emitCustomEvent('tool.status', {
+  context?.emitCustomEvent('t', {
     tool: 'weather',
     label: `Looking up weather for ${city}`,
     progress: 25,
@@ -116,7 +116,7 @@ export const getWeather = getWeatherDef.server(async (args, context) => {
     windKph: 12,
   }
 
-  context?.emitCustomEvent('tool.status', {
+  context?.emitCustomEvent('t', {
     tool: 'weather',
     label: `Weather data ready for ${city}`,
     progress: 100,
@@ -133,7 +133,7 @@ export const getStockQuote = getStockDef.server(async (args, context) => {
   const { symbol } = args as StockInput
   const normalizedSymbol = symbol.toUpperCase().trim()
 
-  context?.emitCustomEvent('tool.status', {
+  context?.emitCustomEvent('t', {
     tool: 'stock',
     label: `Fetching quote for ${normalizedSymbol}`,
     progress: 25,
@@ -146,7 +146,7 @@ export const getStockQuote = getStockDef.server(async (args, context) => {
     marketState: 'Demo delayed',
   }
 
-  context?.emitCustomEvent('tool.status', {
+  context?.emitCustomEvent('t', {
     tool: 'stock',
     label: `Quote ready for ${normalizedSymbol}`,
     progress: 100,
@@ -170,7 +170,7 @@ export const braveWebSearch = braveWebSearchDef.server(async (args, context) => 
   const safeCount = Math.min(Math.max(count, 1), 10)
   const safeQuery = query.slice(0, 400)
 
-  context?.emitCustomEvent('tool.status', {
+  context?.emitCustomEvent('t', {
     tool: 'web-search',
     label: `Searching Brave for “${safeQuery}”`,
     progress: 20,
@@ -193,7 +193,7 @@ export const braveWebSearch = braveWebSearchDef.server(async (args, context) => 
     throw new Error(`Brave Search failed: ${response.status} ${response.statusText}`)
   }
 
-  context?.emitCustomEvent('tool.status', {
+  context?.emitCustomEvent('t', {
     tool: 'web-search',
     label: 'Brave results received',
     progress: 75,
@@ -211,7 +211,7 @@ export const braveWebSearch = braveWebSearchDef.server(async (args, context) => 
       source: result.profile?.name ?? result.meta_url?.hostname,
     }))
 
-  context?.emitCustomEvent('tool.status', {
+  context?.emitCustomEvent('t', {
     tool: 'web-search',
     label: `${results.length} Brave results ready`,
     progress: 100,

@@ -67,12 +67,12 @@ export function Chat() {
     body: { model: selectedModel || undefined, showThinking: showThinking && thinkingAvailable },
     tools: [interactiveSearchTool],
     onCustomEvent: (eventName, value) => {
-      if (eventName === 'followups.generated' && isFollowUpsEventValue(value)) {
+      if (eventName === 'f' && isFollowUpsEventValue(value)) {
         setAgUiFollowUps(value.followUps)
         return
       }
 
-      if (!['demo.status', 'tool.status'].includes(eventName) || !isStatusEventValue(value)) return
+      if (!['s', 't'].includes(eventName) || !isStatusEventValue(value)) return
 
       setAgUiStatuses((current) => [
         ...current.slice(-5),
