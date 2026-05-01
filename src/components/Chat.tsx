@@ -1,6 +1,5 @@
 import { fetchServerSentEvents, useChat } from '@tanstack/ai-react'
 import { useEffect, useMemo, useRef, useState, type SubmitEventHandler } from 'react'
-import { thinkingDotKeyframes } from './chat/agui'
 import { createFollowUps, getMessageText } from './chat/followUps'
 import { readLocalStorage, readLocalStorageBoolean, STORAGE_KEYS, writeLocalStorage } from './chat/storage'
 import { AgUiStatusPanel } from './chat/AgUiStatusPanel'
@@ -12,6 +11,12 @@ import { TypingIndicator } from './chat/TypingIndicator'
 import type { AgUiStatusEvent, FollowUpMode, PendingSearchQueryRequest, UiChatModel } from './chat/types'
 import { requestSearchQueryDef } from '../lib/request-search-tool'
 
+const thinkingDotKeyframes = `
+@keyframes chat-dot-bounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.35; }
+  40% { transform: translateY(-4px); opacity: 1; }
+}
+`
 function isFollowUpMode(value: string | undefined): value is FollowUpMode {
   return value === 'h' || value === 'm' || value === 'a' || value === 'o'
 }
