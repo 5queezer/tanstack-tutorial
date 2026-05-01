@@ -660,14 +660,12 @@ export function Chat() {
                           }
 
                           if (part.type === 'tool-call') {
-                            const toolName = 'name' in part ? String(part.name) : 'tool'
-                            const toolInput = 'input' in part ? part.input : undefined
-                            const toolOutput = 'output' in part ? part.output : undefined
-                            const state = 'state' in part ? String(part.state) : 'running'
+                            const tool = part as any
+                            const toolName = tool.name
 
                             return (
                               <div
-                                key={'id' in part ? String(part.id) : index}
+                                key={tool.id}
                                 style={{
                                   display: 'grid',
                                   gap: '0.35rem',
@@ -680,8 +678,8 @@ export function Chat() {
                                 }}
                               >
                                 <strong>{toolName === 'get_weather' ? 'Weather' : toolName === 'get_stock_quote' ? 'Stock' : toolName === 'brave_web_search' ? 'Search' : toolName === 'request_search_query' ? 'Search query' : toolName}</strong>
-                                <span style={{ color: isUser ? '#ddd' : '#555' }}>{state}</span>
-                                <ToolWidget toolName={toolName} input={toolInput} output={toolOutput} />
+                                <span style={{ color: isUser ? '#ddd' : '#555' }}>{tool.state}</span>
+                                <ToolWidget toolName={toolName} input={tool.input} output={tool.output} />
                               </div>
                             )
                           }
