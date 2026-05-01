@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react'
 
 type MarkdownBlock =
-  | { type: 'c'; content: string }
-  | { type: 'l'; ordered: boolean; items: Array<string> }
-  | { type: 'p'; content: string }
+  | { t: 'c'; c: string }
+  | { t: 'l'; o: boolean; i: Array<string> }
+  | { t: 'p'; c: string }
 
 const linkPattern = /(`[^`]+`|\[([^\]]+)\]\((https?:\/\/[^\s)]+)\))/g
 
@@ -18,7 +18,7 @@ function parseBlocks(content: string): Array<MarkdownBlock> {
 
   function flushParagraph() {
     if (paragraph.length === 0) return
-    blocks.push({ type: 'p', content: paragraph.join(' ') })
+    blocks.push({ t: 'p', c: paragraph.join(' ') })
     paragraph = []
   }
 
@@ -34,7 +34,7 @@ function parseBlocks(content: string): Array<MarkdownBlock> {
         codeLines.push(lines[index])
         index += 1
       }
-      blocks.push({ type: 'c', content: codeLines.join('\n') })
+      blocks.push({ t: 'c', c: codeLines.join('\n') })
       continue
     }
 
@@ -58,7 +58,7 @@ function parseBlocks(content: string): Array<MarkdownBlock> {
         index += 1
       }
 
-      blocks.push({ type: 'l', ordered: isOrdered, items: listItems })
+      blocks.push({ t: 'l', o: isOrdered, i: listItems })
       continue
     }
 
@@ -70,7 +70,7 @@ function parseBlocks(content: string): Array<MarkdownBlock> {
 }
 
 function renderBlock(block: MarkdownBlock, isUser: boolean, key: number) {
-  if (block.type === 'c') {
+  if (block.t === 'c') {
     return (
       <pre
         key={key}
@@ -82,16 +82,16 @@ function renderBlock(block: MarkdownBlock, isUser: boolean, key: number) {
           background: isUser ? '#333' : '#e4e4e4',
         }}
       >
-        <code style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace' }}>{block.content}</code>
+        <code style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace' }}>{block.c}</code>
       </pre>
     )
   }
 
-  if (block.type === 'l') {
-    const ListTag = block.ordered ? 'ol' : 'ul'
+  if (block.t === 'l') {
+    const ListTag = block.o ? 'ol' : 'ul'
     return (
       <ListTag key={key} style={{ margin: '0.4rem 0 0.7rem', paddingLeft: '1.25rem' }}>
-        {block.items.map((item, index) => (
+        {block.i.map((item, index) => (
           <li key={index} style={{ margin: '0.2rem 0' }}>
             {renderInline(item, isUser)}
           </li>
@@ -102,7 +102,7 @@ function renderBlock(block: MarkdownBlock, isUser: boolean, key: number) {
 
   return (
     <p key={key} style={{ margin: '0 0 0.6rem' }}>
-      {renderInline(block.content, isUser)}
+      {renderInline(block.c, isUser)}
     </p>
   )
 }
