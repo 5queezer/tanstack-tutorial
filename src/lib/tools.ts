@@ -139,7 +139,7 @@ export const braveWebSearch = braveWebSearchDef.server(async (args) => {
     }))
 
   return {
-    query: payload.query?.original ?? query,
+    query: payload.query?.original,
     results,
   }
 })
