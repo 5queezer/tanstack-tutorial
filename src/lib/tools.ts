@@ -20,7 +20,7 @@ export const getStockDef = toolDefinition({
 
 export const braveWebSearchDef = toolDefinition({
   name: 'brave_web_search',
-  description: 'Search the live web with Brave. Cite URLs.',
+  description: 'Search the live web with Brave.',
   inputSchema: z.object({
     query: z.string().max(400),
     count: z.number().int().min(1).max(10).optional(),
