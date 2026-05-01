@@ -48,8 +48,7 @@ export const braveWebSearchDef = toolDefinition({
       title: z.string(),
       url: z.string(),
       description: z.string(),
-      age: z.string().optional(),
-      source: z.string().optional(),
+
     })),
   }),
 })
@@ -78,9 +77,7 @@ type BraveSearchResponse = {
       title?: string
       url?: string
       description?: string
-      age?: string
-      profile?: { name?: string }
-      meta_url?: { hostname?: string }
+
     }>
   }
 }
@@ -201,8 +198,7 @@ export const braveWebSearch = braveWebSearchDef.server(async (args, context) => 
       title: result.title!,
       url: result.url!,
       description: result.description ?? '',
-      age: result.age,
-      source: result.profile?.name ?? result.meta_url?.hostname,
+
     }))
 
   context?.emitCustomEvent('t', {
