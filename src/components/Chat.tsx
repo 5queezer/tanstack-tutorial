@@ -13,7 +13,7 @@ function getMessageText(message?: { parts: Array<{ type?: string; content?: stri
 
 function createFollowUps(userText = '', assistantText = '') {
   const cleanedUserText = userText.trim()
-  const tooShortForSpecificFollowUps = cleanedUserText.length < 12 || /^(hi|hello|hey|thanks|thank you)[!.?\s]*$/i.test(cleanedUserText)
+  const tooShortForSpecificFollowUps = cleanedUserText.length < 12 || /^(hi|hello|hey|thanks|thank you)\W*$/i.test(cleanedUserText)
 
   if (tooShortForSpecificFollowUps) {
     return [
