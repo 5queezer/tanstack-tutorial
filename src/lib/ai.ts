@@ -5,7 +5,5 @@ export function getChatModel(modelId: string) {
     throw new Error('OPENROUTER_API_KEY not configured')
   }
 
-  return createOpenRouterText(modelId as any, process.env.OPENROUTER_API_KEY, {
-    httpReferer: process.env.OPENROUTER_SITE_URL ?? 'http://localhost:3000',
-  })
+  return createOpenRouterText(modelId as any, process.env.OPENROUTER_API_KEY)
 }
