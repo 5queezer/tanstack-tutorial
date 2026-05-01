@@ -175,7 +175,7 @@ function getErrorString(value: unknown, key: string): string | undefined {
   if (!value || typeof value !== 'object') return undefined
 
   const field = (value as Record<string, unknown>)[key]
-  return typeof field === 'string' && field.length > 0 ? field : undefined
+  return typeof field === 'string' ? field : undefined
 }
 
 function getErrorNumber(value: unknown, key: string): number | undefined {
