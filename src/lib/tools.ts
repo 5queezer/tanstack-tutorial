@@ -143,7 +143,6 @@ export const braveWebSearch = braveWebSearchDef.server(async (args, context) => 
 
   const response = await fetch(url, {
     headers: {
-      Accept: 'application/json',
       'X-Subscription-Token': process.env.BRAVE_API_KEY,
     },
     signal: AbortSignal.timeout(1e4),
