@@ -108,5 +108,5 @@ export function ToolWidget({ toolName, input, output }: { toolName: string; inpu
     )
   }
 
-  return <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{JSON.stringify(result, null, 2)}</pre>
+  return <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{JSON.stringify(result)}</pre>
 }
