@@ -439,8 +439,6 @@ export function Chat() {
   }
 
   function handleFollowUpClick(question: string) {
-    setModelFollowUps([])
-    setAgUiFollowUps([])
     sendMessage(question)
   }
 
