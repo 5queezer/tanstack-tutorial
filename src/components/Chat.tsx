@@ -684,10 +684,6 @@ export function Chat() {
                             )
                           }
 
-                          if (part.type === 'tool-result') {
-                            return null
-                          }
-
                           if (part.type === 'text') {
                             return (
                               <MarkdownContent key={index} content={part.content} isUser={isUser} />                            )
