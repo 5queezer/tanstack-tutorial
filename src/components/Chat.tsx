@@ -357,7 +357,6 @@ export function Chat() {
               disabled={isLoading || !thinkingAvailable}
               aria-pressed={showThinking}
               aria-label="Thinking"
-              title={thinkingAvailable ? 'Show thinking' : 'Thinking unavailable'}
               style={{
                 fontFamily: 'inherit',
                 padding: '0.55rem 0.75rem',
