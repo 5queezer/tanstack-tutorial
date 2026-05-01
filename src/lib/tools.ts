@@ -75,7 +75,7 @@ const stockBySymbol: Record<string, StockOutput> = {
 export const getWeather = getWeatherDef.server(async (args, context) => {
   const { city } = args as WeatherInput
   context?.emitCustomEvent('t', {
-    label: `Weather: ${city}`,
+    label: `Weather ${city}`,
   })
   const key = city.toLowerCase().trim()
   const weather = weatherByCity[key] ?? {
@@ -86,7 +86,7 @@ export const getWeather = getWeatherDef.server(async (args, context) => {
   }
 
   context?.emitCustomEvent('t', {
-    label: `Weather ready: ${city}`,
+    label: `Weather ready`,
   })
 
   return {
@@ -100,7 +100,7 @@ export const getStockQuote = getStockDef.server(async (args, context) => {
   const normalizedSymbol = symbol.toUpperCase().trim()
 
   context?.emitCustomEvent('t', {
-    label: `Quote: ${normalizedSymbol}`,
+    label: `Quote ${normalizedSymbol}`,
   })
   const quote = stockBySymbol[normalizedSymbol] ?? {
     price: 100 + normalizedSymbol.length * 7.13,
@@ -111,7 +111,7 @@ export const getStockQuote = getStockDef.server(async (args, context) => {
   }
 
   context?.emitCustomEvent('t', {
-    label: `Quote ready: ${normalizedSymbol}`,
+    label: `Quote ready`,
   })
 
   return {
@@ -128,7 +128,7 @@ export const braveWebSearch = braveWebSearchDef.server(async (args, context) => 
   }
 
   context?.emitCustomEvent('t', {
-    label: `Search: ${query}`,
+    label: `Search ${query}`,
   })
 
   const url = new URL('https://api.search.brave.com/res/v1/web/search')
@@ -148,7 +148,7 @@ export const braveWebSearch = braveWebSearchDef.server(async (args, context) => 
   }
 
   context?.emitCustomEvent('t', {
-    label: 'Results received',
+    label: 'Results',
   })
 
   const payload = (await response.json()) as BraveSearchResponse
@@ -163,7 +163,7 @@ export const braveWebSearch = braveWebSearchDef.server(async (args, context) => 
     }))
 
   context?.emitCustomEvent('t', {
-    label: `${results.length} results ready`,
+    label: `${results.length} results`,
   })
 
   return {
