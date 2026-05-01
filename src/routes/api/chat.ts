@@ -102,7 +102,6 @@ async function* withOpenRouterErrorMetadata(
         yield {
           type: 'CUSTOM',
           name: 'f',
-          timestamp: Date.now(),
           value: { followUps: createServerFollowUps(accumulatedContent) },
         } as StreamChunk
       }
@@ -137,7 +136,6 @@ function createStatusEvent(label: string): StreamChunk {
   return {
     type: 'CUSTOM',
     name: 's',
-    timestamp: Date.now(),
     value: { label },
   } as StreamChunk
 }
