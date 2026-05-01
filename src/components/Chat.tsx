@@ -302,7 +302,6 @@ export function Chat() {
   const [followUpMode, setFollowUpMode] = useState<FollowUpMode>('h')
   const [modelFollowUps, setModelFollowUps] = useState<Array<string>>([])
   const [agUiFollowUps, setAgUiFollowUps] = useState<Array<string>>([])
-  const [isLoadingFollowUps, setIsLoadingFollowUps] = useState(false)
   const [pendingSearchPrompt, setPendingSearchPrompt] = useState<string | undefined>()
   const [interactiveSearchInput, setInteractiveSearchInput] = useState('')
   const searchQueryResolverRef = useRef<((result: { query: string }) => void) | undefined>(undefined)
@@ -409,7 +408,6 @@ export function Chat() {
     const lastAssistant = [...serializableMessages].reverse().find((message) => message.role === 'assistant')
     if (!lastAssistant) return
 
-    setIsLoadingFollowUps(true)
     setModelFollowUps([])
 
     fetch('/api/followups', {
@@ -421,9 +419,6 @@ export function Chat() {
         setModelFollowUps(payload?.followUps ?? [])
       })
       .catch(() => setModelFollowUps([]))
-      .finally(() => {
-        setIsLoadingFollowUps(false)
-      })
   }, [followUpMode, isLoading, messages, selectedModel])
 
   function handleFreeOnlyChange(pressed: boolean) {
