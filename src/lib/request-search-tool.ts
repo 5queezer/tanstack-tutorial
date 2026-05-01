@@ -5,11 +5,11 @@ const requestSearchInputSchema = {
   properties: {
     prompt: {
       type: 'string',
-      description: 'Short question asking what to search for',
+      description: 'Question asking what to search for',
     },
     suggestedQuery: {
       type: 'string',
-      description: 'Optional suggested search query the user can edit',
+      description: 'Optional editable suggested query',
     },
   },
   required: ['prompt'],
@@ -27,7 +27,7 @@ const requestSearchOutputSchema = {
 
 export const requestSearchQueryDef = toolDefinition({
   name: 'request_search_query',
-  description: 'Ask the user for a missing or ambiguous web search query. Use this before brave_web_search when the user asks to search but does not specify what to search for.',
+  description: 'Ask the user for a missing or ambiguous query before brave_web_search.',
   inputSchema: requestSearchInputSchema,
   outputSchema: requestSearchOutputSchema,
 })

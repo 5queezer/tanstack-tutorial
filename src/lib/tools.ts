@@ -4,9 +4,9 @@ import { requestSearchQueryDef } from './request-search-tool'
 
 export const getWeatherDef = toolDefinition({
   name: 'get_weather',
-  description: 'Get current weather for a city. Use this when the user asks about weather, temperature, rain, wind, or conditions in a place.',
+  description: 'Get demo city weather: temperature, condition, humidity, and wind.',
   inputSchema: z.object({
-    city: z.string().describe('City or location name, for example Berlin or New York'),
+    city: z.string().describe('City or location'),
   }),
   outputSchema: z.object({
     city: z.string(),
@@ -20,9 +20,9 @@ export const getWeatherDef = toolDefinition({
 
 export const getStockDef = toolDefinition({
   name: 'get_stock_quote',
-  description: 'Get a demo stock quote for a ticker symbol. Use this when the user asks about stocks, share price, market price, or tickers.',
+  description: 'Get a demo stock quote for a ticker symbol.',
   inputSchema: z.object({
-    symbol: z.string().describe('Ticker symbol, for example AAPL, MSFT, NVDA, TSLA, or SPY'),
+    symbol: z.string().describe('Ticker symbol'),
   }),
   outputSchema: z.object({
     symbol: z.string(),
@@ -37,10 +37,10 @@ export const getStockDef = toolDefinition({
 
 export const braveWebSearchDef = toolDefinition({
   name: 'brave_web_search',
-  description: 'Search the live web with Brave Search. Use this for current events, recent facts, documentation lookups, news, or when the user asks to search the web. Cite returned URLs in the answer.',
+  description: 'Search the live web with Brave for current, recent, news, or docs questions. Cite URLs.',
   inputSchema: z.object({
-    query: z.string().max(400).describe('Concise search query, under 400 characters'),
-    count: z.number().int().min(1).max(10).optional().describe('Number of search results to return, default 5'),
+    query: z.string().max(400).describe('Search query'),
+    count: z.number().int().min(1).max(10).optional().describe('Result count, default 5'),
   }),
   outputSchema: z.object({
     query: z.string(),
