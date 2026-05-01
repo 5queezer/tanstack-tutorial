@@ -23,7 +23,7 @@ export const braveWebSearchDef = toolDefinition({
   description: 'Search the live web with Brave for current, recent, news, or docs questions. Cite URLs.',
   inputSchema: z.object({
     query: z.string().max(400).describe('Search'),
-    count: z.number().int().min(1).max(10).optional().describe('Count'),
+    count: z.number().int().min(1).max(10).optional(),
   }),
 })
 
