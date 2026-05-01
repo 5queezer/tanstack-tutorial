@@ -1,14 +1,14 @@
 import type { ReactNode } from 'react'
 
 type MarkdownBlock =
-  | { type: 'code'; content: string; key: string }
-  | { type: 'list'; ordered: boolean; items: Array<string>; key: string }
-  | { type: 'paragraph'; content: string; key: string }
+  | { type: 'code'; content: string }
+  | { type: 'list'; ordered: boolean; items: Array<string> }
+  | { type: 'paragraph'; content: string }
 
 const linkPattern = /(`[^`]+`|\[([^\]]+)\]\((https?:\/\/[^\s)]+)\))/g
 
 export function MarkdownContent({ content, isUser }: { content: string; isUser: boolean }) {
-  return <>{parseBlocks(content).map((block) => renderBlock(block, isUser))}</>
+  return <>{parseBlocks(content).map((block, index) => renderBlock(block, isUser, index))}</>
 }
 
 function parseBlocks(content: string): Array<MarkdownBlock> {
@@ -18,7 +18,7 @@ function parseBlocks(content: string): Array<MarkdownBlock> {
 
   function flushParagraph() {
     if (paragraph.length === 0) return
-    blocks.push({ type: 'paragraph', content: paragraph.join(' '), key: `p-${blocks.length}` })
+    blocks.push({ type: 'paragraph', content: paragraph.join(' ') })
     paragraph = []
   }
 
@@ -34,7 +34,7 @@ function parseBlocks(content: string): Array<MarkdownBlock> {
         codeLines.push(lines[index])
         index += 1
       }
-      blocks.push({ type: 'code', content: codeLines.join('\n'), key: `code-${blocks.length}` })
+      blocks.push({ type: 'code', content: codeLines.join('\n') })
       continue
     }
 
@@ -58,7 +58,7 @@ function parseBlocks(content: string): Array<MarkdownBlock> {
         index += 1
       }
 
-      blocks.push({ type: 'list', ordered: isOrdered, items: listItems, key: `list-${blocks.length}` })
+      blocks.push({ type: 'list', ordered: isOrdered, items: listItems })
       continue
     }
 
@@ -69,11 +69,11 @@ function parseBlocks(content: string): Array<MarkdownBlock> {
   return blocks
 }
 
-function renderBlock(block: MarkdownBlock, isUser: boolean) {
+function renderBlock(block: MarkdownBlock, isUser: boolean, key: number) {
   if (block.type === 'code') {
     return (
       <pre
-        key={block.key}
+        key={key}
         style={{
           overflowX: 'auto',
           margin: '0.5rem 0',
@@ -90,10 +90,10 @@ function renderBlock(block: MarkdownBlock, isUser: boolean) {
   if (block.type === 'list') {
     const ListTag = block.ordered ? 'ol' : 'ul'
     return (
-      <ListTag key={block.key} style={{ margin: '0.4rem 0 0.7rem', paddingLeft: '1.25rem' }}>
+      <ListTag key={key} style={{ margin: '0.4rem 0 0.7rem', paddingLeft: '1.25rem' }}>
         {block.items.map((item, index) => (
-          <li key={`${block.key}-${index}`} style={{ margin: '0.2rem 0' }}>
-            {renderInline(item, isUser, `${block.key}-${index}`)}
+          <li key={index} style={{ margin: '0.2rem 0' }}>
+            {renderInline(item, isUser, `${key}-${index}`)}
           </li>
         ))}
       </ListTag>
@@ -101,8 +101,8 @@ function renderBlock(block: MarkdownBlock, isUser: boolean) {
   }
 
   return (
-    <p key={block.key} style={{ margin: '0 0 0.6rem' }}>
-      {renderInline(block.content, isUser, block.key)}
+    <p key={key} style={{ margin: '0 0 0.6rem' }}>
+      {renderInline(block.content, isUser, String(key))}
     </p>
   )
 }
