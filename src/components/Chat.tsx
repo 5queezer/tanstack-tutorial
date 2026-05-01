@@ -408,8 +408,6 @@ export function Chat() {
     const lastAssistant = [...serializableMessages].reverse().find((message) => message.role === 'assistant')
     if (!lastAssistant) return
 
-    setModelFollowUps([])
-
     fetch('/api/followups', {
       method: 'POST',
       body: JSON.stringify({ model: selectedModel, messages: serializableMessages }),
