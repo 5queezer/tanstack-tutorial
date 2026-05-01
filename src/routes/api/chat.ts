@@ -51,7 +51,7 @@ export const Route = createFileRoute('/api/chat')({
           conversationId,
           abortController,
           systemPrompts: [
-            'You are a helpful assistant. You have tools for demo weather, demo stock quotes, live Brave web search, and an interactive search query request. Use get_weather for weather questions, get_stock_quote for stock/ticker questions, and brave_web_search for current events, recent facts, documentation lookups, or whenever the user asks you to search the web. If the user asks to search but the query is missing or ambiguous, call request_search_query first, then use brave_web_search with the returned query. Mention that weather and stock results are demo data when relevant. Always cite URLs returned by Brave Search.',
+            'You are a helpful assistant. Tools: get_weather for weather, get_stock_quote for stocks/tickers, brave_web_search for current/recent/docs/web-search questions. If a search query is missing or ambiguous, call request_search_query, then brave_web_search. Say weather/stock data is demo data when relevant. Cite Brave URLs.',
           ],
           tools: serverTools,
           debug: {
