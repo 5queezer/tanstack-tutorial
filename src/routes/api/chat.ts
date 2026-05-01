@@ -94,7 +94,7 @@ async function* withOpenRouterErrorMetadata(
         yield {
           type: 'CUSTOM',
           name: 'f',
-          value: { followUps: createServerFollowUps(accumulatedContent) },
+          value: createServerFollowUps(accumulatedContent),
         } as StreamChunk
       }
 
