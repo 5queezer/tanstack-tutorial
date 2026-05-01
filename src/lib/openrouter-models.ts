@@ -7,7 +7,7 @@ import {
 } from './models'
 
 const OPENROUTER_MODELS_URL = 'https://openrouter.ai/api/v1/models'
-const MODEL_CACHE_TTL_MS = 10 * 60 * 1000
+const MODEL_CACHE_TTL_MS = 6e5
 
 let cachedModels: Array<ChatModel> | undefined
 let cachedAt = 0
