@@ -17,7 +17,7 @@ export function AgUiStatusPanel({ statuses, hasError }: { statuses: Array<AgUiSt
       }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', fontSize: 13 }}>
-        <strong>AG-UI live</strong>
+        <strong>AG-UI</strong>
         <span style={{ color: '#666' }}>{latest.label}</span>
       </div>
       <div style={{ height: 6, overflow: 'hidden', borderRadius: 999, background: '#e8e8e8' }}>
