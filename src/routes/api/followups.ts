@@ -35,7 +35,6 @@ export const Route = createFileRoute('/api/followups')({
             headers: {
               Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
               'Content-Type': 'application/json',
-              'HTTP-Referer': process.env.OPENROUTER_SITE_URL ?? 'http://localhost:3000',
             },
             body: JSON.stringify({
               model: body.model,
