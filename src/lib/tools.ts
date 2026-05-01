@@ -126,9 +126,8 @@ export const getStockQuote = getStockDef.server(async (args, context) => {
 
 export const braveWebSearch = braveWebSearchDef.server(async (args, context) => {
   const { query, count = 5 } = args as BraveWebSearchInput
-  const apiKey = process.env.BRAVE_API_KEY
 
-  if (!apiKey) {
+  if (!process.env.BRAVE_API_KEY) {
     throw new Error('BRAVE_API_KEY not configured')
   }
 
@@ -148,7 +147,7 @@ export const braveWebSearch = braveWebSearchDef.server(async (args, context) => 
   const response = await fetch(url, {
     headers: {
       Accept: 'application/json',
-      'X-Subscription-Token': apiKey,
+      'X-Subscription-Token': process.env.BRAVE_API_KEY,
     },
     signal: AbortSignal.timeout(1e4),
   })
