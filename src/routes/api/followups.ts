@@ -29,10 +29,6 @@ export const Route = createFileRoute('/api/followups')({
 
         const messages = (body.messages ?? []).slice(-8)
 
-        if (messages.length < 2) {
-          return json({ followUps: [] })
-        }
-
         try {
           const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
             method: 'POST',
