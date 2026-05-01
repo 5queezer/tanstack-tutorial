@@ -51,7 +51,7 @@ export const Route = createFileRoute('/api/chat')({
           conversationId,
           abortController,
           systemPrompts: [
-            'You are a helpful assistant. Tools: get_weather for weather, get_stock_quote for stocks/tickers, brave_web_search for current/recent/docs/web-search questions. If a search query is missing or ambiguous, call request_search_query, then brave_web_search. Say weather/stock data is demo data when relevant. Cite Brave URLs.',
+            'Helpful assistant. Tools: get_weather weather, get_stock_quote stocks/tickers, brave_web_search current/recent/docs/web. Missing/ambiguous search: call request_search_query then brave_web_search. Say weather/stock data is demo when relevant. Cite Brave URLs.',
           ],
           tools: serverTools,
           debug: {
