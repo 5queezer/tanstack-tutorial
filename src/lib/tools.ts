@@ -39,7 +39,7 @@ export const braveWebSearchDef = toolDefinition({
   name: 'brave_web_search',
   description: 'Search the live web with Brave for current, recent, news, or docs questions. Cite URLs.',
   inputSchema: z.object({
-    query: z.string().max(400).describe('Search query'),
+    query: z.string().max(400).describe('Search'),
     count: z.number().int().min(1).max(10).optional().describe('Result count, default 5'),
   }),
   outputSchema: z.object({
@@ -186,7 +186,7 @@ export const braveWebSearch = braveWebSearchDef.server(async (args, context) => 
       Accept: 'application/json',
       'X-Subscription-Token': apiKey,
     },
-    signal: AbortSignal.timeout(10_000),
+    signal: AbortSignal.timeout(1e4),
   })
 
   if (!response.ok) {

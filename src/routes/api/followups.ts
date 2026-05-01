@@ -66,7 +66,7 @@ export const Route = createFileRoute('/api/followups')({
               max_tokens: 180,
               response_format: { type: 'json_object' },
             }),
-            signal: AbortSignal.timeout(12_000),
+            signal: AbortSignal.timeout(12e3),
           })
 
           if (!response.ok) {

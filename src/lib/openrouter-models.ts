@@ -23,7 +23,7 @@ export async function getOpenRouterModels({ force = false } = {}) {
     headers: process.env.OPENROUTER_API_KEY
       ? { Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}` }
       : undefined,
-    signal: AbortSignal.timeout(10_000),
+    signal: AbortSignal.timeout(1e4),
   })
 
   if (!response.ok) {
