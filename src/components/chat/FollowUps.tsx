@@ -19,10 +19,6 @@ export function FollowUps({ questions, onSelect }: { questions: Array<string>; o
           type="button"
           onClick={() => onSelect(question)}
           style={{
-            display: 'grid',
-            gridTemplateColumns: '20px minmax(0, 1fr)',
-            gap: '0.5rem',
-            alignItems: 'center',
             padding: '0.7rem 0',
             border: 0,
             borderTop: '1px solid #e7e7e7',
@@ -33,8 +29,7 @@ export function FollowUps({ questions, onSelect }: { questions: Array<string>; o
             cursor: 'pointer',
           }}
         >
-          <span aria-hidden="true" style={{ color: '#777' }}>↳</span>
-          <span>{question}</span>
+          {question}
         </button>
       ))}
     </section>
