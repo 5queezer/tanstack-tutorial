@@ -535,7 +535,6 @@ export function Chat() {
             </div>
 
             <button
-              type="button"
               onClick={() => handleFreeOnlyChange(!freeOnly)}
               disabled={isLoading || models.length === 0}
               aria-pressed={freeOnly}
@@ -552,7 +551,6 @@ export function Chat() {
             </button>
 
             <button
-              type="button"
               onClick={() => setShowThinking(!showThinking)}
               disabled={isLoading || !thinkingAvailable}
               aria-pressed={showThinking}
@@ -745,8 +743,7 @@ export function Chat() {
                       {followUps.map((question) => (
                         <button
                           key={question}
-                          type="button"
-                          onClick={() => handleFollowUpClick(question)}
+                                      onClick={() => handleFollowUpClick(question)}
                           style={{
                             padding: '0.7rem 0',
                             border: 0,
