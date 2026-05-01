@@ -55,7 +55,7 @@ export const Route = createFileRoute('/api/followups')({
                 {
                   role: 'system',
                   content:
-                    'Generate 3 short, genuinely useful follow-up questions for a chat UI. Base them on the conversation. Avoid generic filler. Avoid repeating the user question verbatim. Return only JSON: {"followUps":["..."]}.',
+                    'Generate 3 short useful follow-up questions from the conversation. Avoid filler/repetition. Return only JSON: {"followUps":["..."]}.',
                 },
                 {
                   role: 'user',
