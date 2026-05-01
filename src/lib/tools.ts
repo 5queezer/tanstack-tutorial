@@ -131,17 +131,14 @@ export const braveWebSearch = braveWebSearchDef.server(async (args, context) => 
     throw new Error('BRAVE_API_KEY not configured')
   }
 
-  const safeCount = Math.min(Math.max(count, 1), 10)
-  const safeQuery = query.slice(0, 400)
-
   context?.emitCustomEvent('t', {
-    label: `Search: ${safeQuery}`,
+    label: `Search: ${query}`,
     progress: 20,
   })
 
   const url = new URL('https://api.search.brave.com/res/v1/web/search')
-  url.searchParams.set('q', safeQuery)
-  url.searchParams.set('count', String(safeCount))
+  url.searchParams.set('q', query)
+  url.searchParams.set('count', String(count))
   url.searchParams.set('text_decorations', 'false')
 
   const response = await fetch(url, {
@@ -164,7 +161,7 @@ export const braveWebSearch = braveWebSearchDef.server(async (args, context) => 
   const payload = (await response.json()) as BraveSearchResponse
   const results = (payload.web?.results ?? [])
     .filter((result) => result.title && result.url)
-    .slice(0, safeCount)
+    .slice(0, count)
     .map((result) => ({
       title: result.title!,
       url: result.url!,
@@ -178,7 +175,7 @@ export const braveWebSearch = braveWebSearchDef.server(async (args, context) => 
   })
 
   return {
-    query: payload.query?.original ?? safeQuery,
+    query: payload.query?.original ?? query,
     results,
   }
 })
