@@ -43,10 +43,6 @@ const STORAGE_KEYS = {
   followUpMode: 'tc:u',
 } as const
 
-function readLocalStorage(key: string) {
-  return localStorage.getItem(key)
-}
-
 function writeLocalStorage(key: string, value: string | boolean) {
   localStorage.setItem(key, String(value))
 }
@@ -362,10 +358,10 @@ export function Chat() {
         : heuristicFollowUps
 
   useEffect(() => {
-    setSelectedModel(readLocalStorage(STORAGE_KEYS.selectedModel) ?? '')
-    setFreeOnly(readLocalStorage(STORAGE_KEYS.freeOnly) === 'true')
-    setShowThinking(readLocalStorage(STORAGE_KEYS.showThinking) === 'true')
-    setFollowUpMode((readLocalStorage(STORAGE_KEYS.followUpMode) as FollowUpMode) ?? 'h')
+    setSelectedModel(localStorage.getItem(STORAGE_KEYS.selectedModel) ?? '')
+    setFreeOnly(localStorage.getItem(STORAGE_KEYS.freeOnly) === 'true')
+    setShowThinking(localStorage.getItem(STORAGE_KEYS.showThinking) === 'true')
+    setFollowUpMode((localStorage.getItem(STORAGE_KEYS.followUpMode) as FollowUpMode) ?? 'h')
     setSettingsLoaded(true)
   }, [])
 
