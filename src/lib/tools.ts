@@ -72,7 +72,7 @@ const stockBySymbol: Record<string, StockOutput> = {
   SPY: { price: 586.12, change: 0.91, changePercent: 0.16, currency: 'USD', marketState: 'Demo delayed' },
 }
 
-export const getWeather = getWeatherDef.server(async (args, context) => {
+export const getWeather = getWeatherDef.server(async (args) => {
   const { city } = args as WeatherInput
   const key = city.toLowerCase().trim()
   const weather = weatherByCity[key] ?? {
@@ -88,7 +88,7 @@ export const getWeather = getWeatherDef.server(async (args, context) => {
   }
 })
 
-export const getStockQuote = getStockDef.server(async (args, context) => {
+export const getStockQuote = getStockDef.server(async (args) => {
   const { symbol } = args as StockInput
   const normalizedSymbol = symbol.toUpperCase().trim()
   const quote = stockBySymbol[normalizedSymbol] ?? {
@@ -105,7 +105,7 @@ export const getStockQuote = getStockDef.server(async (args, context) => {
   }
 })
 
-export const braveWebSearch = braveWebSearchDef.server(async (args, context) => {
+export const braveWebSearch = braveWebSearchDef.server(async (args) => {
   const { query, count = 5 } = args as BraveWebSearchInput
 
   if (!process.env.BRAVE_API_KEY) {
