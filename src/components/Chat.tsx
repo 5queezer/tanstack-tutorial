@@ -1,10 +1,156 @@
 import { fetchServerSentEvents, useChat } from '@tanstack/ai-react'
-import { useEffect, useMemo, useRef, useState, type SubmitEventHandler } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode, type SubmitEventHandler } from 'react'
 import { createFollowUps, getMessageText } from './chat/followUps'
 import { readLocalStorage, readLocalStorageBoolean, STORAGE_KEYS, writeLocalStorage } from './chat/storage'
-import { MarkdownContent } from './chat/MarkdownContent'
 import type { FollowUpMode, UiChatModel } from './chat/types'
 import { requestSearchQueryDef } from '../lib/request-search-tool'
+
+type MarkdownBlock =
+  | { t: 'c'; c: string }
+  | { t: 'l'; o: boolean; i: Array<string> }
+  | { t: 'p'; c: string }
+
+const linkPattern = /(`[^`]+`|\[([^\]]+)\]\((https?:\/\/[^\s)]+)\))/g
+
+function MarkdownContent({ content, isUser }: { content: string; isUser: boolean }) {
+  return <>{parseBlocks(content).map((block, index) => renderBlock(block, isUser, index))}</>
+}
+
+function parseBlocks(content: string): Array<MarkdownBlock> {
+  const lines = content.split('\n')
+  const blocks: Array<MarkdownBlock> = []
+  let paragraph: Array<string> = []
+
+  function flushParagraph() {
+    if (paragraph.length === 0) return
+    blocks.push({ t: 'p', c: paragraph.join(' ') })
+    paragraph = []
+  }
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index]
+    const trimmed = line.trim()
+
+    if (trimmed.startsWith('```')) {
+      flushParagraph()
+      const codeLines: Array<string> = []
+      index += 1
+      while (index < lines.length && !lines[index].trim().startsWith('```')) {
+        codeLines.push(lines[index])
+        index += 1
+      }
+      blocks.push({ t: 'c', c: codeLines.join('\n') })
+      continue
+    }
+
+    if (!trimmed) {
+      flushParagraph()
+      continue
+    }
+
+    const unordered = /^-\s+(.+)$/.exec(trimmed)
+    const ordered = /^\d+\.\s+(.+)$/.exec(trimmed)
+    if (unordered || ordered) {
+      flushParagraph()
+      const listItems = [unordered?.[1] ?? ordered?.[1] ?? '']
+      const isOrdered = Boolean(ordered)
+
+      while (index + 1 < lines.length) {
+        const nextTrimmed = lines[index + 1].trim()
+        const nextMatch = isOrdered ? /^\d+\.\s+(.+)$/.exec(nextTrimmed) : /^-\s+(.+)$/.exec(nextTrimmed)
+        if (!nextMatch) break
+        listItems.push(nextMatch[1])
+        index += 1
+      }
+
+      blocks.push({ t: 'l', o: isOrdered, i: listItems })
+      continue
+    }
+
+    paragraph.push(trimmed)
+  }
+
+  flushParagraph()
+  return blocks
+}
+
+function renderBlock(block: MarkdownBlock, isUser: boolean, key: number) {
+  if (block.t === 'c') {
+    return (
+      <pre
+        key={key}
+        style={{
+          overflowX: 'auto',
+          margin: '0.5rem 0',
+          padding: '0.65rem',
+          borderRadius: 8,
+          background: isUser ? '#333' : '#e4e4e4',
+        }}
+      >
+        <code style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace' }}>{block.c}</code>
+      </pre>
+    )
+  }
+
+  if (block.t === 'l') {
+    const ListTag = block.o ? 'ol' : 'ul'
+    return (
+      <ListTag key={key} style={{ margin: '0.4rem 0 0.7rem', paddingLeft: '1.25rem' }}>
+        {block.i.map((item, index) => (
+          <li key={index} style={{ margin: '0.2rem 0' }}>
+            {renderInline(item, isUser)}
+          </li>
+        ))}
+      </ListTag>
+    )
+  }
+
+  return (
+    <p key={key} style={{ margin: '0 0 0.6rem' }}>
+      {renderInline(block.c, isUser)}
+    </p>
+  )
+}
+
+function renderInline(text: string, isUser: boolean): Array<ReactNode> {
+  const nodes: Array<ReactNode> = []
+  let lastIndex = 0
+
+  for (const match of text.matchAll(linkPattern)) {
+    const index = match.index!
+    if (index > lastIndex) nodes.push(text.slice(lastIndex, index))
+
+    const token = match[0]
+    if (token.startsWith('`')) {
+      nodes.push(
+        <code
+          key={index}
+          style={{
+            padding: '0.12rem 0.25rem',
+            borderRadius: 4,
+            background: isUser ? '#333' : '#e4e4e4',
+            fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+            fontSize: '0.92em',
+          }}
+        >
+          {token.slice(1, -1)}
+        </code>,
+      )
+    } else {
+      nodes.push(
+        <a key={index} href={match[3]} target="_blank" rel="noreferrer" style={{ color: 'inherit', textDecoration: 'underline' }}>
+          {match[2]}
+        </a>,
+      )
+    }
+
+    lastIndex = index + token.length
+  }
+
+  if (lastIndex < text.length) nodes.push(text.slice(lastIndex))
+  return nodes
+}
+
 
 function parseToolPayload(value: unknown) {
   return value && typeof value === 'object' ? (value as Record<string, unknown>) : undefined
