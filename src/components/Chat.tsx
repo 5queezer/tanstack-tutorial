@@ -50,7 +50,7 @@ setPendingSearchPrompt(input.prompt ?? 'What should I search for?')
         return
       }
 
-      if (!['s', 't'].includes(eventName)) return
+      if (eventName !== 't') return
 
       setAgUiStatus(value as AgUiStatusEvent)
     },
