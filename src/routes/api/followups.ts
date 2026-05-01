@@ -1,7 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
 
-import { getOpenRouterModel } from '../../lib/openrouter-models'
-
 type FollowUpMessage = {
   role?: string
   content?: string
@@ -26,7 +24,7 @@ export const Route = createFileRoute('/api/followups')({
         const body = (await request.json()) as { messages?: Array<FollowUpMessage>; model?: string }
         const model = typeof body.model === 'string' ? body.model : undefined
 
-        if (!model || !(await getOpenRouterModel(model))) {
+        if (!model) {
           return json({ followUps: [] })
         }
 
