@@ -74,38 +74,38 @@ async function* withOpenRouterErrorMetadata(
   let sawFirstToken = false
   let accumulatedContent = ''
 
-  yield createStatusEvent('Model validated')
-  yield createStatusEvent('Request sent to OpenRouter')
+  yield createStatusEvent('Model ready')
+  yield createStatusEvent('Request sent')
 
   try {
     for await (const chunk of stream) {
       if (chunk.type === 'RUN_STARTED') {
-        yield createStatusEvent('AG-UI run started')
+        yield createStatusEvent('Run started')
       }
 
       if (chunk.type === 'TEXT_MESSAGE_CONTENT') {
         accumulatedContent += chunk.delta ?? ''
         if (!sawFirstToken) {
           sawFirstToken = true
-          yield createStatusEvent('First token received')
+          yield createStatusEvent('First token')
         }
       }
 
       if (chunk.type === 'RUN_ERROR') {
-        yield createStatusEvent('Provider error')
+        yield createStatusEvent('Error')
         yield enrichRunErrorChunk(chunk, errorCapture.lastError)
         continue
       }
 
       if (chunk.type === 'RUN_FINISHED') {
-        yield createStatusEvent('Run complete')
+        yield createStatusEvent('Complete')
         yield createFollowUpsEvent(createServerFollowUps(accumulatedContent))
       }
 
       yield chunk
     }
   } catch (error) {
-    yield createStatusEvent('Provider error')
+    yield createStatusEvent('Error')
     yield createRunErrorChunk(formatOpenRouterError(errorCapture.lastError ?? error))
   }
 }
