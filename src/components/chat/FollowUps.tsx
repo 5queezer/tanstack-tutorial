@@ -1,0 +1,42 @@
+export function FollowUps({ questions, onSelect }: { questions: Array<string>; onSelect: (question: string) => void }) {
+  if (questions.length === 0) return null
+
+  return (
+    <section
+      aria-label="Follow-up questions"
+      style={{
+        display: 'grid',
+        gap: '0.35rem',
+        justifySelf: 'stretch',
+        maxWidth: 760,
+        margin: '0.5rem 0 0.25rem',
+      }}
+    >
+      <h2 style={{ margin: '0 0 0.35rem', fontSize: 16 }}>Follow-ups</h2>
+      {questions.map((question) => (
+        <button
+          key={question}
+          type="button"
+          onClick={() => onSelect(question)}
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '20px minmax(0, 1fr)',
+            gap: '0.5rem',
+            alignItems: 'center',
+            padding: '0.7rem 0',
+            border: 0,
+            borderTop: '1px solid #e7e7e7',
+            background: 'transparent',
+            color: '#222',
+            textAlign: 'left',
+            font: 'inherit',
+            cursor: 'pointer',
+          }}
+        >
+          <span aria-hidden="true" style={{ color: '#777' }}>↳</span>
+          <span>{question}</span>
+        </button>
+      ))}
+    </section>
+  )
+}

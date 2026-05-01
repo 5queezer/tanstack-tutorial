@@ -1,222 +1,22 @@
 import { fetchServerSentEvents, useChat } from '@tanstack/ai-react'
+import { clientTools } from '@tanstack/ai-client'
 import { CheckIcon, ChevronDownIcon } from '@radix-ui/react-icons'
 import * as ScrollArea from '@radix-ui/react-scroll-area'
 import * as Select from '@radix-ui/react-select'
 import * as Toggle from '@radix-ui/react-toggle'
 import * as Tooltip from '@radix-ui/react-tooltip'
-import { useEffect, useMemo, useState, type FormEvent } from 'react'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
-
-import type { ChatModel } from '../lib/models'
-
-const thinkingDotKeyframes = `
-@keyframes chat-dot-bounce {
-  0%, 80%, 100% { transform: translateY(0); opacity: 0.35; }
-  40% { transform: translateY(-4px); opacity: 1; }
-}
-`
-
-const STORAGE_KEYS = {
-  selectedModel: 'tanstack-chat:selected-model',
-  freeOnly: 'tanstack-chat:free-only',
-  showThinking: 'tanstack-chat:show-thinking',
-} as const
-
-type UiChatModel = ChatModel & {
-  supportsThinking?: boolean
-}
-
-type ChatMessage = {
-  role: string
-  parts?: Array<{ type?: string; content?: string }>
-}
-
-type AgUiStatusEvent = {
-  label: string
-  progress: number
-  model?: string
-  thinking?: boolean
-  at: number
-}
-
-function getMessageText(message?: ChatMessage) {
-  return message?.parts
-    ?.filter((part) => part.type === 'text' && part.content)
-    .map((part) => part.content)
-    .join(' ')
-    .trim() ?? ''
-}
-
-function readLocalStorage(key: string) {
-  if (typeof window === 'undefined') return undefined
-
-  return window.localStorage.getItem(key) ?? undefined
-}
-
-function readLocalStorageBoolean(key: string, fallback = false) {
-  const value = readLocalStorage(key)
-
-  if (value === 'true') return true
-  if (value === 'false') return false
-
-  return fallback
-}
-
-function writeLocalStorage(key: string, value: string | boolean) {
-  if (typeof window === 'undefined') return
-
-  window.localStorage.setItem(key, String(value))
-}
-
-function parseToolPayload(value: unknown) {
-  if (!value) return undefined
-  if (typeof value === 'object') return value as Record<string, unknown>
-  if (typeof value !== 'string') return undefined
-
-  try {
-    const parsed = JSON.parse(value) as unknown
-    return parsed && typeof parsed === 'object' ? (parsed as Record<string, unknown>) : undefined
-  } catch {
-    return undefined
-  }
-}
-
-function formatNumber(value: unknown, digits = 1) {
-  return typeof value === 'number' ? value.toFixed(digits) : '—'
-}
-
-function renderToolWidget(toolName: string, input: unknown, output: unknown) {
-  const result = parseToolPayload(output)
-  const args = parseToolPayload(input)
-
-  if (!result) {
-    return args ? (
-      <div style={{ color: '#555', fontSize: 13 }}>Input: {JSON.stringify(args)}</div>
-    ) : null
-  }
-
-  if (toolName === 'get_weather') {
-    return (
-      <div style={{ display: 'grid', gap: '0.55rem' }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '1rem' }}>
-          <div>
-            <div style={{ fontSize: 22, fontWeight: 800 }}>{String(result.city ?? 'Weather')}</div>
-            <div style={{ color: '#555' }}>{String(result.condition ?? 'Conditions unavailable')}</div>
-          </div>
-          <div style={{ fontSize: 34, fontWeight: 800 }}>{formatNumber(result.temperatureC, 0)}°C</div>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '0.5rem' }}>
-          <Metric label="Humidity" value={`${formatNumber(result.humidity, 0)}%`} />
-          <Metric label="Wind" value={`${formatNumber(result.windKph, 0)} km/h`} />
-        </div>
-      </div>
-    )
-  }
-
-  if (toolName === 'get_stock_quote') {
-    const change = typeof result.change === 'number' ? result.change : 0
-    const isUp = change >= 0
-
-    return (
-      <div style={{ display: 'grid', gap: '0.55rem' }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '1rem' }}>
-          <div>
-            <div style={{ fontSize: 22, fontWeight: 800 }}>{String(result.symbol ?? 'QUOTE')}</div>
-            <div style={{ color: '#555' }}>{String(result.marketState ?? 'Demo quote')}</div>
-          </div>
-          <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: 28, fontWeight: 800 }}>{String(result.currency ?? 'USD')} {formatNumber(result.price, 2)}</div>
-            <div style={{ color: isUp ? '#147a35' : 'crimson', fontWeight: 700 }}>
-              {isUp ? '▲' : '▼'} {formatNumber(Math.abs(change), 2)} ({formatNumber(Math.abs(Number(result.changePercent ?? 0)), 2)}%)
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  if (toolName === 'brave_web_search') {
-    const results = Array.isArray(result.results) ? result.results.slice(0, 5) : []
-
-    return (
-      <div style={{ display: 'grid', gap: '0.55rem' }}>
-        <div style={{ fontSize: 16, fontWeight: 800 }}>Search results for “{String(result.query ?? args?.query ?? '')}”</div>
-        {results.map((item, index) => {
-          const searchResult = item && typeof item === 'object' ? (item as Record<string, unknown>) : {}
-          const url = String(searchResult.url ?? '')
-
-          return (
-            <a
-              key={`${url}-${index}`}
-              href={url}
-              target="_blank"
-              rel="noreferrer"
-              style={{
-                display: 'grid',
-                gap: 2,
-                padding: '0.55rem',
-                borderRadius: 10,
-                background: '#fff',
-                color: '#111',
-                textDecoration: 'none',
-              }}
-            >
-              <strong>{String(searchResult.title ?? 'Untitled')}</strong>
-              <span style={{ color: '#555', fontSize: 13 }}>{String(searchResult.description ?? '')}</span>
-              <span style={{ color: '#777', fontSize: 12 }}>{url}</span>
-            </a>
-          )
-        })}
-      </div>
-    )
-  }
-
-  return <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{JSON.stringify(result, null, 2)}</pre>
-}
-
-function Metric({ label, value }: { label: string; value: string }) {
-  return (
-    <div style={{ padding: '0.5rem', borderRadius: 10, background: '#fff' }}>
-      <div style={{ color: '#666', fontSize: 12 }}>{label}</div>
-      <div style={{ fontWeight: 800 }}>{value}</div>
-    </div>
-  )
-}
-
-function createFollowUps(userText = '', assistantText = '') {
-  const cleanedUserText = userText.replace(/\s+/g, ' ').trim()
-  const cleanedAssistantText = assistantText.replace(/\s+/g, ' ').trim()
-  const tooShortForSpecificFollowUps = cleanedUserText.length < 12 || /^(hi|hello|hey|yo|sup|thanks|thank you)[!.?\s]*$/i.test(cleanedUserText)
-
-  if (tooShortForSpecificFollowUps) {
-    return [
-      'What can you help me with?',
-      'Give me a few example prompts',
-      'Help me brainstorm an idea',
-      'Explain something complicated simply',
-    ]
-  }
-
-  const topic = cleanedUserText.length > 80 ? `${cleanedUserText.slice(0, 77)}...` : cleanedUserText
-  const assistantMentionsSteps = /step|first|next|then|finally|start|begin/i.test(cleanedAssistantText)
-
-  return [
-    assistantMentionsSteps ? 'Can you turn that into a checklist?' : 'Can you give me a concrete example?',
-    `Can you explain more about “${topic}”?`,
-    'What are the trade-offs?',
-    'What should I ask next?',
-  ]
-}
-
-function isStatusEventValue(value: unknown): value is Omit<AgUiStatusEvent, 'at'> {
-  return Boolean(
-    value &&
-      typeof value === 'object' &&
-      typeof (value as { label?: unknown }).label === 'string' &&
-      typeof (value as { progress?: unknown }).progress === 'number',
-  )
-}
+import { useEffect, useMemo, useRef, useState, type FormEventHandler } from 'react'
+import { thinkingDotKeyframes, isStatusEventValue } from './chat/agui'
+import { createFollowUps, getMessageText } from './chat/followUps'
+import { readLocalStorage, readLocalStorageBoolean, STORAGE_KEYS, writeLocalStorage } from './chat/storage'
+import { AgUiStatusPanel } from './chat/AgUiStatusPanel'
+import { FollowUps } from './chat/FollowUps'
+import { InteractiveSearchPrompt } from './chat/InteractiveSearchPrompt'
+import { MarkdownContent } from './chat/MarkdownContent'
+import { ToolWidget } from './chat/ToolWidget'
+import { TypingIndicator } from './chat/TypingIndicator'
+import type { AgUiStatusEvent, PendingSearchQueryRequest, UiChatModel } from './chat/types'
+import { requestSearchQueryDef } from '../lib/tools'
 
 export function Chat() {
   const [input, setInput] = useState('')
@@ -227,6 +27,9 @@ export function Chat() {
   const [showThinking, setShowThinking] = useState(false)
   const [settingsLoaded, setSettingsLoaded] = useState(false)
   const [agUiStatuses, setAgUiStatuses] = useState<Array<AgUiStatusEvent>>([])
+  const [pendingSearchQuery, setPendingSearchQuery] = useState<PendingSearchQueryRequest | undefined>()
+  const [interactiveSearchInput, setInteractiveSearchInput] = useState('')
+  const searchQueryResolverRef = useRef<((result: { query: string }) => void) | undefined>(undefined)
   const modelOptions = useMemo(
     () => models.filter((model) => !freeOnly || model.free),
     [freeOnly, models],
@@ -234,9 +37,27 @@ export function Chat() {
   const selectedModelInfo = models.find((model) => model.id === selectedModel)
   const selectedModelLabel = selectedModelInfo?.label ?? 'Loading models...'
   const thinkingAvailable = Boolean(selectedModelInfo?.supportsThinking)
+  const interactiveSearchTool = useMemo(
+    () => requestSearchQueryDef.client((toolInput) => {
+      const input = toolInput as { prompt?: string; suggestedQuery?: string }
+      const suggestedQuery = input.suggestedQuery ?? ''
+
+      setInteractiveSearchInput(suggestedQuery)
+      setPendingSearchQuery({
+        prompt: input.prompt ?? 'What should I search for?',
+        suggestedQuery,
+      })
+
+      return new Promise<{ query: string }>((resolve) => {
+        searchQueryResolverRef.current = resolve
+      })
+    }),
+    [],
+  )
   const { messages, sendMessage, isLoading, error, stop } = useChat({
     connection: fetchServerSentEvents('/api/chat'),
     body: { model: selectedModel || undefined, showThinking: showThinking && thinkingAvailable },
+    tools: clientTools(interactiveSearchTool),
     onCustomEvent: (eventName, value) => {
       if (!['demo.status', 'tool.status'].includes(eventName) || !isStatusEventValue(value)) return
 
@@ -343,7 +164,7 @@ export function Chat() {
     }
   }
 
-  function handleSubmit(event: FormEvent) {
+  const handleSubmit: FormEventHandler<HTMLFormElement> = (event) => {
     event.preventDefault()
 
     const text = input.trim()
@@ -358,6 +179,18 @@ export function Chat() {
     if (isLoading) return
     setAgUiStatuses([])
     sendMessage(question)
+  }
+
+  const handleInteractiveSearchSubmit: FormEventHandler<HTMLFormElement> = (event) => {
+    event.preventDefault()
+
+    const query = interactiveSearchInput.trim()
+    if (!query || !searchQueryResolverRef.current) return
+
+    searchQueryResolverRef.current({ query })
+    searchQueryResolverRef.current = undefined
+    setPendingSearchQuery(undefined)
+    setInteractiveSearchInput('')
   }
 
   return (
@@ -524,51 +357,7 @@ export function Chat() {
             </Toggle.Root>
           </div>
 
-          {latestAgUiStatus ? (
-            <section
-              aria-label="AG-UI stream status"
-              style={{
-                display: 'grid',
-                gap: '0.45rem',
-                padding: '0.7rem 0.8rem',
-                border: '1px solid #e4e4e4',
-                borderRadius: 12,
-                background: '#fafafa',
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', fontSize: 13 }}>
-                <strong>AG-UI live</strong>
-                <span style={{ color: '#666' }}>{latestAgUiStatus.label}</span>
-              </div>
-              <div style={{ height: 6, overflow: 'hidden', borderRadius: 999, background: '#e8e8e8' }}>
-                <div
-                  style={{
-                    width: `${latestAgUiStatus.progress}%`,
-                    height: '100%',
-                    borderRadius: 999,
-                    background: latestAgUiStatus.progress >= 100 && error ? 'crimson' : '#111',
-                    transition: 'width 220ms ease',
-                  }}
-                />
-              </div>
-              <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-                {agUiStatuses.map((status) => (
-                  <span
-                    key={`${status.at}-${status.label}`}
-                    style={{
-                      padding: '0.2rem 0.45rem',
-                      borderRadius: 999,
-                      background: '#eee',
-                      color: '#555',
-                      fontSize: 12,
-                    }}
-                  >
-                    {status.label}
-                  </span>
-                ))}
-              </div>
-            </section>
-          ) : null}
+          <AgUiStatusPanel statuses={agUiStatuses} hasError={Boolean(error)} />
 
           {modelsError ? <p style={{ color: 'crimson', margin: 0 }}>{modelsError}</p> : null}
         </header>
@@ -669,9 +458,9 @@ export function Chat() {
                                   fontSize: 13,
                                 }}
                               >
-                                <strong>{toolName === 'get_weather' ? '🌦️ Weather tool' : toolName === 'get_stock_quote' ? '📈 Stock tool' : toolName === 'brave_web_search' ? '🔎 Brave Search tool' : `🔧 ${toolName}`}</strong>
+                                <strong>{toolName === 'get_weather' ? '🌦️ Weather tool' : toolName === 'get_stock_quote' ? '📈 Stock tool' : toolName === 'brave_web_search' ? '🔎 Brave Search tool' : toolName === 'request_search_query' ? '💬 Search query request' : `🔧 ${toolName}`}</strong>
                                 <span style={{ color: isUser ? '#ddd' : '#555' }}>State: {state}</span>
-                                {renderToolWidget(toolName, toolInput, toolOutput)}
+                                <ToolWidget toolName={toolName} input={toolInput} output={toolOutput} />
                               </div>
                             )
                           }
@@ -682,45 +471,7 @@ export function Chat() {
 
                           if (part.type === 'text') {
                             return (
-                              <ReactMarkdown
-                                key={index}
-                                remarkPlugins={[remarkGfm]}
-                                components={{
-                                  p: ({ children }) => <p style={{ margin: '0 0 0.6rem' }}>{children}</p>,
-                                  ul: ({ children }) => <ul style={{ margin: '0.4rem 0 0.7rem', paddingLeft: '1.25rem' }}>{children}</ul>,
-                                  ol: ({ children }) => <ol style={{ margin: '0.4rem 0 0.7rem', paddingLeft: '1.25rem' }}>{children}</ol>,
-                                  li: ({ children }) => <li style={{ margin: '0.2rem 0' }}>{children}</li>,
-                                  code: ({ children }) => (
-                                    <code
-                                      style={{
-                                        padding: '0.12rem 0.25rem',
-                                        borderRadius: 4,
-                                        background: isUser ? '#333' : '#e4e4e4',
-                                        fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
-                                        fontSize: '0.92em',
-                                      }}
-                                    >
-                                      {children}
-                                    </code>
-                                  ),
-                                  pre: ({ children }) => (
-                                    <pre
-                                      style={{
-                                        overflowX: 'auto',
-                                        margin: '0.5rem 0',
-                                        padding: '0.65rem',
-                                        borderRadius: 8,
-                                        background: isUser ? '#333' : '#e4e4e4',
-                                      }}
-                                    >
-                                      {children}
-                                    </pre>
-                                  ),
-                                }}
-                              >
-                                {part.content}
-                              </ReactMarkdown>
-                            )
+                              <MarkdownContent key={index} content={part.content} isUser={isUser} />                            )
                           }
 
                           return null
@@ -730,75 +481,16 @@ export function Chat() {
                     )
                   })}
 
-                  {!isLoading && followUps.length > 0 ? (
-                    <section
-                      aria-label="Follow-up questions"
-                      style={{
-                        display: 'grid',
-                        gap: '0.35rem',
-                        justifySelf: 'stretch',
-                        maxWidth: 760,
-                        margin: '0.5rem 0 0.25rem',
-                      }}
-                    >
-                      <h2 style={{ margin: '0 0 0.35rem', fontSize: 16 }}>Follow-ups</h2>
-                      {followUps.map((question) => (
-                        <button
-                          key={question}
-                          type="button"
-                          onClick={() => handleFollowUpClick(question)}
-                          style={{
-                            display: 'grid',
-                            gridTemplateColumns: '20px minmax(0, 1fr)',
-                            gap: '0.5rem',
-                            alignItems: 'center',
-                            padding: '0.7rem 0',
-                            border: 0,
-                            borderTop: '1px solid #e7e7e7',
-                            background: 'transparent',
-                            color: '#222',
-                            textAlign: 'left',
-                            font: 'inherit',
-                            cursor: 'pointer',
-                          }}
-                        >
-                          <span aria-hidden="true" style={{ color: '#777' }}>↳</span>
-                          <span>{question}</span>
-                        </button>
-                      ))}
-                    </section>
-                  ) : null}
+                  <InteractiveSearchPrompt
+                    request={pendingSearchQuery}
+                    value={interactiveSearchInput}
+                    onChange={setInteractiveSearchInput}
+                    onSubmit={handleInteractiveSearchSubmit}
+                  />
 
-                  {isLoading ? (
-                    <article style={{ display: 'flex', justifyContent: 'flex-start' }}>
-                      <div
-                        aria-label="Assistant is typing"
-                        style={{
-                          display: 'inline-flex',
-                          gap: 5,
-                          alignItems: 'center',
-                          padding: '0.8rem 0.95rem',
-                          borderRadius: 18,
-                          borderBottomLeftRadius: 4,
-                          background: '#f2f2f2',
-                        }}
-                      >
-                        {[0, 1, 2].map((dot) => (
-                          <span
-                            key={dot}
-                            style={{
-                              width: 7,
-                              height: 7,
-                              borderRadius: 999,
-                              background: '#555',
-                              animation: 'chat-dot-bounce 1.1s infinite ease-in-out',
-                              animationDelay: `${dot * 0.16}s`,
-                            }}
-                          />
-                        ))}
-                      </div>
-                    </article>
-                  ) : null}
+                  {!isLoading ? <FollowUps questions={followUps} onSelect={handleFollowUpClick} /> : null}
+
+                  {isLoading ? <TypingIndicator /> : null}
                 </>
               )}
             </div>

@@ -1,0 +1,23 @@
+import type { ChatModel } from '../../lib/models'
+
+export type UiChatModel = ChatModel & {
+  supportsThinking?: boolean
+}
+
+export type ChatMessage = {
+  role: string
+  parts?: Array<{ type?: string; content?: string }>
+}
+
+export type AgUiStatusEvent = {
+  label: string
+  progress: number
+  model?: string
+  thinking?: boolean
+  at: number
+}
+
+export type PendingSearchQueryRequest = {
+  prompt: string
+  suggestedQuery: string
+}
