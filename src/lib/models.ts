@@ -41,11 +41,11 @@ export function isTextChatOpenRouterModel(model: {
   const outputModalities = model.architecture?.output_modalities
   const modality = model.architecture?.modality
 
-  if (inputModalities?.length && !inputModalities.includes('text')) return false
-  if (outputModalities?.length && !outputModalities.includes('text')) return false
-  if (modality && !modality.includes('text')) return false
-
-  return true
+  return !(
+    (inputModalities?.length && !inputModalities.includes('text')) ||
+    (outputModalities?.length && !outputModalities.includes('text')) ||
+    (modality && !modality.includes('text'))
+  )
 }
 
 export function supportsOpenRouterThinking(model: {
