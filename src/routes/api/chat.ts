@@ -127,9 +127,7 @@ function createOpenRouterErrorCaptureLogger() {
       info: () => {},
       warn: () => {},
       error: (_message: string, meta?: Record<string, unknown>) => {
-        if (meta?.error) {
-          capture.lastError = meta.error
-        }
+        capture.lastError = meta?.error ?? capture.lastError
       },
     },
   }
