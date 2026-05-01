@@ -315,7 +315,7 @@ export function Chat() {
   const thinkingAvailable = !!models.find((model) => model.id === selectedModel)?.supportsThinking
   const interactiveSearchTool = {
     name: 'request_search_query',
-    execute: (toolInput: { prompt?: string; suggestedQuery?: string }) => {
+    execute(toolInput: { prompt?: string; suggestedQuery?: string }) {
       setInteractiveSearchInput(toolInput.suggestedQuery ?? '')
       setPendingSearchPrompt(toolInput.prompt ?? 'What should I search for?')
 
@@ -328,7 +328,7 @@ export function Chat() {
     connection: fetchServerSentEvents('/api/chat'),
     body: { model: selectedModel || undefined, showThinking: showThinking && thinkingAvailable },
     tools: [interactiveSearchTool],
-    onCustomEvent: (_eventName, value) => {
+    onCustomEvent(_eventName, value) {
       setAgUiFollowUps(value as Array<string>)
     },
   })
