@@ -116,3 +116,8 @@ test('returns partial failure results without failing the whole run', async () =
   assert.equal(result.workers[1]!.status, 'failed')
   assert.match(result.workers[1]!.error!, /worker timed out/)
 })
+
+test('registers run_subagents in server tools', async () => {
+  const { serverTools } = await import('../src/lib/tools.ts')
+  assert.ok(serverTools.some((tool: any) => tool.name === 'run_subagents'))
+})

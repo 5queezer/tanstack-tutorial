@@ -48,7 +48,7 @@ export const Route = createFileRoute('/api/chat')({
           conversationId,
           abortController,
           systemPrompts: [
-            'Helpful assistant. Tools: get_weather weather, get_stock_quote stocks/tickers, brave_web_search current/recent/docs/web, github_search GitHub issues/PRs/code/repos/users, github_get GitHub issue/PR/comments/reviews/files/commits/status/checks/actions, route_subagents decide direct/tools/plan/subagents/escalate. Missing/ambiguous search: call request_search_query then brave_web_search. Say weather/stock data is demo when relevant. Cite Brave/GitHub URLs.',
+            'Helpful assistant. Tools: get_weather weather, get_stock_quote stocks/tickers, brave_web_search current/recent/docs/web, github_search GitHub issues/PRs/code/repos/users, github_get GitHub issue/PR/comments/reviews/files/commits/status/checks/actions, route_subagents decide direct/tools/plan/subagents/escalate, run_subagents execute bounded read-only specialists only after route_subagents returns spawn_one_specialist or spawn_multiple_specialists. Missing/ambiguous search: call request_search_query then brave_web_search. Say weather/stock data is demo when relevant. Cite Brave/GitHub URLs. For subagent execution, the main assistant integrates worker findings and mentions worker failures or uncertainty.',
           ],
           tools: serverTools,
           debug: {

@@ -1,8 +1,9 @@
 import { toolDefinition } from '@tanstack/ai'
 import { z } from 'zod'
-import { requestSearchQueryDef } from './request-search-tool'
-import { githubGet, githubSearch } from './github-tool'
-import { subagentRoute } from './subagent-router'
+import { requestSearchQueryDef } from './request-search-tool.ts'
+import { githubGet, githubSearch } from './github-tool.ts'
+import { runSubagents } from './subagent-orchestrator.ts'
+import { subagentRoute } from './subagent-router.ts'
 import { traceToolCall } from './langfuse-tracing.ts'
 
 export const getWeatherDef = toolDefinition({
@@ -142,4 +143,34 @@ export const braveWebSearch = braveWebSearchDef.server(async (args) => traceTool
   }
 }))
 
-export const serverTools = [getWeather, getStockQuote, braveWebSearch, githubSearch, githubGet, subagentRoute, requestSearchQueryDef]
+export const runSubagentsDef = toolDefinition({
+  name: 'run_subagents',
+  description: 'Run bounded read-only specialist subagents after route_subagents chooses a spawn action.',
+  inputSchema: z.object({
+    originalPrompt: z.string(),
+    model: z.string().optional(),
+    routingNote: z.object({
+      promptClass: z.enum(['question', 'research', 'implementation', 'review', 'debugging', 'optimization', 'operations']),
+      complexity: z.enum(['low', 'medium', 'high']),
+      domainBreadth: z.enum(['single-domain', 'multi-domain']),
+      subtaskIndependence: z.enum(['low', 'medium', 'high']),
+      verificationBurden: z.enum(['low', 'medium', 'high']),
+      costLatencyPrivacyRisk: z.enum(['low', 'medium', 'high']),
+      chosenAction: z.enum(['answer_directly', 'use_tools', 'write_plan_first', 'spawn_one_specialist', 'spawn_multiple_specialists', 'reject_clarify_escalate']),
+      rationale: z.string(),
+      validationGate: z.string(),
+    }),
+    workers: z.array(z.object({
+      name: z.string(),
+      objective: z.string(),
+      scope: z.string(),
+      nonGoals: z.string(),
+      allowedTools: z.array(z.enum(['brave_web_search', 'github_search', 'github_get'])),
+      expectedOutput: z.string(),
+    })).min(1).max(4),
+  }),
+})
+
+export const runSubagentsTool = runSubagentsDef.server(async (args) => traceToolCall('run_subagents', args, async () => runSubagents(args as any)))
+
+export const serverTools = [getWeather, getStockQuote, braveWebSearch, githubSearch, githubGet, subagentRoute, runSubagentsTool, requestSearchQueryDef]
