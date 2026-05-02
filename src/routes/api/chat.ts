@@ -5,6 +5,7 @@ import type { StreamChunk } from '@tanstack/ai'
 import { getChatModel } from '../../lib/ai'
 import { getOpenRouterModel } from '../../lib/openrouter-models'
 import { serverTools } from '../../lib/tools'
+import { createLangfuseTrace, finishLangfuseObservation, flushLangfuseSafely } from '../../lib/langfuse-tracing.ts'
 
 export const Route = createFileRoute('/api/chat')({
   server: {
@@ -30,6 +31,16 @@ export const Route = createFileRoute('/api/chat')({
         const enableThinking = showThinking && !!selectedModel?.supportsThinking
         const abortController = new AbortController()
         const errorCapture = createOpenRouterErrorCaptureLogger()
+        const langfuseTrace = createLangfuseTrace({
+          name: 'api.chat',
+          model,
+          conversationId,
+          input: messages,
+          metadata: {
+            showThinking,
+            reasoningEnabled: enableThinking,
+          },
+        })
 
         const stream = withOpenRouterErrorMetadata(chat({
           adapter: getChatModel(model),
@@ -52,7 +63,7 @@ export const Route = createFileRoute('/api/chat')({
                 },
               }
             : undefined,
-        }), errorCapture)
+        }), errorCapture, langfuseTrace, request.signal)
 
         return toServerSentEventsResponse(stream, { abortController })
       },
@@ -63,8 +74,11 @@ export const Route = createFileRoute('/api/chat')({
 async function* withOpenRouterErrorMetadata(
   stream: AsyncIterable<StreamChunk>,
   errorCapture: ReturnType<typeof createOpenRouterErrorCaptureLogger>,
+  langfuseTrace?: ReturnType<typeof createLangfuseTrace>,
+  requestSignal?: AbortSignal,
 ): AsyncIterable<StreamChunk> {
   let accumulatedContent = ''
+  let terminalState = false
 
   try {
     for await (const chunk of stream) {
@@ -74,6 +88,14 @@ async function* withOpenRouterErrorMetadata(
       }
 
       if (chunk.type === 'RUN_ERROR') {
+        terminalState = true
+        const error = errorCapture.lastError ?? new Error(chunk.message)
+        finishLangfuseObservation(langfuseTrace?.observation, {
+          status: 'error',
+          startedAt: langfuseTrace?.startedAt,
+          error,
+        })
+        void flushLangfuseSafely()
         yield errorCapture.lastError
           ? {
               ...chunk,
@@ -84,6 +106,13 @@ async function* withOpenRouterErrorMetadata(
       }
 
       if (chunk.type === 'RUN_FINISHED') {
+        terminalState = true
+        finishLangfuseObservation(langfuseTrace?.observation, {
+          status: 'success',
+          startedAt: langfuseTrace?.startedAt,
+          output: accumulatedContent,
+        })
+        void flushLangfuseSafely()
         yield {
           type: 'CUSTOM',
           value: createServerFollowUps(accumulatedContent),
@@ -93,10 +122,27 @@ async function* withOpenRouterErrorMetadata(
       yield chunk
     }
   } catch (error) {
+    terminalState = true
+    finishLangfuseObservation(langfuseTrace?.observation, {
+      status: 'error',
+      startedAt: langfuseTrace?.startedAt,
+      error: errorCapture.lastError ?? error,
+      output: accumulatedContent,
+    })
+    void flushLangfuseSafely()
     yield {
       type: 'RUN_ERROR',
       message: formatOpenRouterError(errorCapture.lastError ?? error),
     } as StreamChunk
+  } finally {
+    if (!terminalState) {
+      finishLangfuseObservation(langfuseTrace?.observation, {
+        status: 'aborted',
+        startedAt: langfuseTrace?.startedAt,
+        output: accumulatedContent,
+      })
+      void flushLangfuseSafely()
+    }
   }
 }
 

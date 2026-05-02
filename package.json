@@ -18,6 +18,7 @@
     "@tanstack/ai-react": "^0.8.0",
     "@tanstack/react-router": "latest",
     "@tanstack/react-start": "latest",
+    "langfuse": "^3.38.20",
     "react": "latest",
     "react-dom": "latest",
     "react-markdown": "^10.1.0",

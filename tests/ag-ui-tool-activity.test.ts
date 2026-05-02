@@ -16,6 +16,7 @@ test('summarizes subagent routing decisions as AG-UI activity rows', () => {
     validationGate: 'Integrator validates findings.',
   })
 
+  assert.ok(summary)
   assert.equal(summary.title, 'Subagent routing')
   assert.deepEqual(summary.rows.slice(0, 4), [
     ['Action', 'spawn_multiple_specialists'],
@@ -34,6 +35,8 @@ test('summarizes github_search with query, type, repo, and result count', () => 
     ],
   })
 
+  assert.ok(summary)
+  assert.ok(summary)
   assert.equal(summary.title, 'GitHub search')
   assert.deepEqual(summary.rows, [
     ['Type', 'prs'],
@@ -52,6 +55,7 @@ test('summarizes github_get requests for PR status details', () => {
     check_runs: [{ name: 'test', status: 'completed', conclusion: 'success' }],
   })
 
+  assert.ok(summary)
   assert.equal(summary.title, 'GitHub details')
   assert.deepEqual(summary.rows, [
     ['Resource', 'check_runs'],
@@ -68,6 +72,7 @@ test('summarizes github_search output even when tool input is absent', () => {
     results: [{ title: 'owner/repo', url: 'https://github.com/owner/repo' }],
   })
 
+  assert.ok(summary)
   assert.equal(summary.title, 'GitHub search')
   assert.deepEqual(summary.rows, [
     ['Type', 'repos'],

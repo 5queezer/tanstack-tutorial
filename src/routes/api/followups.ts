@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { createLangfuseTrace, finishLangfuseObservation, flushLangfuseSafely } from '../../lib/langfuse-tracing.ts'
 
 type FollowUpMessage = {
   role?: string
@@ -29,6 +30,13 @@ export const Route = createFileRoute('/api/followups')({
 
         const messages = (body.messages ?? []).slice(-8)
 
+        const langfuseTrace = createLangfuseTrace({
+          name: 'api.followups',
+          model: body.model,
+          input: messages,
+          metadata: { messageCount: messages.length },
+        })
+
         try {
           const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
             method: 'POST',
@@ -58,9 +66,22 @@ export const Route = createFileRoute('/api/followups')({
           const payload = (await response.json()) as OpenRouterFollowUpResponse
           const content = payload.choices?.[0]?.message?.content ?? ''
           const followUps = parseFollowUps(content)
+          finishLangfuseObservation(langfuseTrace?.observation, {
+            status: 'success',
+            startedAt: langfuseTrace?.startedAt,
+            output: content,
+            metadata: { followUpCount: followUps.length },
+          })
+          void flushLangfuseSafely()
 
           return json({ followUps })
-        } catch {
+        } catch (error) {
+          finishLangfuseObservation(langfuseTrace?.observation, {
+            status: 'error',
+            startedAt: langfuseTrace?.startedAt,
+            error,
+          })
+          void flushLangfuseSafely()
           return json({ followUps: [] })
         }
       },

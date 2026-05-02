@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { requestSearchQueryDef } from './request-search-tool'
 import { githubGet, githubSearch } from './github-tool'
 import { subagentRoute } from './subagent-router'
+import { traceToolCall } from './langfuse-tracing.ts'
 
 export const getWeatherDef = toolDefinition({
   name: 'get_weather',
@@ -74,7 +75,7 @@ const stockBySymbol: Record<string, StockOutput> = {
   SPY: { price: 586.12, change: 0.91, changePercent: 0.16, currency: 'USD', marketState: 'Demo delayed' },
 }
 
-export const getWeather = getWeatherDef.server(async (args) => {
+export const getWeather = getWeatherDef.server(async (args) => traceToolCall('get_weather', args, async () => {
   const { city } = args as WeatherInput
   const key = city.toLowerCase().trim()
   const weather = weatherByCity[key] ?? {
@@ -88,9 +89,9 @@ export const getWeather = getWeatherDef.server(async (args) => {
     city,
     ...weather,
   }
-})
+}))
 
-export const getStockQuote = getStockDef.server(async (args) => {
+export const getStockQuote = getStockDef.server(async (args) => traceToolCall('get_stock_quote', args, async () => {
   const { symbol } = args as StockInput
   const normalizedSymbol = symbol.toUpperCase().trim()
   const quote = stockBySymbol[normalizedSymbol] ?? {
@@ -105,9 +106,9 @@ export const getStockQuote = getStockDef.server(async (args) => {
     symbol: normalizedSymbol,
     ...quote,
   }
-})
+}))
 
-export const braveWebSearch = braveWebSearchDef.server(async (args) => {
+export const braveWebSearch = braveWebSearchDef.server(async (args) => traceToolCall('brave_web_search', args, async () => {
   const { query, count = 5 } = args as BraveWebSearchInput
 
   if (!process.env.BRAVE_API_KEY) {
@@ -139,6 +140,6 @@ export const braveWebSearch = braveWebSearchDef.server(async (args) => {
     query: payload.query?.original,
     results,
   }
-})
+}))
 
 export const serverTools = [getWeather, getStockQuote, braveWebSearch, githubSearch, githubGet, subagentRoute, requestSearchQueryDef]

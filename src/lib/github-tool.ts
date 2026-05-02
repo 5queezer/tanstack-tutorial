@@ -1,5 +1,6 @@
 import { toolDefinition } from '@tanstack/ai'
 import { z } from 'zod'
+import { traceToolCall } from './langfuse-tracing.ts'
 
 type GitHubSearchInput = {
   query: string
@@ -136,7 +137,7 @@ async function githubJson(path: string) {
   return response.json()
 }
 
-export const githubSearch = githubSearchDef.server(async (args) => {
+export const githubSearch = githubSearchDef.server(async (args) => traceToolCall('github_search', args, async () => {
   const input = args as GitHubSearchInput
   const payload = await githubJson(buildGitHubSearchPath(input))
   return {
@@ -144,10 +145,10 @@ export const githubSearch = githubSearchDef.server(async (args) => {
     query: input.query,
     results: compactGitHubItems(payload.items ?? []),
   }
-})
+}))
 
-export const githubGet = githubGetDef.server(async (args) => {
+export const githubGet = githubGetDef.server(async (args) => traceToolCall('github_get', args, async () => {
   const input = args as GitHubGetInput
   const payload = await githubJson(buildGitHubGetPath(input))
   return Array.isArray(payload) ? compactGitHubItems(payload) : payload
-})
+}))

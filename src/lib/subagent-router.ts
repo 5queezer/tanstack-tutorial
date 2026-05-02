@@ -1,5 +1,6 @@
 import { toolDefinition } from '@tanstack/ai'
 import { z } from 'zod'
+import { traceToolCall } from './langfuse-tracing.ts'
 
 export type RoutingLevel = 'low' | 'medium' | 'high'
 export type SubagentAction =
@@ -85,4 +86,4 @@ function note(
   return { promptClass, complexity, domainBreadth, subtaskIndependence, verificationBurden, costLatencyPrivacyRisk, chosenAction, rationale, validationGate }
 }
 
-export const subagentRoute = subagentRouteDef.server(async (args) => routeSubagentRequest((args as { prompt: string }).prompt))
+export const subagentRoute = subagentRouteDef.server(async (args) => traceToolCall('route_subagents', args, async () => routeSubagentRequest((args as { prompt: string }).prompt)))
