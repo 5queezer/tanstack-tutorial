@@ -1,6 +1,7 @@
 import { chat } from '@tanstack/ai'
 
 import { getChatModel } from './ai.ts'
+import { braveWebSearch } from './brave-tool.ts'
 import { githubGet, githubSearch } from './github-tool.ts'
 import type { SubagentAction, SubagentRoutingNote } from './subagent-router.ts'
 
@@ -100,12 +101,9 @@ function requireText(value: string, field: string) {
   if (!value?.trim()) throw new Error(`${field} is required`)
 }
 
-async function getAllowedWorkerTools(names: Array<AllowedSubagentTool>) {
+function getAllowedWorkerTools(names: Array<AllowedSubagentTool>) {
   const tools = []
-  if (names.includes('brave_web_search')) {
-    const { braveWebSearch } = await import('./tools.ts')
-    tools.push(braveWebSearch)
-  }
+  if (names.includes('brave_web_search')) tools.push(braveWebSearch)
   if (names.includes('github_search')) tools.push(githubSearch)
   if (names.includes('github_get')) tools.push(githubGet)
   return tools
@@ -117,7 +115,7 @@ async function runModelWorker(brief: SubagentWorkerBrief, input: RunSubagentsInp
   const output = await chat({
     adapter: getChatModel(input.model),
     stream: false,
-    tools: await getAllowedWorkerTools(brief.allowedTools),
+    tools: getAllowedWorkerTools(brief.allowedTools),
     systemPrompts: [
       'You are a bounded specialist subagent. Complete only the assigned brief. Use only allowed tools. Do not implement code or mutate state. Return concise findings with evidence and uncertainty.',
     ],
