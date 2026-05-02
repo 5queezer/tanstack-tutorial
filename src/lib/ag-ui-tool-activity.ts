@@ -22,6 +22,24 @@ export function summarizeToolActivity(toolName: string, input: any, output: any)
     }
   }
 
+  if (toolName === 'run_subagents') {
+    const workers = output.workers ?? []
+    const completed = workers.filter((worker: any) => worker.status === 'completed').length
+    const failed = workers.filter((worker: any) => worker.status === 'failed').length
+
+    return {
+      title: 'Subagent execution',
+      rows: [
+        ['Action', String(output.action)],
+        ['Workers', String(workers.length)],
+        ['Completed', String(completed)],
+        ['Failed', String(failed)],
+        ...workers.map((worker: any) => [String(worker.name), String(worker.status)] as [string, string]),
+        ['Integration', String(output.integrationHint)],
+      ],
+    }
+  }
+
   if (toolName === 'github_search') {
     const results = output.results ?? []
     return {
