@@ -54,7 +54,7 @@ export const Route = createFileRoute('/api/chat')({
             'Helpful assistant. Tools: get_weather weather, get_stock_quote stocks/tickers, brave_web_search current/recent/docs/web, github_search GitHub issues/PRs/code/repos/users, github_get GitHub issue/PR/comments/reviews/files/commits/status/checks/actions. Missing/ambiguous search: call request_search_query then brave_web_search. Say weather/stock data is demo when relevant. Cite Brave/GitHub URLs. For subagent execution, integrate worker findings and mention failures, verification status, or uncertainty.',
             createSubagentSystemPrompt(subagentMode),
           ],
-          tools: getServerTools(subagentMode),
+          tools: getServerTools(subagentMode, model),
           debug: {
             errors: true,
             logger: errorCapture.logger,

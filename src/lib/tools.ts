@@ -1,9 +1,9 @@
-import { chat } from '@tanstack/ai'
-import { toolDefinition } from '@tanstack/ai'
+import { chat, toolDefinition, type ToolExecutionContext } from '@tanstack/ai'
 import {
-  createDelegateSubagentsTool,
-  createRunSubagentsTool,
   createSubagentRouterTool,
+  delegateSubagentsInputSchema,
+  runSubagents,
+  runSubagentsInputSchema,
   type RunSubagentsResult,
   type RunSubagentsInput,
 } from '@5queezer/tanstack-ai-subagents'
@@ -13,6 +13,7 @@ import { braveWebSearch } from './brave-tool.ts'
 import { requestSearchQueryDef } from './request-search-tool.ts'
 import { githubGet, githubSearch } from './github-tool.ts'
 import { traceToolCall } from './langfuse-tracing.ts'
+import { createSubagentLifecycleCallbacks } from './subagent-live-activity.ts'
 import type { SubagentMode } from './subagent-modes.ts'
 
 export const getWeatherDef = toolDefinition({
@@ -119,55 +120,97 @@ export const getStockQuote = getStockDef.server(async (args) => traceToolCall('g
 
 export const subagentRoute = createSubagentRouterTool({ trace: traceToolCall })
 
-export const runSubagentsTool = createRunSubagentsTool<WorkerToolName, WorkerTool, ReturnType<typeof getChatModel>>({
-  chat,
-  getAdapter: getChatModel,
-  tools: subagentTools,
-  profiles: subagentProfiles,
-  maxWorkers: 4,
-  policy: { maxDepth: 3 },
-  trace: traceToolCall,
+const runSubagentsDef = toolDefinition({
+  name: 'run_subagents',
+  description: 'Run bounded specialist subagents after route_subagents chooses a spawn action.',
+  inputSchema: runSubagentsInputSchema,
 })
 
-export const verifiedRunSubagentsTool = createRunSubagentsTool<WorkerToolName, WorkerTool, ReturnType<typeof getChatModel>>({
-  chat,
-  getAdapter: getChatModel,
-  tools: subagentTools,
-  profiles: subagentProfiles,
-  maxWorkers: 4,
-  policy: { requireVerification: true, maxDepth: 3 },
-  trace: traceToolCall,
-  verifier: async (result: RunSubagentsResult, input: RunSubagentsInput<WorkerToolName>) => ({
-    status: result.workers.every((worker) => worker.status === 'completed') ? 'verified' : 'needs_review',
+export const runSubagentsTool = createRunSubagentsTool(false)
+
+export const verifiedRunSubagentsTool = createRunSubagentsTool(true)
+
+const delegateSubagentsDef = toolDefinition({
+  name: 'delegate_subagents',
+  description: 'Let the model directly delegate to bounded specialist subagents. Use when independent read-only workers can improve the answer.',
+  inputSchema: delegateSubagentsInputSchema,
+})
+
+export const delegateSubagentsTool = createDelegateSubagentsTool()
+
+function createRunSubagentsTool(verified: boolean, selectedModel?: string) {
+  return runSubagentsDef.server(async (args, context) => traceToolCall('run_subagents', args, async () => runSubagents(
+    withSelectedSubagentModel(args as RunSubagentsInput<WorkerToolName>, selectedModel),
+    createRunSubagentsOptions(context, verified),
+  )))
+}
+
+function createDelegateSubagentsTool(selectedModel?: string) {
+  return delegateSubagentsDef.server(async (args, context) => traceToolCall('delegate_subagents', args, async () => {
+    const input = withSelectedSubagentModel(args as RunSubagentsInput<WorkerToolName>, selectedModel)
+    return runSubagents({
+      ...input,
+      routingNote: modelChosenRoutingNote(input.workers.length),
+    }, createRunSubagentsOptions(context, true, true))
+  }))
+}
+
+export function withSelectedSubagentModel<TToolName extends string>(input: RunSubagentsInput<TToolName>, selectedModel?: string): RunSubagentsInput<TToolName> {
+  return input.model || !selectedModel ? input : { ...input, model: selectedModel }
+}
+
+function createRunSubagentsOptions(context: ToolExecutionContext | undefined, verified: boolean, modelDelegated = false) {
+  return {
+    chat,
+    getAdapter: getChatModel,
+    tools: subagentTools,
+    profiles: subagentProfiles,
+    maxWorkers: 4,
+    policy: { ...(verified ? { requireVerification: true } : {}), maxDepth: 3 },
+    ...(context ? createSubagentLifecycleCallbacks(context) : {}),
+    ...(verified ? { verifier: modelDelegated ? verifyModelDelegatedRun : verifyRoutedRun } : {}),
+  }
+}
+
+async function verifyRoutedRun(result: RunSubagentsResult, input: RunSubagentsInput<WorkerToolName>) {
+  return {
+    status: result.workers.every((worker) => worker.status === 'completed') ? 'verified' as const : 'needs_review' as const,
     summary: result.workers.every((worker) => worker.status === 'completed')
       ? `Verified ${result.topology} delegation against ${input.routingNote.validationGate}`
       : 'One or more workers failed; review gaps before integrating.',
     checkedWorkers: result.workers.map((worker) => worker.name),
-  }),
-})
+  }
+}
 
-export const delegateSubagentsTool = createDelegateSubagentsTool<WorkerToolName, WorkerTool, ReturnType<typeof getChatModel>>({
-  chat,
-  getAdapter: getChatModel,
-  tools: subagentTools,
-  profiles: subagentProfiles,
-  maxWorkers: 4,
-  policy: { requireVerification: true, maxDepth: 3 },
-  trace: traceToolCall,
-  verifier: async (result) => ({
-    status: result.workers.every((worker) => worker.status === 'completed') ? 'verified' : 'needs_review',
+async function verifyModelDelegatedRun(result: RunSubagentsResult) {
+  return {
+    status: result.workers.every((worker) => worker.status === 'completed') ? 'verified' as const : 'needs_review' as const,
     summary: `Verified model-directed ${result.topology} delegation before integration.`,
     checkedWorkers: result.workers.map((worker) => worker.name),
-  }),
-})
+  }
+}
+
+function modelChosenRoutingNote(workerCount: number): RunSubagentsInput['routingNote'] {
+  return {
+    promptClass: 'model-delegated',
+    complexity: workerCount > 1 ? 'high' : 'medium',
+    domainBreadth: workerCount > 1 ? 'multi-domain' : 'single-domain',
+    subtaskIndependence: workerCount > 1 ? 'high' : 'medium',
+    verificationBurden: 'medium',
+    costLatencyPrivacyRisk: 'medium',
+    chosenAction: workerCount > 1 ? 'spawn_multiple_specialists' : 'spawn_one_specialist',
+    rationale: 'The model selected bounded subagent delegation through a validated tool call.',
+    validationGate: 'The calling application validates worker findings before presenting the final answer.',
+  }
+}
 
 const baseServerTools = [getWeather, getStockQuote, braveWebSearch, githubSearch, githubGet]
 
-export function getServerTools(mode: SubagentMode) {
+export function getServerTools(mode: SubagentMode, selectedModel?: string) {
   if (mode === 'deterministic_routing') return [...baseServerTools, subagentRoute, requestSearchQueryDef]
-  if (mode === 'model_delegated') return [...baseServerTools, delegateSubagentsTool, requestSearchQueryDef]
-  if (mode === 'staged_dag_verified') return [...baseServerTools, subagentRoute, verifiedRunSubagentsTool, requestSearchQueryDef]
-  return [...baseServerTools, subagentRoute, runSubagentsTool, requestSearchQueryDef]
+  if (mode === 'model_delegated') return [...baseServerTools, createDelegateSubagentsTool(selectedModel), requestSearchQueryDef]
+  if (mode === 'staged_dag_verified') return [...baseServerTools, subagentRoute, createRunSubagentsTool(true, selectedModel), requestSearchQueryDef]
+  return [...baseServerTools, subagentRoute, createRunSubagentsTool(false, selectedModel), requestSearchQueryDef]
 }
 
 export const serverTools = getServerTools('staged_dag_verified')

@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode, type SubmitEventH
 import type { FollowUpMode, SubagentMode, UiChatModel } from './chat/types'
 import { summarizeToolActivity, type ToolActivitySummary } from '../lib/ag-ui-tool-activity'
 import { normalizeSubagentMode, subagentModeOptions } from '../lib/subagent-modes'
+import { isSubagentActivityEvent, updateSubagentActivity, type SubagentActivityItem } from '../lib/subagent-live-activity'
 import { parseMarkdownBlocks, parseMarkdownInline, type MarkdownBlock } from '../lib/markdown-lite'
 import { typingDotDelays } from '../lib/typing-indicator'
 
@@ -143,6 +144,33 @@ function Metric({ label, value }: { label: string; value: string }) {
   )
 }
 
+function SubagentActivityPanel({ items }: { items: Array<SubagentActivityItem> }) {
+  if (items.length === 0) return null
+
+  return (
+    <div style={{ display: 'grid', gap: '0.45rem', padding: '0.65rem', borderRadius: 12, border: '1px solid #d7e6fa', background: '#f7fbff', fontSize: 13 }}>
+      <strong>Subagents</strong>
+      <div style={{ display: 'grid', gap: '0.35rem' }}>
+        {items.map((item) => (
+          <div key={item.name} style={{ display: 'grid', gridTemplateColumns: '1rem 1fr auto', alignItems: 'center', gap: '0.45rem' }}>
+            <span
+              className={item.status === 'running' ? 'subagent-dot' : undefined}
+              style={{
+                color: item.status === 'failed' ? 'crimson' : item.status === 'completed' ? '#147a35' : '#2563eb',
+                fontWeight: 800,
+              }}
+            >
+              {item.status === 'running' ? '●' : item.status === 'completed' ? '✓' : '×'}
+            </span>
+            <span style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace' }}>{item.name}</span>
+            <span style={{ color: item.status === 'failed' ? 'crimson' : '#555' }}>{item.error ?? item.status}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 function ActivitySummary({ summary }: { summary: ToolActivitySummary }) {
   return (
     <div style={{ display: 'grid', gap: '0.4rem', padding: '0.55rem', borderRadius: 10, background: '#fff' }}>
@@ -264,6 +292,7 @@ export function Chat() {
   const [subagentMode, setSubagentMode] = useState<SubagentMode>('deterministic_routing')
   const [modelFollowUps, setModelFollowUps] = useState<Array<string>>([])
   const [agUiFollowUps, setAgUiFollowUps] = useState<Array<string>>([])
+  const [subagentActivity, setSubagentActivity] = useState<Array<SubagentActivityItem>>([])
   const [pendingSearchPrompt, setPendingSearchPrompt] = useState<string | undefined>()
   const [interactiveSearchInput, setInteractiveSearchInput] = useState('')
   const searchQueryResolverRef = useRef<((result: { query: string }) => void) | undefined>(undefined)
@@ -284,7 +313,12 @@ export function Chat() {
     connection: fetchServerSentEvents('/api/chat'),
     body: { model: selectedModel, showThinking: showThinking && thinkingAvailable, subagentMode },
     tools: [interactiveSearchTool],
-    onCustomEvent(_eventName, value) {
+    onCustomEvent(eventName, value) {
+      if (eventName === 'subagent:worker' && isSubagentActivityEvent(value)) {
+        setSubagentActivity((items) => updateSubagentActivity(items, value))
+        return
+      }
+
       setAgUiFollowUps(value as Array<string>)
     },
   })
@@ -397,6 +431,7 @@ export function Chat() {
     const text = input.trim()
     if (!text) return
 
+    setSubagentActivity([])
     sendMessage(text)
     setInput('')
   }
@@ -413,7 +448,7 @@ export function Chat() {
 
   return (
     <>
-      <style>{`@keyframes typing-dot{0%,80%,100%{opacity:.35;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}`}</style>
+      <style>{`@keyframes typing-dot{0%,80%,100%{opacity:.35;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}@keyframes subagent-pulse{0%,100%{opacity:.35;transform:scale(.85)}50%{opacity:1;transform:scale(1.15)}}.subagent-dot{display:inline-block;animation:subagent-pulse 1s ease-in-out infinite}`}</style>
       <main
         style={{
           height: '100vh',
@@ -652,6 +687,14 @@ export function Chat() {
                     </article>
                     )
                   })}
+
+                  {subagentActivity.length > 0 ? (
+                    <article style={{ display: 'flex', justifyContent: 'flex-start' }}>
+                      <div style={{ width: 'min(560px, 100%)' }}>
+                        <SubagentActivityPanel items={subagentActivity} />
+                      </div>
+                    </article>
+                  ) : null}
 
                   {pendingSearchPrompt ? (
                     <article style={{ display: 'flex', justifyContent: 'flex-start' }}>

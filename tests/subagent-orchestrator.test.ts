@@ -142,3 +142,11 @@ test('registers subagent package tools in server tool sets', async () => {
   assert.ok(getServerTools('route_then_run').some((tool: any) => tool.name === 'run_subagents'))
   assert.ok(getServerTools('model_delegated').some((tool: any) => tool.name === 'delegate_subagents'))
 })
+
+test('server subagent tools inject the selected chat model when tool input omits model', async () => {
+  const { withSelectedSubagentModel } = await import('../src/lib/tools.ts')
+  const request = input('spawn_multiple_specialists', [worker('kernel'), worker('tls')])
+  delete request.model
+
+  assert.equal(withSelectedSubagentModel(request, 'openrouter/selected').model, 'openrouter/selected')
+})

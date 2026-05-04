@@ -46,17 +46,7 @@ export const Route = createFileRoute('/api/followups')({
             },
             body: JSON.stringify({
               model: body.model,
-              messages: [
-                {
-                  role: 'system',
-                  content:
-                    'Return JSON with 3 short follow-up questions: {"followUps":["..."]}.',
-                },
-                {
-                  role: 'user',
-                  content: messages.map((message) => `${message.role}: ${message.content}`).join('\n\n'),
-                },
-              ],
+              messages: createFollowUpMessages(messages),
               max_tokens: 180,
               response_format: { type: 'json_object' },
             }),
@@ -88,6 +78,19 @@ export const Route = createFileRoute('/api/followups')({
     },
   },
 })
+
+export function createFollowUpMessages(messages: Array<FollowUpMessage>) {
+  return [
+    {
+      role: 'system' as const,
+      content: 'Return JSON only with exactly 3 short follow-up questions: {"followUps":["..."]}. Base every question on the actual conversation, especially the latest user request and assistant answer. Make questions specific, relevant, and useful next steps. Do not suggest generic prompts, unrelated topics, or actions not implied by the conversation.',
+    },
+    {
+      role: 'user' as const,
+      content: `Actual conversation:\n${messages.map((message) => `${message.role}: ${message.content}`).join('\n\n')}\n\nPropose relevant follow-up questions for this exact conversation.`,
+    },
+  ]
+}
 
 function parseFollowUps(content: string) {
   try {
