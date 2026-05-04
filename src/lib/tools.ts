@@ -1,11 +1,19 @@
+import { chat } from '@tanstack/ai'
 import { toolDefinition } from '@tanstack/ai'
+import {
+  createDelegateSubagentsTool,
+  createRunSubagentsTool,
+  createSubagentRouterTool,
+  type RunSubagentsResult,
+  type RunSubagentsInput,
+} from '@5queezer/tanstack-ai-subagents'
 import { z } from 'zod'
-import { braveWebSearch, braveWebSearchDef } from './brave-tool.ts'
+import { getChatModel } from './ai.ts'
+import { braveWebSearch } from './brave-tool.ts'
 import { requestSearchQueryDef } from './request-search-tool.ts'
 import { githubGet, githubSearch } from './github-tool.ts'
-import { runSubagents } from './subagent-orchestrator.ts'
-import { subagentRoute } from './subagent-router.ts'
 import { traceToolCall } from './langfuse-tracing.ts'
+import type { SubagentMode } from './subagent-modes.ts'
 
 export const getWeatherDef = toolDefinition({
   name: 'get_weather',
@@ -39,6 +47,10 @@ type StockOutput = {
   marketState: string
 }
 
+type WorkerToolName = 'brave_web_search' | 'github_search' | 'github_get'
+
+type WorkerTool = typeof braveWebSearch | typeof githubSearch | typeof githubGet
+
 const weatherByCity: Record<string, WeatherOutput> = {
   berlin: { condition: 'Partly cloudy', temperatureC: 18, humidity: 62, windKph: 14 },
   london: { condition: 'Light rain', temperatureC: 15, humidity: 78, windKph: 18 },
@@ -53,6 +65,23 @@ const stockBySymbol: Record<string, StockOutput> = {
   NVDA: { price: 128.93, change: 3.21, changePercent: 2.55, currency: 'USD', marketState: 'Demo delayed' },
   TSLA: { price: 244.81, change: -5.44, changePercent: -2.17, currency: 'USD', marketState: 'Demo delayed' },
   SPY: { price: 586.12, change: 0.91, changePercent: 0.16, currency: 'USD', marketState: 'Demo delayed' },
+}
+
+const subagentTools: Record<WorkerToolName, WorkerTool> = {
+  brave_web_search: braveWebSearch,
+  github_search: githubSearch,
+  github_get: githubGet,
+}
+
+const subagentProfiles = {
+  research: {
+    toolNames: ['brave_web_search', 'github_search', 'github_get'] as WorkerToolName[],
+    systemPrompt: 'Research the assigned subtask with read-only web and GitHub tools. Return concise findings with evidence URLs and uncertainty.',
+  },
+  verify: {
+    toolNames: ['github_search', 'github_get'] as WorkerToolName[],
+    systemPrompt: 'Verify worker findings against GitHub evidence. Return exact evidence, gaps, and whether the finding is ready to integrate.',
+  },
 }
 
 export const getWeather = getWeatherDef.server(async (args) => traceToolCall('get_weather', args, async () => {
@@ -88,34 +117,57 @@ export const getStockQuote = getStockDef.server(async (args) => traceToolCall('g
   }
 }))
 
-export const runSubagentsDef = toolDefinition({
-  name: 'run_subagents',
-  description: 'Run bounded read-only specialist subagents after route_subagents chooses a spawn action.',
-  inputSchema: z.object({
-    originalPrompt: z.string(),
-    model: z.string().optional(),
-    routingNote: z.object({
-      promptClass: z.enum(['question', 'research', 'implementation', 'review', 'debugging', 'optimization', 'operations']),
-      complexity: z.enum(['low', 'medium', 'high']),
-      domainBreadth: z.enum(['single-domain', 'multi-domain']),
-      subtaskIndependence: z.enum(['low', 'medium', 'high']),
-      verificationBurden: z.enum(['low', 'medium', 'high']),
-      costLatencyPrivacyRisk: z.enum(['low', 'medium', 'high']),
-      chosenAction: z.enum(['answer_directly', 'use_tools', 'write_plan_first', 'spawn_one_specialist', 'spawn_multiple_specialists', 'reject_clarify_escalate']),
-      rationale: z.string(),
-      validationGate: z.string(),
-    }),
-    workers: z.array(z.object({
-      name: z.string(),
-      objective: z.string(),
-      scope: z.string(),
-      nonGoals: z.string(),
-      allowedTools: z.array(z.enum(['brave_web_search', 'github_search', 'github_get'])),
-      expectedOutput: z.string(),
-    })).min(1).max(4),
+export const subagentRoute = createSubagentRouterTool({ trace: traceToolCall })
+
+export const runSubagentsTool = createRunSubagentsTool<WorkerToolName, WorkerTool, ReturnType<typeof getChatModel>>({
+  chat,
+  getAdapter: getChatModel,
+  tools: subagentTools,
+  profiles: subagentProfiles,
+  maxWorkers: 4,
+  policy: { maxDepth: 3 },
+  trace: traceToolCall,
+})
+
+export const verifiedRunSubagentsTool = createRunSubagentsTool<WorkerToolName, WorkerTool, ReturnType<typeof getChatModel>>({
+  chat,
+  getAdapter: getChatModel,
+  tools: subagentTools,
+  profiles: subagentProfiles,
+  maxWorkers: 4,
+  policy: { requireVerification: true, maxDepth: 3 },
+  trace: traceToolCall,
+  verifier: async (result: RunSubagentsResult, input: RunSubagentsInput<WorkerToolName>) => ({
+    status: result.workers.every((worker) => worker.status === 'completed') ? 'verified' : 'needs_review',
+    summary: result.workers.every((worker) => worker.status === 'completed')
+      ? `Verified ${result.topology} delegation against ${input.routingNote.validationGate}`
+      : 'One or more workers failed; review gaps before integrating.',
+    checkedWorkers: result.workers.map((worker) => worker.name),
   }),
 })
 
-export const runSubagentsTool = runSubagentsDef.server(async (args) => traceToolCall('run_subagents', args, async () => runSubagents(args as any)))
+export const delegateSubagentsTool = createDelegateSubagentsTool<WorkerToolName, WorkerTool, ReturnType<typeof getChatModel>>({
+  chat,
+  getAdapter: getChatModel,
+  tools: subagentTools,
+  profiles: subagentProfiles,
+  maxWorkers: 4,
+  policy: { requireVerification: true, maxDepth: 3 },
+  trace: traceToolCall,
+  verifier: async (result) => ({
+    status: result.workers.every((worker) => worker.status === 'completed') ? 'verified' : 'needs_review',
+    summary: `Verified model-directed ${result.topology} delegation before integration.`,
+    checkedWorkers: result.workers.map((worker) => worker.name),
+  }),
+})
 
-export const serverTools = [getWeather, getStockQuote, braveWebSearch, githubSearch, githubGet, subagentRoute, runSubagentsTool, requestSearchQueryDef]
+const baseServerTools = [getWeather, getStockQuote, braveWebSearch, githubSearch, githubGet]
+
+export function getServerTools(mode: SubagentMode) {
+  if (mode === 'deterministic_routing') return [...baseServerTools, subagentRoute, requestSearchQueryDef]
+  if (mode === 'model_delegated') return [...baseServerTools, delegateSubagentsTool, requestSearchQueryDef]
+  if (mode === 'staged_dag_verified') return [...baseServerTools, subagentRoute, verifiedRunSubagentsTool, requestSearchQueryDef]
+  return [...baseServerTools, subagentRoute, runSubagentsTool, requestSearchQueryDef]
+}
+
+export const serverTools = getServerTools('staged_dag_verified')

@@ -85,10 +85,16 @@ test('summarizes github_search output even when tool input is absent', () => {
 test('summarizes run_subagents worker execution', () => {
   const summary = summarizeToolActivity('run_subagents', undefined, {
     action: 'spawn_multiple_specialists',
+    topology: 'staged_dag',
     workers: [
       { name: 'frontend', status: 'completed', output: 'Frontend OK' },
       { name: 'backend', status: 'failed', output: '', error: 'timeout' },
     ],
+    verification: {
+      status: 'needs_review',
+      summary: 'Backend timed out.',
+      checkedWorkers: ['frontend', 'backend'],
+    },
     integrationHint: 'Integrate completed worker findings.',
   })
 
@@ -96,9 +102,12 @@ test('summarizes run_subagents worker execution', () => {
   assert.equal(summary.title, 'Subagent execution')
   assert.deepEqual(summary.rows, [
     ['Action', 'spawn_multiple_specialists'],
+    ['Topology', 'staged_dag'],
     ['Workers', '2'],
     ['Completed', '1'],
     ['Failed', '1'],
+    ['Verified', 'needs_review'],
+    ['Verifier', 'Backend timed out.'],
     ['frontend', 'completed'],
     ['backend', 'failed'],
     ['Integration', 'Integrate completed worker findings.'],

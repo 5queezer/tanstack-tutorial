@@ -22,18 +22,23 @@ export function summarizeToolActivity(toolName: string, input: any, output: any)
     }
   }
 
-  if (toolName === 'run_subagents') {
+  if (toolName === 'run_subagents' || toolName === 'delegate_subagents') {
     const workers = output.workers ?? []
     const completed = workers.filter((worker: any) => worker.status === 'completed').length
     const failed = workers.filter((worker: any) => worker.status === 'failed').length
 
     return {
-      title: 'Subagent execution',
+      title: toolName === 'delegate_subagents' ? 'Subagent delegation' : 'Subagent execution',
       rows: [
         ['Action', String(output.action)],
+        ...(output.topology ? [['Topology', String(output.topology)] as [string, string]] : []),
         ['Workers', String(workers.length)],
         ['Completed', String(completed)],
         ['Failed', String(failed)],
+        ...(output.verification ? [
+          ['Verified', String(output.verification.status)] as [string, string],
+          ['Verifier', String(output.verification.summary)] as [string, string],
+        ] : []),
         ...workers.map((worker: any) => [String(worker.name), String(worker.status)] as [string, string]),
         ['Integration', String(output.integrationHint)],
       ],

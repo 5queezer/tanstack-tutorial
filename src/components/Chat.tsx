@@ -1,7 +1,8 @@
 import { fetchServerSentEvents, useChat } from '@tanstack/ai-react'
 import { useEffect, useMemo, useRef, useState, type ReactNode, type SubmitEventHandler } from 'react'
-import type { FollowUpMode, UiChatModel } from './chat/types'
+import type { FollowUpMode, SubagentMode, UiChatModel } from './chat/types'
 import { summarizeToolActivity, type ToolActivitySummary } from '../lib/ag-ui-tool-activity'
+import { normalizeSubagentMode, subagentModeOptions } from '../lib/subagent-modes'
 import { parseMarkdownBlocks, parseMarkdownInline, type MarkdownBlock } from '../lib/markdown-lite'
 import { typingDotDelays } from '../lib/typing-indicator'
 
@@ -44,6 +45,7 @@ const STORAGE_KEYS = {
   freeOnly: 'tc:f',
   showThinking: 'tc:t',
   followUpMode: 'tc:u',
+  subagentMode: 'tc:s',
 } as const
 
 
@@ -259,6 +261,7 @@ export function Chat() {
   const [showThinking, setShowThinking] = useState(false)
   const [settingsLoaded, setSettingsLoaded] = useState(false)
   const [followUpMode, setFollowUpMode] = useState<FollowUpMode>('h')
+  const [subagentMode, setSubagentMode] = useState<SubagentMode>('deterministic_routing')
   const [modelFollowUps, setModelFollowUps] = useState<Array<string>>([])
   const [agUiFollowUps, setAgUiFollowUps] = useState<Array<string>>([])
   const [pendingSearchPrompt, setPendingSearchPrompt] = useState<string | undefined>()
@@ -279,7 +282,7 @@ export function Chat() {
   } as any
   const { messages, sendMessage, isLoading, error, stop } = useChat({
     connection: fetchServerSentEvents('/api/chat'),
-    body: { model: selectedModel, showThinking: showThinking && thinkingAvailable },
+    body: { model: selectedModel, showThinking: showThinking && thinkingAvailable, subagentMode },
     tools: [interactiveSearchTool],
     onCustomEvent(_eventName, value) {
       setAgUiFollowUps(value as Array<string>)
@@ -310,6 +313,7 @@ export function Chat() {
     setFreeOnly(localStorage.getItem(STORAGE_KEYS.freeOnly) === 'true')
     setShowThinking(localStorage.getItem(STORAGE_KEYS.showThinking) === 'true')
     setFollowUpMode((localStorage.getItem(STORAGE_KEYS.followUpMode) as FollowUpMode) ?? 'h')
+    setSubagentMode(normalizeSubagentMode(localStorage.getItem(STORAGE_KEYS.subagentMode)))
     setSettingsLoaded(true)
   }, [])
 
@@ -354,7 +358,8 @@ export function Chat() {
     localStorage.setItem(STORAGE_KEYS.freeOnly, String(freeOnly))
     localStorage.setItem(STORAGE_KEYS.showThinking, String(showThinking))
     localStorage.setItem(STORAGE_KEYS.followUpMode, followUpMode)
-  }, [selectedModel, freeOnly, showThinking, followUpMode, settingsLoaded])
+    localStorage.setItem(STORAGE_KEYS.subagentMode, subagentMode)
+  }, [selectedModel, freeOnly, showThinking, followUpMode, subagentMode, settingsLoaded])
 
   useEffect(() => {
     if (followUpMode !== 'm' || isLoading || !selectedModel || messages.length === 0) return
@@ -479,6 +484,26 @@ export function Chat() {
                 <option value="m">Model</option>
                 <option value="a">AG-UI</option>
                 <option value="o">Off</option>
+              </select>
+            </div>
+
+            <div style={{ display: 'grid', gap: 4, fontSize: 14 }}>
+              <span>Subagents</span>
+              <select
+                value={subagentMode}
+                onChange={(event) => setSubagentMode(normalizeSubagentMode(event.target.value))}
+                disabled={isLoading}
+                style={{
+                  height: 38,
+                  padding: '0 0.65rem',
+                  border: '1px solid #ccc',
+                  borderRadius: 8,
+                  background: '#fff',
+                }}
+              >
+                {subagentModeOptions.map((option) => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
               </select>
             </div>
 
@@ -609,7 +634,7 @@ export function Chat() {
                                   fontSize: 13,
                                 }}
                               >
-                                <strong>{toolName === 'get_weather' ? 'Weather' : toolName === 'get_stock_quote' ? 'Stock' : toolName === 'brave_web_search' ? 'Search' : toolName === 'github_search' ? 'GitHub search' : toolName === 'github_get' ? 'GitHub details' : toolName === 'route_subagents' ? 'Subagent routing' : toolName === 'request_search_query' ? 'Search query' : toolName}</strong>
+                                <strong>{toolName === 'get_weather' ? 'Weather' : toolName === 'get_stock_quote' ? 'Stock' : toolName === 'brave_web_search' ? 'Search' : toolName === 'github_search' ? 'GitHub search' : toolName === 'github_get' ? 'GitHub details' : toolName === 'route_subagents' ? 'Subagent routing' : toolName === 'run_subagents' ? 'Subagent execution' : toolName === 'delegate_subagents' ? 'Subagent delegation' : toolName === 'request_search_query' ? 'Search query' : toolName}</strong>
                                 <span style={{ color: isUser ? '#ddd' : '#555' }}>{tool.state}</span>
                                 <ToolWidget toolName={toolName} input={tool.input} output={tool.output} />
                               </div>

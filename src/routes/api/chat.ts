@@ -4,8 +4,9 @@ import type { StreamChunk } from '@tanstack/ai'
 
 import { getChatModel } from '../../lib/ai'
 import { getOpenRouterModel } from '../../lib/openrouter-models'
-import { serverTools } from '../../lib/tools'
+import { getServerTools } from '../../lib/tools'
 import { createLangfuseTrace, finishLangfuseObservation, flushLangfuseSafely } from '../../lib/langfuse-tracing.ts'
+import { createSubagentSystemPrompt, normalizeSubagentMode } from '../../lib/subagent-modes.ts'
 
 export const Route = createFileRoute('/api/chat')({
   server: {
@@ -23,6 +24,7 @@ export const Route = createFileRoute('/api/chat')({
         const conversationId = body.conversationId ?? body.data?.conversationId
         const model = body.model ?? body.data?.model
         const showThinking = !!(body.showThinking ?? body.data?.showThinking)
+        const subagentMode = normalizeSubagentMode(body.subagentMode ?? body.data?.subagentMode)
 
         if (typeof model !== 'string' || !model) {
           return new Response(JSON.stringify({ error: 'No model selected' }), { status: 400 })
@@ -39,6 +41,7 @@ export const Route = createFileRoute('/api/chat')({
           metadata: {
             showThinking,
             reasoningEnabled: enableThinking,
+            subagentMode,
           },
         })
 
@@ -48,9 +51,10 @@ export const Route = createFileRoute('/api/chat')({
           conversationId,
           abortController,
           systemPrompts: [
-            'Helpful assistant. Tools: get_weather weather, get_stock_quote stocks/tickers, brave_web_search current/recent/docs/web, github_search GitHub issues/PRs/code/repos/users, github_get GitHub issue/PR/comments/reviews/files/commits/status/checks/actions, route_subagents decide direct/tools/plan/subagents/escalate, run_subagents execute bounded read-only specialists only after route_subagents returns spawn_one_specialist or spawn_multiple_specialists. Missing/ambiguous search: call request_search_query then brave_web_search. Say weather/stock data is demo when relevant. Cite Brave/GitHub URLs. For subagent execution, the main assistant integrates worker findings and mentions worker failures or uncertainty.',
+            'Helpful assistant. Tools: get_weather weather, get_stock_quote stocks/tickers, brave_web_search current/recent/docs/web, github_search GitHub issues/PRs/code/repos/users, github_get GitHub issue/PR/comments/reviews/files/commits/status/checks/actions. Missing/ambiguous search: call request_search_query then brave_web_search. Say weather/stock data is demo when relevant. Cite Brave/GitHub URLs. For subagent execution, integrate worker findings and mention failures, verification status, or uncertainty.',
+            createSubagentSystemPrompt(subagentMode),
           ],
-          tools: serverTools,
+          tools: getServerTools(subagentMode),
           debug: {
             errors: true,
             logger: errorCapture.logger,

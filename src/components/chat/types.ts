@@ -6,3 +6,4 @@ export type UiChatModel = ChatModel & {
 
 
 export type FollowUpMode = 'h' | 'm' | 'a' | 'o'
+export type { SubagentMode } from '../../lib/subagent-modes'
